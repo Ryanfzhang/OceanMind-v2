@@ -7,7 +7,7 @@
 
 - [ ] `uv run ruff check src tests scripts`
 - [ ] `uv run pytest -q`
-- [ ] `cd frontend/terminal && npx tsc --noEmit` (if frontend touched)
+- [ ] `cd frontend/ocean-desktop && npm run check` (if Desktop touched)
 
 ## Notes
 

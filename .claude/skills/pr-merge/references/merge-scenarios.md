@@ -6,7 +6,7 @@ PR adds a new feature, no files overlap with local changes.
 
 ```bash
 # Preferred: squash merge via GitHub (preserves author)
-gh pr merge 17 --repo HKUDS/OpenHarness --squash \
+gh pr merge 17 --repo OWNER/REPO --squash \
   --subject "feat(skills): add diagnose skill (#17)"
 
 # Result: author "Qu Zhi" appears in git log
@@ -123,9 +123,9 @@ When the merged PR introduces a compatibility issue (e.g., API mismatch with a p
 # Fix in a SEPARATE commit (don't amend the author's commit)
 git commit -m "fix(api): handle Kimi reasoning_content in OpenAI client
 
-Kimi k2.5 requires reasoning_content on assistant tool_call messages.
+The provider requires reasoning_content on assistant tool_call messages.
 Fix: capture during streaming, replay when converting back.
-Found during post-merge testing with harness-eval."
+Found during post-merge integration testing."
 ```
 
 This preserves the original author's commit intact while documenting the fix separately.

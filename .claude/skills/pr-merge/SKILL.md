@@ -72,7 +72,7 @@ python -m pytest tests/ -q          # unit tests
 git push origin main                # push
 ```
 
-Then run `harness-eval` for end-to-end verification on an unfamiliar codebase.
+Then run the repository's focused integration and end-to-end checks.
 
 ## Attribution Checklist
 

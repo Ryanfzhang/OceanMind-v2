@@ -1,0 +1,15 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_workspace_fixture",
+  "type": "workspace.open",
+  "payload": {
+    "path": "/tmp/ocean-workspace"
+  },
+  "context": {
+    "session_id": "ses_fixture",
+    "workspace_id": "ws_default",
+    "client_id": "client_desktop_fixture",
+    "active_mode": "figure"
+  },
+  "expected_workspace_revision": 0
+}

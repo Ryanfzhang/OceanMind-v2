@@ -1,0 +1,19 @@
+{
+  "name": "@ocean-partner/client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./backend-sequence": "./src/backend-sequence.ts",
+    "./protocol": "./src/generated/protocol-v2.ts",
+    "./transport": "./src/transport.ts",
+    "./workspace-revision": "./src/workspace-revision.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

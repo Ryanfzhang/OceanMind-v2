@@ -1,0 +1,35 @@
+[package]
+name = "ocean-windows-sandbox-broker"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "ocean-sandbox-broker"
+path = "src/main.rs"
+
+[[bin]]
+name = "native-contract-fixture"
+path = "src/bin/native-contract-fixture.rs"
+required-features = ["native-contract-fixture"]
+
+[features]
+native-contract-fixture = []
+
+[dependencies]
+base64 = "0.22.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+windows-sys = { version = "0.59.0", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_Security_Authorization",
+  "Win32_Security_Isolation",
+  "Win32_Storage_FileSystem",
+  "Win32_System_JobObjects",
+  "Win32_System_IO",
+  "Win32_System_Pipes",
+  "Win32_System_Threading",
+  "Win32_System_WindowsProgramming",
+] }

@@ -1,44 +1,22 @@
 # Changelog
 
-All notable changes to OpenHarness should be recorded in this file.
+All notable OceanMind changes are recorded here.
 
-The format is based on Keep a Changelog, and this project currently tracks changes in a lightweight, repository-oriented way.
-
-## [Unreleased]
-
-### Added
-
-- `diagnose` skill: trace agent run failures and regressions using structured evidence from run artifacts.
-- OpenAI-compatible API client (`--api-format openai`) supporting any provider that implements the OpenAI `/v1/chat/completions` format, including Alibaba DashScope, DeepSeek, GitHub Models, Groq, Together AI, Ollama, and more.
-- `OPENHARNESS_API_FORMAT` environment variable for selecting the API format.
-- `OPENAI_API_KEY` fallback when using OpenAI-format providers.
-- GitHub Actions CI workflow for Python linting, tests, and frontend TypeScript checks.
-- `CONTRIBUTING.md` with local setup, validation commands, and PR expectations.
-- `docs/SHOWCASE.md` with concrete OpenHarness usage patterns and demo commands.
-- GitHub issue templates and a pull request template.
-- React TUI assistant messages now render structured Markdown blocks, including headings, lists, code fences, blockquotes, links, and tables.
-
-### Fixed
-
-- `BackendHostConfig` was missing the `cwd` field, causing `AttributeError: 'BackendHostConfig' object has no attribute 'cwd'` on startup when `oh` was run after the runtime refactor that added `cwd` support to `build_runtime`.
-- Shell-escape `$ARGUMENTS` substitution in command hooks to prevent shell injection from payload values containing metacharacters like `$(...)` or backticks.
-- Swarm `_READ_ONLY_TOOLS` now uses actual registered tool names (snake_case) instead of PascalCase, fixing read-only auto-approval in `handle_permission_request`.
-- Memory scanner now parses YAML frontmatter (`name`, `description`, `type`) instead of returning raw `---` as description.
-- Memory search matches against body content in addition to metadata, with metadata weighted higher for relevance.
-- Memory search tokenizer handles Han characters for multilingual queries.
-- Fixed duplicate response in React TUI caused by double Enter key submission in the input handler.
-- Fixed concurrent permission modals overwriting each other in TUI default mode when the LLM returns multiple tool calls in one response; `_ask_permission` now serialises callers via an `asyncio.Lock` so each modal is shown and resolved before the next one is emitted.
-- Fixed React TUI Markdown tables to size columns from rendered cell text so inline formatting like code spans and bold text no longer breaks alignment.
+## Unreleased
 
 ### Changed
 
-- README now links to contribution docs, changelog, showcase material, and provider compatibility guidance.
-- README quick start now includes a one-command demo and clearer provider compatibility notes.
-- README provider compatibility section updated to include OpenAI-format providers.
+- Replaced the previous agent runtime with Deep Agents and LangGraph.
+- Unified ordinary conversation, bounded multi-agent analysis, and autoresearch under one
+  Coordinator-led runtime.
+- Made Expert results durable and bound scientific conclusions to their supporting outputs.
+- Standardized project state under `.oceanmind`.
 
-## [0.1.0] - 2026-04-01
+### Removed
 
-### Added
+- Removed the previous runtime package, its terminal frontend, dedicated tests, scripts, and
+  obsolete evaluation scaffolding.
 
-- Initial public release of OpenHarness.
-- Core agent loop, tool registry, permission system, hooks, skills, plugins, MCP support, and terminal UI.
+## 0.1.5 - 2026-08-26
+
+- First OceanMind release using the Deep Agents + LangGraph runtime.

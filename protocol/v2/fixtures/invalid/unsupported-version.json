@@ -1,0 +1,10 @@
+{
+  "protocol_version": 1,
+  "request_id": "req_wrong_version",
+  "type": "system.handshake",
+  "payload": {
+    "client_kind": "desktop",
+    "client_version": "0.1.0",
+    "supported_protocol_versions": [1]
+  }
+}

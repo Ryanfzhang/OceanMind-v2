@@ -1,0 +1,10 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_handshake_fixture",
+  "type": "system.handshake",
+  "payload": {
+    "client_kind": "desktop",
+    "client_version": "0.1.0",
+    "supported_protocol_versions": [2]
+  }
+}

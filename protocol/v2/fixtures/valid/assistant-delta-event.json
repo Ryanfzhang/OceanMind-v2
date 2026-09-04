@@ -1,0 +1,14 @@
+{
+  "protocol_version": 2,
+  "event_id": "evt_assistant_delta_fixture",
+  "session_id": "ses_fixture",
+  "workspace_id": "ws_fixture",
+  "request_id": "req_session_submit_fixture",
+  "sequence": 9,
+  "timestamp": "2026-07-12T10:00:00Z",
+  "type": "assistant.delta",
+  "payload": {
+    "turn_id": "req_session_submit_fixture:turn:1",
+    "text": "Inspecting metadata."
+  }
+}

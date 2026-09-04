@@ -1,0 +1,14 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_session_submit_fixture",
+  "type": "session.submit",
+  "payload": {
+    "text": "Inspect the materialized dataset."
+  },
+  "context": {
+    "client_id": "client_desktop_fixture",
+    "session_id": "ses_fixture",
+    "workspace_id": "ws_fixture"
+  },
+  "expected_workspace_revision": 4
+}

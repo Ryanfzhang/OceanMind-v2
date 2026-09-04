@@ -1,0 +1,16 @@
+{
+  "protocol_version": 2,
+  "event_id": "evt_snapshot_fixture",
+  "session_id": "ses_fixture",
+  "workspace_id": "ws_default",
+  "request_id": "req_snapshot_fixture",
+  "sequence": 7,
+  "timestamp": "2026-07-11T12:00:00Z",
+  "type": "workspace.snapshot",
+  "payload": {
+    "workspace_id": "ws_default",
+    "path": "/tmp/ocean-workspace",
+    "revision": 3,
+    "artifacts": []
+  }
+}

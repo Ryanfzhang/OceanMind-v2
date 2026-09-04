@@ -1,0 +1,18 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_paper_register_fixture",
+  "type": "paper.register",
+  "payload": {
+    "citation": {
+      "title": "Citation-only paper",
+      "publication_year": 2011,
+      "source_url": "https://example.org/paper"
+    }
+  },
+  "context": {
+    "client_id": "client_desktop_fixture",
+    "session_id": "ses_fixture",
+    "workspace_id": "ws_fixture"
+  },
+  "expected_workspace_revision": 4
+}

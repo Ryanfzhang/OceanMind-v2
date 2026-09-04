@@ -1,0 +1,8 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_missing_context",
+  "type": "workspace.open",
+  "payload": {
+    "path": "/tmp/ocean-workspace"
+  }
+}

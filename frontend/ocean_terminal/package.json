@@ -1,0 +1,28 @@
+{
+  "name": "@ocean-partner/terminal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.tsx",
+    "build": "esbuild src/index.tsx --bundle --platform=node --format=esm --target=node18 --alias:react-devtools-core=./src/react-devtools-stub.ts '--banner:js=import {createRequire} from \"node:module\";const require=createRequire(import.meta.url);' --outfile=../../src/ocean_partner/_ocean_terminal/dist/ocean-terminal.mjs",
+    "check": "tsc --noEmit",
+    "protocol-fixtures": "tsx scripts/validate-protocol-fixtures.ts",
+    "transport-check": "tsx scripts/verify-transport.ts",
+    "workspace-open-check": "tsx scripts/verify-workspace-open.ts",
+    "artifact-inspector-check": "tsx scripts/verify-artifact-inspector.ts"
+  },
+  "dependencies": {
+    "ink": "^5.1.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.12",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "esbuild": "^0.28.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

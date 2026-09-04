@@ -1,0 +1,4395 @@
+{
+  "$defs": {
+    "ArtifactCreatedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactCreatedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.created",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "ArtifactCreatedEvent",
+      "type": "object"
+    },
+    "ArtifactCreatedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "$ref": "#/$defs/ArtifactSummaryPayload"
+        },
+        "manifest_uri": {
+          "title": "Manifest Uri",
+          "type": "string"
+        },
+        "workspace_revision": {
+          "minimum": 0,
+          "title": "Workspace Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact",
+        "manifest_uri",
+        "workspace_revision"
+      ],
+      "title": "ArtifactCreatedPayload",
+      "type": "object"
+    },
+    "ArtifactProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "impact_reasons": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ImpactHop"
+          },
+          "title": "Impact Reasons",
+          "type": "array"
+        },
+        "impact_state": {
+          "default": "current",
+          "enum": [
+            "current",
+            "stale",
+            "invalidated",
+            "source_unavailable"
+          ],
+          "title": "Impact State",
+          "type": "string"
+        },
+        "lifecycle_state": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "available",
+            "superseded",
+            "archived",
+            "tombstoned"
+          ],
+          "title": "Lifecycle State",
+          "type": "string"
+        },
+        "ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "source_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Event Id"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "updated_at"
+      ],
+      "title": "ArtifactProjection",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "ArtifactStatusChangedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactStatusChangedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.status.changed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "ArtifactStatusChangedEvent",
+      "type": "object"
+    },
+    "ArtifactStatusChangedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "projection": {
+          "$ref": "#/$defs/ArtifactProjection"
+        },
+        "ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "ref",
+        "projection"
+      ],
+      "title": "ArtifactStatusChangedPayload",
+      "type": "object"
+    },
+    "ArtifactSummaryPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "enum": [
+            "project_context",
+            "paper",
+            "claim",
+            "observation",
+            "hypothesis",
+            "dataset",
+            "dataset_diagnosis",
+            "interactive_view",
+            "experiment",
+            "decision",
+            "report"
+          ],
+          "title": "Artifact Type",
+          "type": "string"
+        },
+        "projection": {
+          "$ref": "#/$defs/ArtifactProjection"
+        },
+        "ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "artifact_type",
+        "title",
+        "summary",
+        "projection"
+      ],
+      "title": "ArtifactSummaryPayload",
+      "type": "object"
+    },
+    "ArtifactVersionCreatedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactCreatedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.version.created",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "ArtifactVersionCreatedEvent",
+      "type": "object"
+    },
+    "AssistantDeltaEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/AssistantDeltaPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "assistant.delta",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "AssistantDeltaEvent",
+      "type": "object"
+    },
+    "AssistantDeltaPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 16000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "turn_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_id",
+        "text"
+      ],
+      "title": "AssistantDeltaPayload",
+      "type": "object"
+    },
+    "AssistantTurnCompletedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/AssistantTurnCompletedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "assistant.turn.completed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "AssistantTurnCompletedEvent",
+      "type": "object"
+    },
+    "AssistantTurnCompletedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "text": {
+          "default": "",
+          "maxLength": 64000,
+          "title": "Text",
+          "type": "string"
+        },
+        "tool_call_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 128,
+          "title": "Tool Call Ids",
+          "type": "array"
+        },
+        "turn_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_id",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "title": "AssistantTurnCompletedPayload",
+      "type": "object"
+    },
+    "ContextCompactionProgressEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ContextCompactionProgressPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "context.compaction.progress",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "ContextCompactionProgressEvent",
+      "type": "object"
+    },
+    "ContextCompactionProgressPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attempt"
+        },
+        "checkpoint": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checkpoint"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metadata"
+        },
+        "phase": {
+          "enum": [
+            "hooks_start",
+            "context_collapse_start",
+            "context_collapse_end",
+            "session_memory_start",
+            "session_memory_end",
+            "compact_start",
+            "compact_retry",
+            "compact_end",
+            "compact_failed"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "trigger": {
+          "enum": [
+            "auto",
+            "manual",
+            "reactive"
+          ],
+          "title": "Trigger",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase",
+        "trigger"
+      ],
+      "title": "ContextCompactionProgressPayload",
+      "type": "object"
+    },
+    "DesktopRuntimeCapabilitiesPayload": {
+      "additionalProperties": false,
+      "description": "The only runtime capability document permitted in ``system.ready``.",
+      "properties": {
+        "backend_schema": {
+          "pattern": "^ocean-desktop-backend/v[1-9][0-9]*$",
+          "title": "Backend Schema",
+          "type": "string"
+        },
+        "connections": {
+          "items": {
+            "$ref": "#/$defs/RuntimeConnectionPayload"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Connections",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "ocean-desktop-runtime-capabilities/v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scientific_runtime": {
+          "$ref": "#/$defs/ScientificRuntimeCapabilityPayload"
+        },
+        "skills": {
+          "items": {
+            "$ref": "#/$defs/ResearchSkillMetadataPayload"
+          },
+          "maxItems": 24,
+          "title": "Skills",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "backend_schema",
+        "connections",
+        "scientific_runtime"
+      ],
+      "title": "DesktopRuntimeCapabilitiesPayload",
+      "type": "object"
+    },
+    "DisclosurePolicySummary": {
+      "additionalProperties": false,
+      "description": "Provider-bound decisions visible to local workspace clients, never disclosed data.",
+      "properties": {
+        "aggregate_statistics": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Aggregate Statistics",
+          "type": "string"
+        },
+        "confirmed": {
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "diagnostic_excerpt": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Diagnostic Excerpt",
+          "type": "string"
+        },
+        "document_text": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Document Text",
+          "type": "string"
+        },
+        "metadata": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Metadata",
+          "type": "string"
+        },
+        "policy_version": {
+          "minimum": 1,
+          "title": "Policy Version",
+          "type": "integer"
+        },
+        "provider_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Provider Id",
+          "type": "string"
+        },
+        "raw_bounded_sample": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Raw Bounded Sample",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider_id",
+        "policy_version",
+        "metadata",
+        "aggregate_statistics",
+        "raw_bounded_sample",
+        "document_text",
+        "diagnostic_excerpt",
+        "confirmed",
+        "updated_at"
+      ],
+      "title": "DisclosurePolicySummary",
+      "type": "object"
+    },
+    "DisclosurePolicyUpdatedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/DisclosurePolicyUpdatedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "disclosure.policy.updated",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "DisclosurePolicyUpdatedEvent",
+      "type": "object"
+    },
+    "DisclosurePolicyUpdatedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "$ref": "#/$defs/DisclosurePolicySummary"
+        },
+        "previous_revision": {
+          "minimum": 0,
+          "title": "Previous Revision",
+          "type": "integer"
+        },
+        "workspace_revision": {
+          "minimum": 0,
+          "title": "Workspace Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "policy",
+        "previous_revision",
+        "workspace_revision"
+      ],
+      "title": "DisclosurePolicyUpdatedPayload",
+      "type": "object"
+    },
+    "ImpactHop": {
+      "additionalProperties": false,
+      "properties": {
+        "relation": {
+          "anyOf": [
+            {
+              "enum": [
+                "derived_from",
+                "uses_dataset",
+                "supports_claim",
+                "contradicts_claim",
+                "tests_hypothesis",
+                "supersedes",
+                "included_in_report",
+                "motivates"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "self",
+              "type": "string"
+            }
+          ],
+          "title": "Relation"
+        },
+        "source": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "source_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Event Id"
+        },
+        "trigger": {
+          "enum": [
+            "superseded",
+            "tombstoned",
+            "source_unavailable",
+            "decision_invalidated"
+          ],
+          "title": "Trigger",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "relation",
+        "trigger"
+      ],
+      "title": "ImpactHop",
+      "type": "object"
+    },
+    "InteractionRequestedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/InteractionRequestedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "interaction.requested",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "InteractionRequestedEvent",
+      "type": "object"
+    },
+    "InteractionRequestedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "interaction_id": {
+          "maxLength": 128,
+          "pattern": "^int_[A-Za-z0-9_-]+$",
+          "title": "Interaction Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "question",
+            "permission",
+            "paper_selection"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "options": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PaperSelectionOptionPayload"
+          },
+          "maxItems": 30,
+          "title": "Options",
+          "type": "array"
+        },
+        "question": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "tool_name": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Name"
+        }
+      },
+      "required": [
+        "interaction_id",
+        "kind",
+        "question"
+      ],
+      "title": "InteractionRequestedPayload",
+      "type": "object"
+    },
+    "PaperSelectionOptionPayload": {
+      "additionalProperties": false,
+      "description": "One Literature Expert-curated paper presented by the Coordinator.",
+      "properties": {
+        "citation": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "evidence_scope": {
+          "anyOf": [
+            {
+              "enum": [
+                "metadata_only",
+                "abstract",
+                "public_excerpt"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Scope"
+        },
+        "evidence_summary": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Summary"
+        },
+        "paper_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$",
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "topic": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Topic",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "validation_target": {
+          "anyOf": [
+            {
+              "maxLength": 1500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validation Target"
+        }
+      },
+      "required": [
+        "paper_id",
+        "title",
+        "topic"
+      ],
+      "title": "PaperSelectionOptionPayload",
+      "type": "object"
+    },
+    "ProtocolErrorPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_request",
+            "unsupported_protocol",
+            "request_id_conflict",
+            "request_interrupted",
+            "workspace_revision_conflict",
+            "permission_denied",
+            "interaction_timeout",
+            "model_error",
+            "tool_error",
+            "budget_exhausted",
+            "expert_timeout",
+            "expert_resource_limit_exceeded",
+            "expert_code_exit_nonzero",
+            "dependency_missing",
+            "unsafe_execution",
+            "source_changed_during_work",
+            "expert_result_incomplete",
+            "artifact_not_found",
+            "artifact_version_conflict",
+            "artifact_commit_failed",
+            "invalid_artifact",
+            "task_not_found",
+            "task_revision_conflict",
+            "task_active_request_conflict",
+            "task_checkpoint_incompatible",
+            "store_error",
+            "cancelled"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "recoverable": {
+          "title": "Recoverable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "recoverable",
+        "details"
+      ],
+      "title": "ProtocolErrorPayload",
+      "type": "object"
+    },
+    "RequestAcceptedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/RequestAcceptedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "request.accepted",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "RequestAcceptedEvent",
+      "type": "object"
+    },
+    "RequestAcceptedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "request_type": {
+          "title": "Request Type",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "accepted",
+            "in_progress"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_type",
+        "state"
+      ],
+      "title": "RequestAcceptedPayload",
+      "type": "object"
+    },
+    "RequestCancelledEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/RequestCancelledPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "request.cancelled",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "RequestCancelledEvent",
+      "type": "object"
+    },
+    "RequestCancelledPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "title": "RequestCancelledPayload",
+      "type": "object"
+    },
+    "RequestCompletedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/RequestCompletedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "request.completed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "RequestCompletedEvent",
+      "type": "object"
+    },
+    "RequestCompletedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "additionalProperties": true,
+          "title": "Result",
+          "type": "object"
+        },
+        "workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Revision"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "RequestCompletedPayload",
+      "type": "object"
+    },
+    "RequestFailedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/RequestFailedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "request.failed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "RequestFailedEvent",
+      "type": "object"
+    },
+    "RequestFailedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "$ref": "#/$defs/ProtocolErrorPayload"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "RequestFailedPayload",
+      "type": "object"
+    },
+    "ResearchSkillMetadataPayload": {
+      "additionalProperties": false,
+      "description": "Display-safe metadata for one packaged research-process skill.",
+      "properties": {
+        "description": {
+          "maxLength": 360,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "pattern": "^[a-z][a-z0-9-]{0,127}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^sha256:[a-f0-9]{12}$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "version"
+      ],
+      "title": "ResearchSkillMetadataPayload",
+      "type": "object"
+    },
+    "RuntimeConnectionPayload": {
+      "additionalProperties": false,
+      "description": "One renderer-safe local capability, never an executable or endpoint.",
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "id": {
+          "enum": [
+            "expert_code_execution",
+            "web_search",
+            "jina_reader",
+            "netcdf",
+            "zarr",
+            "gsw"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "enum": [
+            "Expert code",
+            "Web search",
+            "Jina Reader",
+            "NetCDF",
+            "Zarr",
+            "TEOS-10"
+          ],
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "available"
+      ],
+      "title": "RuntimeConnectionPayload",
+      "type": "object"
+    },
+    "ScientificRuntimeCapabilityPayload": {
+      "additionalProperties": false,
+      "description": "Bounded packaged-runtime identity without installation details.",
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "dependency_count": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dependency Count"
+        },
+        "fingerprint_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fingerprint Sha256"
+        },
+        "schema_version": {
+          "anyOf": [
+            {
+              "const": "ocean-frozen-scientific-runtime/v1",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schema Version"
+        }
+      },
+      "required": [
+        "available"
+      ],
+      "title": "ScientificRuntimeCapabilityPayload",
+      "type": "object"
+    },
+    "SystemErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/SystemErrorPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "system.error",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "SystemErrorEvent",
+      "type": "object"
+    },
+    "SystemErrorPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "$ref": "#/$defs/ProtocolErrorPayload"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "SystemErrorPayload",
+      "type": "object"
+    },
+    "SystemReadyEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/SystemReadyPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "system.ready",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "SystemReadyEvent",
+      "type": "object"
+    },
+    "SystemReadyPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "backend_schema": {
+          "pattern": "^ocean-desktop-backend/v[1-9][0-9]*$",
+          "title": "Backend Schema",
+          "type": "string"
+        },
+        "backend_version": {
+          "title": "Backend Version",
+          "type": "string"
+        },
+        "capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "client_capability": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 16,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Client Capability"
+        },
+        "client_id": {
+          "title": "Client Id",
+          "type": "string"
+        },
+        "client_kind": {
+          "const": "desktop",
+          "title": "Client Kind",
+          "type": "string"
+        },
+        "runtime_capabilities": {
+          "$ref": "#/$defs/DesktopRuntimeCapabilitiesPayload"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "backend_version",
+        "backend_schema",
+        "client_id",
+        "session_id",
+        "client_kind",
+        "capabilities",
+        "runtime_capabilities"
+      ],
+      "title": "SystemReadyPayload",
+      "type": "object"
+    },
+    "SystemShutdownEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/SystemShutdownPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "system.shutdown",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "SystemShutdownEvent",
+      "type": "object"
+    },
+    "SystemShutdownPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "title": "SystemShutdownPayload",
+      "type": "object"
+    },
+    "TaskInteractionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "interaction_id": {
+          "maxLength": 128,
+          "pattern": "^int_[A-Za-z0-9_-]+$",
+          "title": "Interaction Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "question",
+            "permission",
+            "paper_selection"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "options": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PaperSelectionOptionPayload"
+          },
+          "maxItems": 30,
+          "title": "Options",
+          "type": "array"
+        },
+        "question": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "state": {
+          "const": "pending",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "interaction_id",
+        "kind",
+        "question",
+        "state",
+        "created_at"
+      ],
+      "title": "TaskInteractionPayload",
+      "type": "object"
+    },
+    "TaskSnapshotEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskSnapshotPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.snapshot",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "TaskSnapshotEvent",
+      "type": "object"
+    },
+    "TaskSnapshotPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "additionalProperties": true,
+          "title": "Checkpoint",
+          "type": "object"
+        },
+        "delivery_manifests": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Delivery Manifests",
+          "type": "array"
+        },
+        "interactions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TaskInteractionPayload"
+          },
+          "title": "Interactions",
+          "type": "array"
+        },
+        "next_transcript_cursor": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Transcript Cursor"
+        },
+        "outputs": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "task": {
+          "$ref": "#/$defs/TaskSummaryPayload"
+        },
+        "task_results": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Task Results",
+          "type": "array"
+        },
+        "team_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TeamSnapshotPayload"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "team_snapshots": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TeamSnapshotPayload"
+          },
+          "maxItems": 100,
+          "title": "Team Snapshots",
+          "type": "array"
+        },
+        "transcript": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TaskTranscriptItemPayload"
+          },
+          "title": "Transcript",
+          "type": "array"
+        },
+        "workflow": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workflow"
+        }
+      },
+      "required": [
+        "task"
+      ],
+      "title": "TaskSnapshotPayload",
+      "type": "object"
+    },
+    "TaskSummaryPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "active_request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active Request Id"
+        },
+        "conversation_generation": {
+          "minimum": 0,
+          "title": "Conversation Generation",
+          "type": "integer"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "stable_checkpoint_id": {
+          "anyOf": [
+            {
+              "pattern": "^chk_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stable Checkpoint Id"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "completed",
+            "archived"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 128,
+          "pattern": "^task_[A-Za-z0-9_-]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "task_revision": {
+          "minimum": 0,
+          "title": "Task Revision",
+          "type": "integer"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        },
+        "workspace_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "workspace_id",
+        "title",
+        "status",
+        "task_revision",
+        "conversation_generation",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "TaskSummaryPayload",
+      "type": "object"
+    },
+    "TaskTranscriptItemPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "interrupted": {
+          "default": false,
+          "title": "Interrupted",
+          "type": "boolean"
+        },
+        "item_id": {
+          "maxLength": 128,
+          "pattern": "^tr_[A-Za-z0-9_-]+$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "role": {
+          "enum": [
+            "user",
+            "assistant",
+            "tool",
+            "system"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "text": {
+          "maxLength": 64000,
+          "title": "Text",
+          "type": "string"
+        },
+        "tool_call_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Call Id"
+        },
+        "turn_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turn Id"
+        }
+      },
+      "required": [
+        "item_id",
+        "sequence",
+        "role",
+        "text",
+        "created_at"
+      ],
+      "title": "TaskTranscriptItemPayload",
+      "type": "object"
+    },
+    "TeamAgentPayload": {
+      "additionalProperties": false,
+      "description": "One real participant in the active adaptive team topology.",
+      "properties": {
+        "activity": {
+          "default": "",
+          "maxLength": 512,
+          "title": "Activity",
+          "type": "string"
+        },
+        "agent_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "coordinator",
+            "expert",
+            "discussion"
+          ],
+          "title": "Authority",
+          "type": "string"
+        },
+        "expert_key": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expert Key"
+        },
+        "limitations": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Limitations",
+          "type": "array"
+        },
+        "profile_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Id"
+        },
+        "result_summary": {
+          "anyOf": [
+            {
+              "maxLength": 8000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result Summary"
+        },
+        "semantic_role": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Semantic Role",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "planning",
+            "working",
+            "waiting",
+            "discussing",
+            "recovering",
+            "completed",
+            "incomplete",
+            "blocked",
+            "failed",
+            "skipped"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "task_goal": {
+          "anyOf": [
+            {
+              "maxLength": 8000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Goal"
+        },
+        "work_order_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Work Order Id"
+        }
+      },
+      "required": [
+        "agent_id",
+        "semantic_role",
+        "authority",
+        "status"
+      ],
+      "title": "TeamAgentPayload",
+      "type": "object"
+    },
+    "TeamAgentProfilePayload": {
+      "additionalProperties": false,
+      "description": "One trusted professional role available for sparse activation.",
+      "properties": {
+        "authority": {
+          "enum": [
+            "expert",
+            "discussion"
+          ],
+          "title": "Authority",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "framing",
+            "data",
+            "science",
+            "methods",
+            "evidence",
+            "visualization",
+            "discussion"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "display_name": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "profile_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "summary": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "display_name",
+        "authority",
+        "category",
+        "summary"
+      ],
+      "title": "TeamAgentProfilePayload",
+      "type": "object"
+    },
+    "TeamDependencyPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "from_agent_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "From Agent Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "delegation",
+            "discussion",
+            "feedback"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "to_agent_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "To Agent Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_agent_id",
+        "to_agent_id",
+        "kind"
+      ],
+      "title": "TeamDependencyPayload",
+      "type": "object"
+    },
+    "TeamInteractionPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "from_agent_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "From Agent Id",
+          "type": "string"
+        },
+        "interaction_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Interaction Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "delegation",
+            "handoff",
+            "discussion",
+            "feedback",
+            "continuation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "active",
+            "completed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "maxLength": 512,
+          "title": "Summary",
+          "type": "string"
+        },
+        "to_agent_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "To Agent Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "interaction_id",
+        "from_agent_id",
+        "to_agent_id",
+        "kind",
+        "state"
+      ],
+      "title": "TeamInteractionPayload",
+      "type": "object"
+    },
+    "TeamSnapshotEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/TeamSnapshotPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "team.snapshot",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "TeamSnapshotEvent",
+      "type": "object"
+    },
+    "TeamSnapshotPayload": {
+      "additionalProperties": false,
+      "description": "A renderer-safe, event-derived view of the current adaptive team.",
+      "properties": {
+        "agents": {
+          "items": {
+            "$ref": "#/$defs/TeamAgentPayload"
+          },
+          "maxItems": 13,
+          "minItems": 1,
+          "title": "Agents",
+          "type": "array"
+        },
+        "dependencies": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TeamDependencyPayload"
+          },
+          "maxItems": 16,
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "interactions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TeamInteractionPayload"
+          },
+          "maxItems": 16,
+          "title": "Interactions",
+          "type": "array"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "role_pool": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TeamAgentProfilePayload"
+          },
+          "maxItems": 16,
+          "title": "Role Pool",
+          "type": "array"
+        },
+        "status": {
+          "default": "working",
+          "enum": [
+            "working",
+            "completed",
+            "incomplete",
+            "blocked",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "strategy": {
+          "enum": [
+            "direct",
+            "single_delegate",
+            "parallel_team",
+            "team_with_discussion"
+          ],
+          "title": "Strategy",
+          "type": "string"
+        },
+        "todos": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TeamTodoPayload"
+          },
+          "maxItems": 6,
+          "title": "Todos",
+          "type": "array"
+        }
+      },
+      "required": [
+        "revision",
+        "strategy",
+        "agents"
+      ],
+      "title": "TeamSnapshotPayload",
+      "type": "object"
+    },
+    "TeamTodoPayload": {
+      "additionalProperties": false,
+      "description": "Coordinator-authored plan item with execution progress only.\n\n``state`` deliberately stops at ``result_returned``. Whether that result is\nsufficient, needs a follow-up, or completes the user's request remains a\nCoordinator decision.",
+      "properties": {
+        "depends_on": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "expected_outputs": {
+          "default": [
+            "answer"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Expected Outputs",
+          "type": "array"
+        },
+        "expert_key": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expert Key"
+        },
+        "profile_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "question": {
+          "maxLength": 8000,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "result_summary": {
+          "anyOf": [
+            {
+              "maxLength": 8000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result Summary"
+        },
+        "session_round": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Round"
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "queued",
+            "working",
+            "result_returned",
+            "stopped",
+            "skipped"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "todo_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Todo Id",
+          "type": "string"
+        },
+        "work_order_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Work Order Id"
+        }
+      },
+      "required": [
+        "todo_id",
+        "question",
+        "profile_id",
+        "state"
+      ],
+      "title": "TeamTodoPayload",
+      "type": "object"
+    },
+    "ToolCallCompletedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolCallCompletedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "tool.call.completed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "ToolCallCompletedEvent",
+      "type": "object"
+    },
+    "ToolCallCompletedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Seconds"
+        },
+        "is_error": {
+          "title": "Is Error",
+          "type": "boolean"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metadata"
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "output": {
+          "maxLength": 64000,
+          "title": "Output",
+          "type": "string"
+        },
+        "tool_call_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Tool Call Id",
+          "type": "string"
+        },
+        "tool_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "turn_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_id",
+        "tool_call_id",
+        "tool_name",
+        "output",
+        "is_error"
+      ],
+      "title": "ToolCallCompletedPayload",
+      "type": "object"
+    },
+    "ToolCallStartedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolCallStartedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "tool.call.started",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "ToolCallStartedEvent",
+      "type": "object"
+    },
+    "ToolCallStartedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "additionalProperties": true,
+          "title": "Input",
+          "type": "object"
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "tool_call_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Tool Call Id",
+          "type": "string"
+        },
+        "tool_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Tool Name",
+          "type": "string"
+        },
+        "turn_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_id",
+        "tool_call_id",
+        "tool_name",
+        "input"
+      ],
+      "title": "ToolCallStartedPayload",
+      "type": "object"
+    },
+    "TranscriptItemAppendedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/TranscriptItemAppendedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "transcript.item.appended",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "TranscriptItemAppendedEvent",
+      "type": "object"
+    },
+    "TranscriptItemAppendedPayload": {
+      "additionalProperties": false,
+      "description": "A bounded local transcript record; it is progress, not a request terminal.",
+      "properties": {
+        "item_id": {
+          "maxLength": 128,
+          "pattern": "^tr_[A-Za-z0-9_-]+$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "user",
+            "assistant",
+            "tool",
+            "system"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 64000,
+          "title": "Text",
+          "type": "string"
+        },
+        "tool_call_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Call Id"
+        },
+        "turn_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turn Id"
+        }
+      },
+      "required": [
+        "item_id",
+        "role",
+        "text"
+      ],
+      "title": "TranscriptItemAppendedPayload",
+      "type": "object"
+    },
+    "WorkspaceChangedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/WorkspaceChangedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "workspace.changed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "WorkspaceChangedEvent",
+      "type": "object"
+    },
+    "WorkspaceChangedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "change": {
+          "enum": [
+            "opened",
+            "updated"
+          ],
+          "title": "Change",
+          "type": "string"
+        },
+        "previous_revision": {
+          "minimum": 0,
+          "title": "Previous Revision",
+          "type": "integer"
+        },
+        "workspace_revision": {
+          "minimum": 0,
+          "title": "Workspace Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "previous_revision",
+        "workspace_revision",
+        "change"
+      ],
+      "title": "WorkspaceChangedPayload",
+      "type": "object"
+    },
+    "WorkspaceSnapshotEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/WorkspaceSnapshotPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "workspace.snapshot",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "WorkspaceSnapshotEvent",
+      "type": "object"
+    },
+    "WorkspaceSnapshotPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "active_refs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "title": "Active Refs",
+          "type": "object"
+        },
+        "artifacts": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "disclosure_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisclosurePolicySummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace_id",
+        "revision",
+        "artifacts"
+      ],
+      "title": "WorkspaceSnapshotPayload",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "artifact.created": "#/$defs/ArtifactCreatedEvent",
+      "artifact.status.changed": "#/$defs/ArtifactStatusChangedEvent",
+      "artifact.version.created": "#/$defs/ArtifactVersionCreatedEvent",
+      "assistant.delta": "#/$defs/AssistantDeltaEvent",
+      "assistant.turn.completed": "#/$defs/AssistantTurnCompletedEvent",
+      "context.compaction.progress": "#/$defs/ContextCompactionProgressEvent",
+      "disclosure.policy.updated": "#/$defs/DisclosurePolicyUpdatedEvent",
+      "interaction.requested": "#/$defs/InteractionRequestedEvent",
+      "request.accepted": "#/$defs/RequestAcceptedEvent",
+      "request.cancelled": "#/$defs/RequestCancelledEvent",
+      "request.completed": "#/$defs/RequestCompletedEvent",
+      "request.failed": "#/$defs/RequestFailedEvent",
+      "system.error": "#/$defs/SystemErrorEvent",
+      "system.ready": "#/$defs/SystemReadyEvent",
+      "system.shutdown": "#/$defs/SystemShutdownEvent",
+      "task.snapshot": "#/$defs/TaskSnapshotEvent",
+      "team.snapshot": "#/$defs/TeamSnapshotEvent",
+      "tool.call.completed": "#/$defs/ToolCallCompletedEvent",
+      "tool.call.started": "#/$defs/ToolCallStartedEvent",
+      "transcript.item.appended": "#/$defs/TranscriptItemAppendedEvent",
+      "workspace.changed": "#/$defs/WorkspaceChangedEvent",
+      "workspace.snapshot": "#/$defs/WorkspaceSnapshotEvent"
+    },
+    "propertyName": "type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/SystemReadyEvent"
+    },
+    {
+      "$ref": "#/$defs/RequestAcceptedEvent"
+    },
+    {
+      "$ref": "#/$defs/RequestCompletedEvent"
+    },
+    {
+      "$ref": "#/$defs/RequestFailedEvent"
+    },
+    {
+      "$ref": "#/$defs/RequestCancelledEvent"
+    },
+    {
+      "$ref": "#/$defs/InteractionRequestedEvent"
+    },
+    {
+      "$ref": "#/$defs/TranscriptItemAppendedEvent"
+    },
+    {
+      "$ref": "#/$defs/AssistantDeltaEvent"
+    },
+    {
+      "$ref": "#/$defs/AssistantTurnCompletedEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolCallStartedEvent"
+    },
+    {
+      "$ref": "#/$defs/ToolCallCompletedEvent"
+    },
+    {
+      "$ref": "#/$defs/ContextCompactionProgressEvent"
+    },
+    {
+      "$ref": "#/$defs/TaskSnapshotEvent"
+    },
+    {
+      "$ref": "#/$defs/TeamSnapshotEvent"
+    },
+    {
+      "$ref": "#/$defs/WorkspaceSnapshotEvent"
+    },
+    {
+      "$ref": "#/$defs/WorkspaceChangedEvent"
+    },
+    {
+      "$ref": "#/$defs/DisclosurePolicyUpdatedEvent"
+    },
+    {
+      "$ref": "#/$defs/SystemShutdownEvent"
+    },
+    {
+      "$ref": "#/$defs/SystemErrorEvent"
+    },
+    {
+      "$ref": "#/$defs/ArtifactCreatedEvent"
+    },
+    {
+      "$ref": "#/$defs/ArtifactVersionCreatedEvent"
+    },
+    {
+      "$ref": "#/$defs/ArtifactStatusChangedEvent"
+    }
+  ]
+}

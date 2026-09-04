@@ -14,8 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - "3.10"
           - "3.11"
+          - "3.12"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +34,11 @@ jobs:
         run: uv sync --extra dev
 
       - name: Run test suite
-        run: uv run pytest -q
+        run: >-
+          uv run pytest -q
+          tests/test_ocean_partner
+          tests/test_sandbox/test_execution.py
+          tests/test_sandbox/test_windows_broker.py
 
   python-quality:
     name: Python quality
@@ -57,27 +61,184 @@ jobs:
         run: uv sync --extra dev
 
       - name: Ruff
-        run: uv run ruff check src tests scripts
+        run: >-
+          uv run ruff check
+          src/ocean_partner/agent.py
+          src/ocean_partner/agent_contract.py
+          src/ocean_partner/agent_tools.py
+          src/ocean_partner/deep_runtime.py
+          src/ocean_partner/model_config.py
+          src/ocean_partner/tool_history.py
+          src/ocean_partner/web_search.py
+          src/ocean_partner/runtime.py
+          src/ocean_partner/tools.py
+          src/ocean_partner/team/orchestrator.py
+          src/ocean_partner/sandbox
+          tests/test_ocean_partner/test_deep_agent_runtime.py
 
-  frontend-typecheck:
-    name: Frontend typecheck
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend/terminal
+  ocean-desktop:
+    name: Ocean Desktop checks
+    runs-on: macos-13
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync --extra dev --extra ocean-runtime --extra desktop-build
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: frontend/terminal/package-lock.json
+          cache-dependency-path: frontend/ocean-desktop/package-lock.json
 
-      - name: Install frontend dependencies
+      - name: Install Desktop dependencies
+        working-directory: frontend/ocean-desktop
         run: npm ci
 
-      - name: TypeScript check
-        run: npx tsc --noEmit
+      - name: Run macOS trusted-execution contract
+        run: >-
+          .venv/bin/python -m pytest -q
+          tests/test_sandbox/test_execution.py
+          tests/test_ocean_partner/test_sandbox_self_check.py
+          tests/test_ocean_partner/test_current_team_contract.py
+
+      - name: Typecheck and unit tests
+        working-directory: frontend/ocean-desktop
+        run: |
+          npm run typecheck
+          npm test -- --run
+
+      - name: Electron security-boundary test
+        working-directory: frontend/ocean-desktop
+        run: npm run e2e
+
+      - name: Record Desktop smoke performance baseline
+        working-directory: frontend/ocean-desktop
+        run: npm run benchmark:smoke
+
+      - name: Build and verify unsigned macOS package
+        working-directory: frontend/ocean-desktop
+        env:
+          OCEAN_PYTHON: ${{ github.workspace }}/.venv/bin/python
+        run: |
+          npm run build:sidecar
+          npm run package:dir
+
+      - name: Generate macOS package release metadata
+        run: >-
+          .venv/bin/python scripts/generate_desktop_release_manifest.py
+          --app "frontend/ocean-desktop/dist/mac/Ocean Research Partner.app"
+          --output "release-metadata/macos-ci"
+          --version "0.1.0-ci"
+
+      - name: Record macOS package verification attestation
+        working-directory: frontend/ocean-desktop
+        run: >-
+          npm run verify:package --
+          --output ../../release-metadata/macos-ci/package-verification.json
+
+      - name: Launch frozen macOS Desktop app without development runtimes
+        working-directory: frontend/ocean-desktop
+        run: >-
+          npm run verify:package-launch --
+          --output ../../release-metadata/macos-ci/packaged-launch.json
+
+      - name: Upload macOS package evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocean-desktop-macos-package-evidence
+          path: release-metadata/macos-ci
+          if-no-files-found: error
+
+  ocean-desktop-windows-package:
+    name: Ocean Desktop Windows package spike
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync --extra dev --extra ocean-runtime --extra desktop-build
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/ocean-desktop/package-lock.json
+
+      - name: Set up Rust for the native sandbox broker
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Test native Windows sandbox broker contract
+        run: cargo test --locked --features native-contract-fixture --manifest-path native/windows-sandbox-broker/Cargo.toml
+
+      - name: Test Python Windows sandbox boundary
+        shell: pwsh
+        run: >-
+          .\.venv\Scripts\python.exe -m pytest -q
+          tests/test_sandbox/test_windows_broker.py
+          tests/test_sandbox/test_execution.py
+
+      - name: Install Desktop dependencies
+        working-directory: frontend/ocean-desktop
+        run: npm ci
+
+      - name: Build and verify fail-closed Windows package
+        working-directory: frontend/ocean-desktop
+        env:
+          OCEAN_PYTHON: ${{ github.workspace }}\.venv\Scripts\python.exe
+        run: |
+          npm run build:sidecar
+          npm run package:dir
+
+      - name: Generate Windows package release metadata
+        shell: pwsh
+        run: >-
+          .\.venv\Scripts\python.exe scripts\generate_desktop_release_manifest.py
+          --app "frontend/ocean-desktop/dist/win-unpacked"
+          --output "release-metadata/windows-ci"
+          --version "0.1.0-ci"
+
+      - name: Record Windows package verification attestation
+        working-directory: frontend/ocean-desktop
+        shell: pwsh
+        run: >-
+          npm run verify:package --
+          --output ../../release-metadata/windows-ci/package-verification.json
+
+      - name: Launch frozen Windows Desktop app without development runtimes
+        working-directory: frontend/ocean-desktop
+        shell: pwsh
+        run: >-
+          npm run verify:package-launch --
+          --output ../../release-metadata/windows-ci/packaged-launch.json
+
+      - name: Upload Windows package evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocean-desktop-windows-package-evidence
+          path: release-metadata/windows-ci
+          if-no-files-found: error

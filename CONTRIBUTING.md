@@ -1,68 +1,42 @@
-# Contributing to OpenHarness
+# Contributing to OceanMind
 
-OpenHarness is an open-source agent harness focused on clarity, hackability, and compatibility with Claude-style workflows.
-
-## Ways to contribute
-
-- Fix bugs or tighten edge-case handling in the harness runtime.
-- Improve docs, onboarding, examples, and architecture notes.
-- Add tests for tools, permissions, plugins, MCP, or multi-agent flows.
-- Contribute new skills, plugins, or provider compatibility improvements.
-- Share real usage patterns that can be added to [`docs/SHOWCASE.md`](docs/SHOWCASE.md).
+OceanMind is a local-first multi-agent workbench for ocean-science research.
 
 ## Development setup
 
 ```bash
-git clone https://github.com/HKUDS/OpenHarness.git
-cd OpenHarness
-uv sync --extra dev
-```
+python -m venv .venv
+.venv/bin/pip install -e ".[dev,ocean-runtime]"
 
-If you want to work on the React terminal UI as well:
-
-```bash
-cd frontend/terminal
+cd frontend/ocean-desktop
 npm ci
-cd ../..
 ```
 
-## Local checks
-
-Run the same core checks that CI runs before opening a PR:
+## Validation
 
 ```bash
-uv run ruff check src tests scripts
-uv run pytest -q
+.venv/bin/python -m pytest -q
+make lint
+
+cd frontend/ocean-desktop
+npm run check
+npm test -- --run
+npm run build
 ```
 
-Frontend sanity check:
+For changes to packaging, also build the Python wheel and Desktop sidecar:
 
 ```bash
-cd frontend/terminal
-npx tsc --noEmit
+.venv/bin/python -m hatchling build -t wheel
+.venv/bin/python scripts/check_ocean_wheel_contents.py
+
+cd frontend/ocean-desktop
+npm run build:sidecar
 ```
 
-## Pull request expectations
+## Pull requests
 
-- Keep PRs scoped. Small, reviewable changes merge faster than broad rewrites.
-- Include the problem, the change, and how you verified it.
-- Add or update tests when behavior changes.
-- Update docs when CLI flags, workflows, or compatibility claims change.
-- Add a short entry under `Unreleased` in [`CHANGELOG.md`](CHANGELOG.md) for user-visible changes.
-- If you are improving type coverage, feel free to run `uv run mypy src/openharness`, but it is not yet a required green check for the whole repo.
-
-## Documentation and community contributions
-
-Issue [#7](https://github.com/HKUDS/OpenHarness/issues/7) surfaced several high-value docs needs. Useful contributions in that area include:
-
-- README accuracy improvements and compatibility notes.
-- Short, reproducible examples for common workflows.
-- Showcase entries based on real usage rather than generic marketing claims.
-- Contribution and maintenance docs that make the repo easier to navigate.
-
-## Reporting bugs and proposing features
-
-- Use the GitHub issue templates when possible.
-- Include environment details, exact commands, and error output for bugs.
-- For features, explain the concrete workflow gap and expected behavior.
-- If the request is mostly documentation or maintenance related, say that explicitly so it can be scoped as a docs PR.
+- Keep changes scoped and preserve existing task history and local research data.
+- Add focused tests for behavioral changes.
+- Keep scientific claims tied to inspectable evidence and reproducible outputs.
+- Update the changelog for user-visible changes.

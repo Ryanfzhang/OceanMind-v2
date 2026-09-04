@@ -1,0 +1,3232 @@
+{
+  "$defs": {
+    "ArtifactCreatePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{2,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "artifact_type": {
+          "enum": [
+            "project_context",
+            "paper",
+            "claim",
+            "observation",
+            "hypothesis",
+            "dataset",
+            "dataset_diagnosis",
+            "interactive_view",
+            "experiment",
+            "decision",
+            "report"
+          ],
+          "title": "Artifact Type",
+          "type": "string"
+        },
+        "content": {
+          "additionalProperties": true,
+          "title": "Content",
+          "type": "object"
+        },
+        "intrinsic_links": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ArtifactLinkDraft"
+          },
+          "title": "Intrinsic Links",
+          "type": "array"
+        },
+        "provenance": {
+          "additionalProperties": true,
+          "title": "Provenance",
+          "type": "object"
+        },
+        "summary": {
+          "default": "",
+          "maxLength": 8000,
+          "title": "Summary",
+          "type": "string"
+        },
+        "supersedes_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supersedes Version"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "title"
+      ],
+      "title": "ArtifactCreatePayload",
+      "type": "object"
+    },
+    "ArtifactCreateRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactCreatePayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.create",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "ArtifactCreateRequest",
+      "type": "object"
+    },
+    "ArtifactGetPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "ArtifactGetPayload",
+      "type": "object"
+    },
+    "ArtifactGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactGetPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "ArtifactGetRequest",
+      "type": "object"
+    },
+    "ArtifactLinkDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "intrinsic": {
+          "default": true,
+          "title": "Intrinsic",
+          "type": "boolean"
+        },
+        "relation": {
+          "enum": [
+            "derived_from",
+            "uses_dataset",
+            "supports_claim",
+            "contradicts_claim",
+            "tests_hypothesis",
+            "supersedes",
+            "included_in_report",
+            "motivates"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "relation",
+        "target"
+      ],
+      "title": "ArtifactLinkDraft",
+      "type": "object"
+    },
+    "ArtifactListPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "project_context",
+                "paper",
+                "claim",
+                "observation",
+                "hypothesis",
+                "dataset",
+                "dataset_diagnosis",
+                "interactive_view",
+                "experiment",
+                "decision",
+                "report"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Type"
+        },
+        "limit": {
+          "default": 100,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "title": "ArtifactListPayload",
+      "type": "object"
+    },
+    "ArtifactListRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactListPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.list",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "ArtifactListRequest",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "version"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "ArtifactResourceGrantPayload": {
+      "additionalProperties": false,
+      "description": "Request one bounded viewer resource from an exact immutable artifact version.",
+      "properties": {
+        "artifact_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "file_name": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,255}$",
+          "title": "File Name",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "paper_viewer",
+            "report_viewer",
+            "report_notebook",
+            "report_code",
+            "report_environment",
+            "report_inputs",
+            "report_reproducibility",
+            "report_image",
+            "interactive_view_data",
+            "interactive_view_preview"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_ref",
+        "file_name",
+        "purpose"
+      ],
+      "title": "ArtifactResourceGrantPayload",
+      "type": "object"
+    },
+    "ArtifactResourceGrantRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactResourceGrantPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.resource.grant",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "ArtifactResourceGrantRequest",
+      "type": "object"
+    },
+    "ArtifactVersionsPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^[a-z][a-z0-9_]{2,127}$",
+          "title": "Artifact Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id"
+      ],
+      "title": "ArtifactVersionsPayload",
+      "type": "object"
+    },
+    "ArtifactVersionsRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/ArtifactVersionsPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "artifact.versions.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "ArtifactVersionsRequest",
+      "type": "object"
+    },
+    "DatasetImportPayload": {
+      "additionalProperties": false,
+      "description": "Attach one local file or directory to the current Task.\n\nLocal datasets are references by default.  The immutable artifact records the\nauthorized path and provenance, while the source bytes stay where the user put\nthem.  ``materialized_snapshot`` remains an explicit compatibility option.",
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{2,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "desktop_staged": {
+          "default": false,
+          "title": "Desktop Staged",
+          "type": "boolean"
+        },
+        "local_path": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Local Path"
+        },
+        "materialization_acknowledged": {
+          "default": false,
+          "title": "Materialization Acknowledged",
+          "type": "boolean"
+        },
+        "materialization_level": {
+          "default": "local_reference",
+          "enum": [
+            "local_reference",
+            "materialized_snapshot"
+          ],
+          "title": "Materialization Level",
+          "type": "string"
+        },
+        "relative_path": {
+          "anyOf": [
+            {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relative Path"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "title": "DatasetImportPayload",
+      "type": "object"
+    },
+    "DatasetImportRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/DatasetImportPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "dataset.import",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "DatasetImportRequest",
+      "type": "object"
+    },
+    "DisclosurePolicyGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/EmptyPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "disclosure.policy.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "DisclosurePolicyGetRequest",
+      "type": "object"
+    },
+    "DisclosurePolicySetPayload": {
+      "additionalProperties": false,
+      "description": "A complete, explicitly confirmed policy replaces the active workspace policy.",
+      "properties": {
+        "aggregate_statistics": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Aggregate Statistics",
+          "type": "string"
+        },
+        "confirmed": {
+          "const": true,
+          "title": "Confirmed",
+          "type": "boolean"
+        },
+        "diagnostic_excerpt": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Diagnostic Excerpt",
+          "type": "string"
+        },
+        "document_text": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Document Text",
+          "type": "string"
+        },
+        "metadata": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Metadata",
+          "type": "string"
+        },
+        "provider_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Provider Id",
+          "type": "string"
+        },
+        "raw_bounded_sample": {
+          "enum": [
+            "allow",
+            "prompt",
+            "deny"
+          ],
+          "title": "Raw Bounded Sample",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider_id",
+        "metadata",
+        "aggregate_statistics",
+        "raw_bounded_sample",
+        "document_text",
+        "diagnostic_excerpt",
+        "confirmed"
+      ],
+      "title": "DisclosurePolicySetPayload",
+      "type": "object"
+    },
+    "DisclosurePolicySetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/DisclosurePolicySetPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "disclosure.policy.set",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "DisclosurePolicySetRequest",
+      "type": "object"
+    },
+    "EmptyPayload": {
+      "additionalProperties": false,
+      "description": "Explicit empty object payload for commands with no inputs.",
+      "properties": {},
+      "title": "EmptyPayload",
+      "type": "object"
+    },
+    "HandshakePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "bootstrap_token": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 16,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bootstrap Token"
+        },
+        "client_capability": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 16,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Client Capability"
+        },
+        "client_kind": {
+          "const": "desktop",
+          "title": "Client Kind",
+          "type": "string"
+        },
+        "client_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Client Version",
+          "type": "string"
+        },
+        "supported_protocol_versions": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Supported Protocol Versions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "client_kind",
+        "client_version",
+        "supported_protocol_versions"
+      ],
+      "title": "HandshakePayload",
+      "type": "object"
+    },
+    "HypothesisActivatePayload": {
+      "additionalProperties": false,
+      "description": "Explicit user action that selects one immutable hypothesis as active.",
+      "properties": {
+        "hypothesis_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "hypothesis_ref"
+      ],
+      "title": "HypothesisActivatePayload",
+      "type": "object"
+    },
+    "HypothesisActivateRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/HypothesisActivatePayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "hypothesis.activate",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "HypothesisActivateRequest",
+      "type": "object"
+    },
+    "InteractionRespondPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "maxLength": 16000,
+          "minLength": 1,
+          "title": "Answer",
+          "type": "string"
+        },
+        "interaction_id": {
+          "maxLength": 128,
+          "pattern": "^int_[A-Za-z0-9_-]+$",
+          "title": "Interaction Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "interaction_id",
+        "answer"
+      ],
+      "title": "InteractionRespondPayload",
+      "type": "object"
+    },
+    "InteractionRespondRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/InteractionRespondPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "interaction.respond",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "InteractionRespondRequest",
+      "type": "object"
+    },
+    "PaperCitation": {
+      "additionalProperties": false,
+      "description": "Bibliographic metadata only; document text is never embedded in this contract.",
+      "properties": {
+        "authors": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Authors",
+          "type": "array"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "publication_year": {
+          "anyOf": [
+            {
+              "maximum": 3000,
+              "minimum": 1600,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publication Year"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "maxLength": 2048,
+              "pattern": "^https://",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "venue": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Venue"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "PaperCitation",
+      "type": "object"
+    },
+    "PaperImportPayload": {
+      "additionalProperties": false,
+      "description": "Import one workspace-local PDF without extracting or disclosing document text.",
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{2,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "citation": {
+          "$ref": "#/$defs/PaperCitation"
+        },
+        "materialization_acknowledged": {
+          "const": true,
+          "title": "Materialization Acknowledged",
+          "type": "boolean"
+        },
+        "relative_path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "relative_path",
+        "citation",
+        "materialization_acknowledged"
+      ],
+      "title": "PaperImportPayload",
+      "type": "object"
+    },
+    "PaperImportRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/PaperImportPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "paper.import",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "PaperImportRequest",
+      "type": "object"
+    },
+    "PaperRegisterPayload": {
+      "additionalProperties": false,
+      "description": "Register citation metadata when no local document snapshot is available.",
+      "properties": {
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{2,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "citation": {
+          "$ref": "#/$defs/PaperCitation"
+        }
+      },
+      "required": [
+        "citation"
+      ],
+      "title": "PaperRegisterPayload",
+      "type": "object"
+    },
+    "PaperRegisterRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/PaperRegisterPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "paper.register",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "PaperRegisterRequest",
+      "type": "object"
+    },
+    "PortableExportCreatePayload": {
+      "additionalProperties": false,
+      "description": "Create one private, portable evidence bundle from exact immutable refs.",
+      "properties": {
+        "artifact_refs": {
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Artifact Refs",
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "artifact_refs"
+      ],
+      "title": "PortableExportCreatePayload",
+      "type": "object"
+    },
+    "PortableExportCreateRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/PortableExportCreatePayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "portable.export.create",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "PortableExportCreateRequest",
+      "type": "object"
+    },
+    "RequestCancelPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "target_request_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Target Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_request_id"
+      ],
+      "title": "RequestCancelPayload",
+      "type": "object"
+    },
+    "RequestCancelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/RequestCancelPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "request.cancel",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "RequestCancelRequest",
+      "type": "object"
+    },
+    "RequestContext": {
+      "additionalProperties": false,
+      "description": "Client-visible routing context; authority is bound server-side.",
+      "properties": {
+        "active_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "literature",
+                "exploration",
+                "figure",
+                "writing"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active Mode"
+        },
+        "client_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Client Id",
+          "type": "string"
+        },
+        "session_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "session_id",
+        "client_id"
+      ],
+      "title": "RequestContext",
+      "type": "object"
+    },
+    "RequestStatusGetPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "target_request_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Target Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_request_id"
+      ],
+      "title": "RequestStatusGetPayload",
+      "type": "object"
+    },
+    "RequestStatusGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/RequestStatusGetPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "request.status.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "RequestStatusGetRequest",
+      "type": "object"
+    },
+    "SessionOpenPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requested Workspace Id"
+        },
+        "resume_session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resume Session Id"
+        }
+      },
+      "title": "SessionOpenPayload",
+      "type": "object"
+    },
+    "SessionOpenRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/SessionOpenPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "session.open",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "SessionOpenRequest",
+      "type": "object"
+    },
+    "SessionSubmitPayload": {
+      "additionalProperties": false,
+      "description": "One user-authored foreground prompt for the workspace-bound Ocean agent.",
+      "properties": {
+        "context_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "maxItems": 8,
+          "title": "Context Refs",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "literature_acquisition_mode": {
+          "default": "ask_before_download",
+          "enum": [
+            "ask_before_download",
+            "auto_download_open_access",
+            "search_only"
+          ],
+          "title": "Literature Acquisition Mode",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 32000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "SessionSubmitPayload",
+      "type": "object"
+    },
+    "SessionSubmitRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "minimum": 0,
+          "title": "Expected Workspace Revision",
+          "type": "integer"
+        },
+        "payload": {
+          "$ref": "#/$defs/SessionSubmitPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "session.submit",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context",
+        "expected_workspace_revision"
+      ],
+      "title": "SessionSubmitRequest",
+      "type": "object"
+    },
+    "ShutdownPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "title": "ShutdownPayload",
+      "type": "object"
+    },
+    "SystemHandshakeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequestContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/HandshakePayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "system.handshake",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload"
+      ],
+      "title": "SystemHandshakeRequest",
+      "type": "object"
+    },
+    "SystemShutdownRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/ShutdownPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "system.shutdown",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "SystemShutdownRequest",
+      "type": "object"
+    },
+    "TaskAgentTranscriptGetPayload": {
+      "additionalProperties": false,
+      "description": "Identify one visible participant in one task request.",
+      "properties": {
+        "agent_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Agent Id",
+          "type": "string"
+        },
+        "parent_request_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Parent Request Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 128,
+          "pattern": "^task_[A-Za-z0-9_-]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "work_order_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Work Order Id"
+        }
+      },
+      "required": [
+        "task_id",
+        "parent_request_id",
+        "agent_id"
+      ],
+      "title": "TaskAgentTranscriptGetPayload",
+      "type": "object"
+    },
+    "TaskAgentTranscriptGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskAgentTranscriptGetPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.agent_transcript.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskAgentTranscriptGetRequest",
+      "type": "object"
+    },
+    "TaskArchiveRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskIdPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "task.archive",
+            "task.reopen"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskArchiveRequest",
+      "type": "object"
+    },
+    "TaskCreatePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "TaskCreatePayload",
+      "type": "object"
+    },
+    "TaskCreateRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskCreatePayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.create",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskCreateRequest",
+      "type": "object"
+    },
+    "TaskDeleteRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskIdPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.delete",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskDeleteRequest",
+      "type": "object"
+    },
+    "TaskGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskIdPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "task.get",
+            "task.open"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskGetRequest",
+      "type": "object"
+    },
+    "TaskIdPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "maxLength": 128,
+          "pattern": "^task_[A-Za-z0-9_-]+$",
+          "title": "Task Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "title": "TaskIdPayload",
+      "type": "object"
+    },
+    "TaskListPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "include_archived": {
+          "default": false,
+          "title": "Include Archived",
+          "type": "boolean"
+        },
+        "limit": {
+          "default": 100,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "title": "TaskListPayload",
+      "type": "object"
+    },
+    "TaskListRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskListPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.list",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskListRequest",
+      "type": "object"
+    },
+    "TaskOutputListPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "default": 100,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "task_id": {
+          "maxLength": 128,
+          "pattern": "^task_[A-Za-z0-9_-]+$",
+          "title": "Task Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "title": "TaskOutputListPayload",
+      "type": "object"
+    },
+    "TaskOutputListRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskOutputListPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.output.list",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskOutputListRequest",
+      "type": "object"
+    },
+    "TaskRenamePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "maxLength": 128,
+          "pattern": "^task_[A-Za-z0-9_-]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "title"
+      ],
+      "title": "TaskRenamePayload",
+      "type": "object"
+    },
+    "TaskRenameRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskRenamePayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.rename",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskRenameRequest",
+      "type": "object"
+    },
+    "TaskResultInteractiveViewGetPayload": {
+      "additionalProperties": false,
+      "description": "Load one bounded interactive view from its canonical result files.",
+      "properties": {
+        "result_ref": {
+          "$ref": "#/$defs/TaskResultRef"
+        }
+      },
+      "required": [
+        "result_ref"
+      ],
+      "title": "TaskResultInteractiveViewGetPayload",
+      "type": "object"
+    },
+    "TaskResultInteractiveViewGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskResultInteractiveViewGetPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task_result.interactive_view.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskResultInteractiveViewGetRequest",
+      "type": "object"
+    },
+    "TaskResultRef": {
+      "description": "Small identity passed between an Expert, Coordinator, and frontend.",
+      "properties": {
+        "result_id": {
+          "title": "Result Id",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task_id",
+        "result_id"
+      ],
+      "title": "TaskResultRef",
+      "type": "object"
+    },
+    "TaskResultResourceGrantPayload": {
+      "additionalProperties": false,
+      "description": "Request one immutable file from a result owned by the current task.",
+      "properties": {
+        "file_name": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,511}$",
+          "title": "File Name",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "report_viewer",
+            "report_notebook",
+            "report_code",
+            "report_environment",
+            "report_inputs",
+            "report_reproducibility",
+            "report_image",
+            "interactive_view_data",
+            "interactive_view_preview",
+            "result_file"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "result_ref": {
+          "$ref": "#/$defs/TaskResultRef"
+        }
+      },
+      "required": [
+        "result_ref",
+        "file_name",
+        "purpose"
+      ],
+      "title": "TaskResultResourceGrantPayload",
+      "type": "object"
+    },
+    "TaskResultResourceGrantRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskResultResourceGrantPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task_result.resource.grant",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskResultResourceGrantRequest",
+      "type": "object"
+    },
+    "TaskSnapshotGetPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "before_sequence": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Before Sequence"
+        },
+        "task_id": {
+          "maxLength": 128,
+          "pattern": "^task_[A-Za-z0-9_-]+$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "transcript_limit": {
+          "default": 100,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Transcript Limit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "title": "TaskSnapshotGetPayload",
+      "type": "object"
+    },
+    "TaskSnapshotGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskSnapshotGetPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.snapshot.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "TaskSnapshotGetRequest",
+      "type": "object"
+    },
+    "WorkspaceOpenPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "WorkspaceOpenPayload",
+      "type": "object"
+    },
+    "WorkspaceOpenRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/WorkspaceOpenPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "workspace.open",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "WorkspaceOpenRequest",
+      "type": "object"
+    },
+    "WorkspaceSnapshotGetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/RequestContext"
+        },
+        "expected_task_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Task Revision"
+        },
+        "expected_workspace_revision": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Workspace Revision"
+        },
+        "payload": {
+          "$ref": "#/$defs/EmptyPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "maxLength": 128,
+          "pattern": "^req_[A-Za-z0-9_-]+$",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "workspace.snapshot.get",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "request_id",
+        "type",
+        "payload",
+        "context"
+      ],
+      "title": "WorkspaceSnapshotGetRequest",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "artifact.create": "#/$defs/ArtifactCreateRequest",
+      "artifact.get": "#/$defs/ArtifactGetRequest",
+      "artifact.list": "#/$defs/ArtifactListRequest",
+      "artifact.resource.grant": "#/$defs/ArtifactResourceGrantRequest",
+      "artifact.versions.get": "#/$defs/ArtifactVersionsRequest",
+      "dataset.import": "#/$defs/DatasetImportRequest",
+      "disclosure.policy.get": "#/$defs/DisclosurePolicyGetRequest",
+      "disclosure.policy.set": "#/$defs/DisclosurePolicySetRequest",
+      "hypothesis.activate": "#/$defs/HypothesisActivateRequest",
+      "interaction.respond": "#/$defs/InteractionRespondRequest",
+      "paper.import": "#/$defs/PaperImportRequest",
+      "paper.register": "#/$defs/PaperRegisterRequest",
+      "portable.export.create": "#/$defs/PortableExportCreateRequest",
+      "request.cancel": "#/$defs/RequestCancelRequest",
+      "request.status.get": "#/$defs/RequestStatusGetRequest",
+      "session.open": "#/$defs/SessionOpenRequest",
+      "session.submit": "#/$defs/SessionSubmitRequest",
+      "system.handshake": "#/$defs/SystemHandshakeRequest",
+      "system.shutdown": "#/$defs/SystemShutdownRequest",
+      "task.agent_transcript.get": "#/$defs/TaskAgentTranscriptGetRequest",
+      "task.archive": "#/$defs/TaskArchiveRequest",
+      "task.create": "#/$defs/TaskCreateRequest",
+      "task.delete": "#/$defs/TaskDeleteRequest",
+      "task.get": "#/$defs/TaskGetRequest",
+      "task.list": "#/$defs/TaskListRequest",
+      "task.open": "#/$defs/TaskGetRequest",
+      "task.output.list": "#/$defs/TaskOutputListRequest",
+      "task.rename": "#/$defs/TaskRenameRequest",
+      "task.reopen": "#/$defs/TaskArchiveRequest",
+      "task.snapshot.get": "#/$defs/TaskSnapshotGetRequest",
+      "task_result.interactive_view.get": "#/$defs/TaskResultInteractiveViewGetRequest",
+      "task_result.resource.grant": "#/$defs/TaskResultResourceGrantRequest",
+      "workspace.open": "#/$defs/WorkspaceOpenRequest",
+      "workspace.snapshot.get": "#/$defs/WorkspaceSnapshotGetRequest"
+    },
+    "propertyName": "type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/SystemHandshakeRequest"
+    },
+    {
+      "$ref": "#/$defs/SessionOpenRequest"
+    },
+    {
+      "$ref": "#/$defs/SessionSubmitRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskCreateRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskListRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskGetRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskRenameRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskArchiveRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskDeleteRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskSnapshotGetRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskAgentTranscriptGetRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskOutputListRequest"
+    },
+    {
+      "$ref": "#/$defs/WorkspaceOpenRequest"
+    },
+    {
+      "$ref": "#/$defs/WorkspaceSnapshotGetRequest"
+    },
+    {
+      "$ref": "#/$defs/RequestStatusGetRequest"
+    },
+    {
+      "$ref": "#/$defs/RequestCancelRequest"
+    },
+    {
+      "$ref": "#/$defs/InteractionRespondRequest"
+    },
+    {
+      "$ref": "#/$defs/SystemShutdownRequest"
+    },
+    {
+      "$ref": "#/$defs/ArtifactListRequest"
+    },
+    {
+      "$ref": "#/$defs/ArtifactGetRequest"
+    },
+    {
+      "$ref": "#/$defs/ArtifactResourceGrantRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskResultResourceGrantRequest"
+    },
+    {
+      "$ref": "#/$defs/TaskResultInteractiveViewGetRequest"
+    },
+    {
+      "$ref": "#/$defs/ArtifactVersionsRequest"
+    },
+    {
+      "$ref": "#/$defs/ArtifactCreateRequest"
+    },
+    {
+      "$ref": "#/$defs/DatasetImportRequest"
+    },
+    {
+      "$ref": "#/$defs/PaperImportRequest"
+    },
+    {
+      "$ref": "#/$defs/PaperRegisterRequest"
+    },
+    {
+      "$ref": "#/$defs/HypothesisActivateRequest"
+    },
+    {
+      "$ref": "#/$defs/PortableExportCreateRequest"
+    },
+    {
+      "$ref": "#/$defs/DisclosurePolicyGetRequest"
+    },
+    {
+      "$ref": "#/$defs/DisclosurePolicySetRequest"
+    }
+  ]
+}

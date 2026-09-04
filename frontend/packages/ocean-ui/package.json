@@ -1,0 +1,23 @@
+{
+  "name": "@ocean-partner/ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./modal-focus": "./src/modal-focus.ts",
+    "./notifications": "./src/notifications.ts",
+    "./command-palette": "./src/command-palette.tsx",
+    "./resize-handles": "./src/resize-handles.tsx"
+  },
+  "peerDependencies": {
+    "lucide-react": "^1.24.0",
+    "react": "^18"
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

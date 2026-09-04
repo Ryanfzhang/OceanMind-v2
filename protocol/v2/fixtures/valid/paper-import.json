@@ -1,0 +1,21 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_paper_import_fixture",
+  "type": "paper.import",
+  "payload": {
+    "relative_path": "papers/example.pdf",
+    "citation": {
+      "title": "Example local paper",
+      "authors": ["A. Author"],
+      "publication_year": 2010,
+      "doi": "10.1234/example"
+    },
+    "materialization_acknowledged": true
+  },
+  "context": {
+    "client_id": "client_desktop_fixture",
+    "session_id": "ses_fixture",
+    "workspace_id": "ws_fixture"
+  },
+  "expected_workspace_revision": 4
+}

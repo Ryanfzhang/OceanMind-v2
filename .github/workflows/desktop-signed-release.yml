@@ -1,0 +1,163 @@
+name: Ocean Desktop signed release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing immutable tag matching frontend/ocean-desktop/package.json, for example v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: Signed macOS ${{ matrix.architecture }} candidate
+    runs-on: ${{ matrix.runner }}
+    environment: desktop-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: x64
+            runner: macos-15-intel
+          - architecture: arm64
+            runner: macos-14
+    steps:
+      - name: Checkout immutable release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/ocean-desktop/package-lock.json
+
+      - name: Verify tag matches packaged version
+        shell: bash
+        run: |
+          expected="v$(node -p \"require('./frontend/ocean-desktop/package.json').version\")"
+          test "${{ inputs.tag }}" = "$expected"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync --extra dev --extra ocean-runtime --extra desktop-build
+
+      - name: Install Desktop dependencies
+        working-directory: frontend/ocean-desktop
+        run: npm ci
+
+      - name: Build, sign, notarize, and verify macOS candidate
+        working-directory: frontend/ocean-desktop
+        env:
+          OCEAN_PYTHON: ${{ github.workspace }}/.venv/bin/python
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          npm run build:sidecar
+          npm run package:release:mac:signed
+
+      - name: Generate signed macOS release metadata
+        shell: bash
+        run: |
+          version="$(node -p \"require('./frontend/ocean-desktop/package.json').version\")"
+          .venv/bin/python scripts/generate_desktop_release_manifest.py \
+            --app "frontend/ocean-desktop/dist/mac/Ocean Research Partner.app" \
+            --output "release-metadata/macos-${{ matrix.architecture }}" \
+            --version "$version"
+
+      - name: Upload signed macOS candidate and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocean-desktop-macos-${{ matrix.architecture }}-signed-candidate
+          path: |
+            frontend/ocean-desktop/dist/*.dmg
+            frontend/ocean-desktop/dist/*-mac.zip
+            release-metadata/macos-${{ matrix.architecture }}
+          if-no-files-found: error
+
+  windows:
+    name: Signed Windows x64 candidate
+    runs-on: windows-latest
+    environment: desktop-release
+    steps:
+      - name: Checkout immutable release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/ocean-desktop/package-lock.json
+
+      - name: Verify tag matches packaged version
+        shell: pwsh
+        run: |
+          $expected = "v$(node -p \"require('./frontend/ocean-desktop/package.json').version\")"
+          if ("${{ inputs.tag }}" -ne $expected) { throw "Release tag must equal $expected." }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync --extra dev --extra ocean-runtime --extra desktop-build
+
+      - name: Install Desktop dependencies
+        working-directory: frontend/ocean-desktop
+        run: npm ci
+
+      - name: Build, sign, and verify Windows candidate
+        working-directory: frontend/ocean-desktop
+        env:
+          OCEAN_PYTHON: ${{ github.workspace }}\.venv\Scripts\python.exe
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+        run: |
+          npm run build:sidecar
+          npm run package:release:win:signed
+
+      - name: Generate signed Windows release metadata
+        shell: pwsh
+        run: |
+          $version = node -p "require('./frontend/ocean-desktop/package.json').version"
+          .\.venv\Scripts\python.exe scripts\generate_desktop_release_manifest.py `
+            --app "frontend/ocean-desktop/dist/win-unpacked" `
+            --output "release-metadata/windows-x64" `
+            --version "$version"
+
+      - name: Upload signed Windows candidate and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocean-desktop-windows-x64-signed-candidate
+          path: |
+            frontend/ocean-desktop/dist/*.exe
+            release-metadata/windows-x64
+          if-no-files-found: error

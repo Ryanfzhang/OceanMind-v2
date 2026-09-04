@@ -1,0 +1,19 @@
+{
+  "protocol_version": 2,
+  "request_id": "req_disclosure_policy_missing_confirmation",
+  "type": "disclosure.policy.set",
+  "payload": {
+    "provider_id": "openai_codex",
+    "metadata": "allow",
+    "aggregate_statistics": "allow",
+    "raw_bounded_sample": "deny",
+    "document_text": "deny",
+    "diagnostic_excerpt": "deny"
+  },
+  "context": {
+    "client_id": "client_desktop_fixture",
+    "session_id": "ses_fixture",
+    "workspace_id": "ws_fixture"
+  },
+  "expected_workspace_revision": 4
+}
