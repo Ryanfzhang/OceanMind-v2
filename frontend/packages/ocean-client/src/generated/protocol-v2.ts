@@ -844,6 +844,23 @@ export interface TaskResultResourceGrantRequest {
   "expected_task_revision"?: number | null;
 }
 
+export interface TaskResultsChangedEvent {
+  "protocol_version": 2;
+  "event_id": string;
+  "session_id"?: string | null;
+  "workspace_id"?: string | null;
+  "task_id"?: string | null;
+  "request_id"?: string | null;
+  "sequence": number;
+  "timestamp": string;
+  "type": "task.results.changed";
+  "payload": TaskResultsChangedPayload;
+}
+
+export interface TaskResultsChangedPayload {
+  "result_ids": Array<string>;
+}
+
 export interface TaskSnapshotEvent {
   "protocol_version": 2;
   "event_id": string;
@@ -1121,4 +1138,4 @@ export interface WorkspaceSnapshotPayload {
 
 export type OceanRequest = SystemHandshakeRequest | SessionOpenRequest | SessionSubmitRequest | TaskCreateRequest | TaskListRequest | TaskGetRequest | TaskRenameRequest | TaskArchiveRequest | TaskDeleteRequest | TaskSnapshotGetRequest | TaskAgentTranscriptGetRequest | TaskOutputListRequest | WorkspaceOpenRequest | WorkspaceSnapshotGetRequest | RequestStatusGetRequest | RequestCancelRequest | InteractionRespondRequest | SystemShutdownRequest | ArtifactListRequest | ArtifactGetRequest | ArtifactResourceGrantRequest | TaskResultResourceGrantRequest | TaskResultInteractiveViewGetRequest | ArtifactVersionsRequest | ArtifactCreateRequest | DatasetImportRequest | PaperImportRequest | PaperRegisterRequest | HypothesisActivateRequest | PortableExportCreateRequest | DisclosurePolicyGetRequest | DisclosurePolicySetRequest;
 
-export type OceanEvent = SystemReadyEvent | RequestAcceptedEvent | RequestCompletedEvent | RequestFailedEvent | RequestCancelledEvent | InteractionRequestedEvent | TranscriptItemAppendedEvent | AssistantDeltaEvent | AssistantTurnCompletedEvent | ToolCallStartedEvent | ToolCallCompletedEvent | ContextCompactionProgressEvent | TaskSnapshotEvent | TeamSnapshotEvent | WorkspaceSnapshotEvent | WorkspaceChangedEvent | DisclosurePolicyUpdatedEvent | SystemShutdownEvent | SystemErrorEvent | ArtifactCreatedEvent | ArtifactVersionCreatedEvent | ArtifactStatusChangedEvent;
+export type OceanEvent = SystemReadyEvent | RequestAcceptedEvent | RequestCompletedEvent | RequestFailedEvent | RequestCancelledEvent | InteractionRequestedEvent | TranscriptItemAppendedEvent | AssistantDeltaEvent | AssistantTurnCompletedEvent | ToolCallStartedEvent | ToolCallCompletedEvent | ContextCompactionProgressEvent | TaskSnapshotEvent | TaskResultsChangedEvent | TeamSnapshotEvent | WorkspaceSnapshotEvent | WorkspaceChangedEvent | DisclosurePolicyUpdatedEvent | SystemShutdownEvent | SystemErrorEvent | ArtifactCreatedEvent | ArtifactVersionCreatedEvent | ArtifactStatusChangedEvent;

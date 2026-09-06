@@ -120,9 +120,17 @@ jobs:
           npm run typecheck
           npm test -- --run
 
-      - name: Electron security-boundary test
+      - name: Electron interaction regression tests
         working-directory: frontend/ocean-desktop
         run: npm run e2e
+
+      - name: Upload Electron failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-interaction-failures
+          path: frontend/ocean-desktop/test-results/
+          retention-days: 7
 
       - name: Record Desktop smoke performance baseline
         working-directory: frontend/ocean-desktop

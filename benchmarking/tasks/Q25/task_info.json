@@ -1,0 +1,7 @@
+{
+  "id": "Q25",
+  "track": "idea_hypothesis",
+  "title": "Can surface chlorophyll represent the water column?",
+  "query": "Using the supplied papers and CMOMS data, propose and test a hypothesis about when surface chlorophyll is an unreliable indicator of water-column chlorophyll. Identify a physically interpretable condition under which the relationship changes.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
+  "data_status": "pending_subset_selection"
+}

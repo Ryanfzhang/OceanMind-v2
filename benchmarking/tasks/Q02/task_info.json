@@ -1,0 +1,7 @@
+{
+  "id": "Q02",
+  "track": "data_analysis",
+  "title": "Subsurface chlorophyll maximum",
+  "query": "For the supplied CMOMS cross-shelf transects, calculate the depth and concentration of the subsurface chlorophyll maximum during summer 2011. Distinguish an interior maximum from a surface maximum or an unresolved profile.",
+  "data_status": "pending_subset_selection"
+}

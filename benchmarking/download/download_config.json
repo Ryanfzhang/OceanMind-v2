@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "products": [
+    {
+      "id": "modis_monthly",
+      "enabled": true,
+      "server": "https://coastwatch.pfeg.noaa.gov/erddap",
+      "dataset": "erdMH1chlamday_R2022SQ",
+      "version_label": "MODIS-Aqua R2022 family; actual processing_version captured from provider",
+      "variables": ["chlor_a"],
+      "start": "2003-01",
+      "end": "2022-12",
+      "cadence": "month",
+      "bbox": null,
+      "notes": "Q05/Q21/Q24 shared archive. Explicit MODIS download bbox required. Q22's 2002 months are not included by default; change start to 2002-07 if that route is chosen. No automatic fallback to R2018 (ends April 2022)."
+    },
+    {
+      "id": "seawifs_monthly",
+      "enabled": true,
+      "server": "https://oceanwatch.pifsc.noaa.gov/erddap",
+      "dataset": "sw_chla_monthly_2018_0",
+      "version_label": "SeaWiFS R2018.0",
+      "variables": ["chlor_a"],
+      "start": "1997-09",
+      "end": "2010-04",
+      "cadence": "month",
+      "bbox": [104, 120, 1, 25],
+      "notes": "Q23 rectangle only, not its final ocean/shelf mask. Missing months are inventoried, never filled. Not the paper-era processing release."
+    },
+    {
+      "id": "blended_wind_monthly",
+      "enabled": true,
+      "server": "https://coastwatch.noaa.gov/erddap",
+      "dataset": "noaacwBlendedWindsMonthly",
+      "version_label": "NOAA Blended Sea Winds v2",
+      "variables": ["windspeed", "u_wind", "v_wind", "mask"],
+      "axis_values": {"zlev": 10},
+      "start": "1997-09",
+      "end": "2010-04",
+      "cadence": "month",
+      "bbox": [104, 120, 1, 25],
+      "notes": "Q23. Preserve scalar windspeed independently of monthly mean vectors. Not a replacement for the CMOMS 2011 forcing."
+    }
+  ],
+  "pending": [
+    {"id": "modis_daily_or_sampling", "reason": "Select days/regions and same-release daily or L3-bin sampling product; monthly pixels cannot reconstruct within-month sampling."},
+    {"id": "argo_apex", "reason": "Freeze Gulf bbox, float/cycle IDs, QC selection and background samples. Generic Gulf Argo is not automatically the original BOEM/APEX sample."},
+    {"id": "gmog_glider", "reason": "Obtain exact authorized Poseidon mission files from provider/authors; no verified bulk public endpoint."},
+    {"id": "gulf_altimetry", "reason": "Choose ADT/SSH product ID, version, datum, event windows and Gulf bbox; obtain provider credentials if required."},
+    {"id": "gulf_reanalysis", "reason": "Q15/Q29 product, years, event and depth remain undecided; do not silently select GLORYS or substitute observations."},
+    {"id": "regional_nemo", "reason": "Optional author simulation route; requires exact run/event files, not a generic CMEMS download."},
+    {"id": "bathymetry_masks", "reason": "ETOPO5 access/version and task polygons remain unresolved; no automatic ETOPO2022 replacement or generated scientific masks."},
+    {"id": "cmoms_forcing", "reason": "Must identify the user's actual wind/river forcing, not replace it with unrelated observational products."}
+  ]
+}

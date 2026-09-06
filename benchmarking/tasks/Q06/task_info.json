@@ -1,0 +1,7 @@
+{
+  "id": "Q06",
+  "track": "data_analysis",
+  "title": "Bottom hypoxia exposure",
+  "query": "Using the 2011 CMOMS bottom-water oxygen data, calculate the daily area below 2 mg L−1 and the annual number of hypoxic days at each valid bottom grid cell. Verify the oxygen-unit conversion and report missing-data limitations.",
+  "data_status": "pending_subset_selection"
+}

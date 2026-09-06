@@ -145,9 +145,11 @@ class OceanBackendHost:
             task_workspaces=self.task_workspace_projector,
             task_results=self.task_results,
         )
+        self.event_bus = EventBus()
         self.skill_curator = SkillCurator(
             store=self.store,
             task_results=self.task_results,
+            event_emitter=self.event_bus.emit_workspace,
         )
         # Filesystem intents are recovered before active request records are marked interrupted.
         self.recovered_artifact_operations = self.artifact_service.recover_pending()
@@ -157,7 +159,6 @@ class OceanBackendHost:
             task_results=self.task_results,
         )
         self.recovered_expert_work = self.expert_recovery.recover()
-        self.event_bus = EventBus()
         self.team = OceanTeamOrchestrator(
             store=self.store,
             artifacts=self.artifact_service,
@@ -184,8 +185,9 @@ class OceanBackendHost:
             expected_client_kind=expected_client_kind,
         )
 
-    async def run_stdio(self, *, input_stream: BinaryIO | None = None) -> int:
-        self.skill_curator.start()
+    async def run_stdio(self, *, input_stream: BinaryIO | None = None, skill_curator: bool = True) -> int:
+        if skill_curator:
+            self.skill_curator.start()
         return await self.stdio.run(input_stream=input_stream)
 
     async def close(self) -> None:
@@ -201,6 +203,7 @@ async def run_stdio_backend(
     state_directory: Path,
     *,
     expected_client_kind: ClientKind = "desktop",
+    skill_curator: bool = True,
 ) -> int:
     """Run the production stdio adapter using stdout only for protocol frames."""
 
@@ -216,7 +219,7 @@ async def run_stdio_backend(
         expected_client_kind=expected_client_kind,
     )
     try:
-        return await host.run_stdio()
+        return await host.run_stdio(skill_curator=skill_curator)
     finally:
         await host.close()
 

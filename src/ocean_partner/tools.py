@@ -554,7 +554,9 @@ class OceanExpertRunCodeInput(OceanToolInput):
 class OceanExpertRunCodeTool(_OceanTool):
     name = "ocean_expert_run_code"
     description = (
-        "Run one complete Python analysis program inside this Expert's task sandbox. The input "
+        "Run a Python analysis or download program inside this Expert's task sandbox with network "
+        "access. Never upload local data without user authorization. Use acquisition Skills for "
+        "provider methods; save reusable downloads in OCEAN_WORK_DIR/downloads. The input "
         "manifest contains server-prepared AnalysisContext, exact read-only sources, and reusable "
         "prior results. OCEAN_WORK_DIR persists intermediate arrays across focused follow-ups. "
         "ScientificFigure.save() durably declares candidate results with their supporting "

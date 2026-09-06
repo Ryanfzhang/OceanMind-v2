@@ -1,0 +1,7 @@
+{
+  "id": "Q08",
+  "track": "autoresearch",
+  "title": "Distinct chlorophyll hotspots",
+  "query": "Determine whether the 2011 northern South China Sea shelf contains distinct chlorophyll hotspots associated with river-influenced and upwelling-influenced waters. Quantify their differences and assess whether the available evidence supports different nutrient-supply pathways.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

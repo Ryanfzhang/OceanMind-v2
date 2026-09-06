@@ -1,0 +1,7 @@
+{
+  "id": "Q22",
+  "track": "autoresearch",
+  "title": "Coastal and offshore bloom timing",
+  "query": "Investigate whether coastal waters influenced by the Pearl River and offshore waters near SEATS exhibit different bloom timing and interannual consistency. Quantify how observation gaps affect the inferred seasonal peaks.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

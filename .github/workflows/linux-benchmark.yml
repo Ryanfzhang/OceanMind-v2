@@ -1,0 +1,36 @@
+name: Linux benchmark execution
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/ocean_partner/batch.py'
+      - 'src/ocean_partner/cli.py'
+      - 'src/ocean_partner/backend/host.py'
+      - 'src/ocean_partner/sandbox/**'
+      - 'src/ocean_partner/sandbox_probe_entry.py'
+      - 'tests/test_sandbox/**'
+      - 'tests/test_ocean_partner/test_batch.py'
+      - '.github/workflows/linux-benchmark.yml'
+
+jobs:
+  linux-sandbox:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+      - name: Install namespace sandbox (no privileged execution)
+        run: sudo apt-get update && sudo apt-get install -y bubblewrap libseccomp2
+      - name: Install runtime
+        run: uv sync --extra dev --extra ocean-runtime
+      - name: Prove native isolation and real backend protocol (no model calls)
+        env:
+          OCEAN_REQUIRE_LINUX_SANDBOX: '1'
+        run: |
+          export OCEAN_SANDBOX_PYTHON="$PWD/.venv/bin/python"
+          uv run python -m ocean_partner sandbox-self-check
+          uv run pytest -q tests/test_sandbox/test_linux.py tests/test_sandbox/test_execution.py tests/test_ocean_partner/test_batch.py tests/test_ocean_partner/test_stdio_host.py

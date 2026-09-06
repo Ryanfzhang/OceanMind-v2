@@ -1,0 +1,7 @@
+{
+  "id": "Q05",
+  "track": "data_analysis",
+  "title": "Interannual chlorophyll anomalies near the Pearl River",
+  "query": "Using monthly MODIS-Aqua chlorophyll data for 2011–2022 and the supplied Pearl River nearshore mask (water depth <50 m), calculate the area-weighted regional monthly means and calendar-month climatology. Calculate January and July percentage anomalies relative to their respective climatological means, identify the strongest positive and negative anomalies, and report valid spatial coverage without treating missing observations as zero.",
+  "data_status": "pending_subset_selection"
+}

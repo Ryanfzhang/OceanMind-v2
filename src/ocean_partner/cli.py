@@ -17,21 +17,72 @@ from ocean_partner.backend.host import run_stdio_backend
 from ocean_partner.backend.store import RequestStore
 from ocean_partner.doctor import ocean_doctor
 from ocean_partner.exports import PortableExportService
-from ocean_partner.protocol.v2.schema import write_protocol_artifacts
 from ocean_partner.protocol.v2.models import ClientKind
+from ocean_partner.protocol.v2.schema import write_protocol_artifacts
 from ocean_partner.sandbox_self_check import run_sandbox_self_check
-from ocean_partner.storage import OceanPaths
 from ocean_partner.scientific_runtime import (
     FROZEN_SCIENTIFIC_RUNTIME_MODULES,
     capture_frozen_scientific_runtime_manifest,
 )
-
+from ocean_partner.storage import OceanPaths
 
 app = typer.Typer(
     help="Ocean Research Partner workbench.",
     no_args_is_help=True,
     add_completion=False,
 )
+
+
+@app.command("batch")
+def batch_queries(
+    queries: Path = typer.Option(..., "--queries", exists=True, dir_okay=False),
+    output: Path = typer.Option(..., "--output", help="New batch output directory, outside source data."),
+    resume: bool = typer.Option(False, "--resume", help="Skip completed cases in this batch; retry other cases."),
+) -> None:
+    """Run a JSONL query set without the Desktop UI (one isolated process per case)."""
+    from ocean_partner.batch import load_queries, run_batch
+
+    try:
+        cases = load_queries(queries)
+        results = asyncio.run(run_batch(cases, output, resume=resume))
+    except asyncio.CancelledError as exc:
+        raise typer.Exit(130) from exc
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    typer.echo(json.dumps({"results": results}, ensure_ascii=False))
+    raise typer.Exit(0 if all(item["status"] == "completed" for item in results) else 1)
+
+
+@app.command("run")
+def run_query(
+    query: str = typer.Option(..., "--query", help="Research query sent unchanged to the Coordinator."),
+    output: Path = typer.Option(..., "--output", help="New isolated output directory."),
+    dataset: list[Path] = typer.Option([], "--dataset", help="Read-only dataset file/directory; repeatable."),
+    timeout: float = typer.Option(3600, "--timeout", min=1, max=604800),
+) -> None:
+    """Run one headless research task. Unanswered interactions are recorded, not auto-approved."""
+    from ocean_partner.batch import QueryCase, resolve_datasets, run_batch
+
+    try:
+        case = resolve_datasets(QueryCase(id="query", query=query, datasets=dataset, timeout_seconds=timeout), Path.cwd())
+        results = asyncio.run(run_batch([case], output))
+    except asyncio.CancelledError as exc:
+        raise typer.Exit(130) from exc
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    typer.echo(json.dumps(results[0], ensure_ascii=False))
+    raise typer.Exit(0 if results[0]["status"] == "completed" else 1)
+
+
+@app.command("configure-models")
+def configure_models() -> None:
+    """Read role API configuration as JSON from stdin, without echoing credentials."""
+    try:
+        payload = json.loads(sys.stdin.read(16_384))
+        result = _desktop_provider_setup(payload)
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter("Invalid role configuration; expected roles with provider/model/base_url/api_key") from exc
+    typer.echo(json.dumps(result, ensure_ascii=False))
 
 
 def _desktop_provider_status() -> dict[str, object]:
@@ -141,6 +192,7 @@ def backend(
         "--client-kind",
         help="Authenticated Protocol v2 Desktop transport kind.",
     ),
+    skill_curator: bool = typer.Option(True, "--skill-curator/--no-skill-curator"),
 ) -> None:
     """Run the Protocol v2 JSONL backend used by OceanMind Desktop."""
 
@@ -148,7 +200,9 @@ def backend(
         raise typer.BadParameter("must be desktop", param_hint="--client-kind")
     root = state_dir or default_state_dir(Path.cwd())
     raise typer.Exit(
-        asyncio.run(run_stdio_backend(root, expected_client_kind=cast(ClientKind, client_kind)))
+        asyncio.run(run_stdio_backend(
+            root, expected_client_kind=cast(ClientKind, client_kind), skill_curator=skill_curator,
+        ))
     )
 
 

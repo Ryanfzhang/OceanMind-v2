@@ -55,6 +55,26 @@ def test_literature_skill_remains_hidden_until_its_capability_is_enabled():
     assert len(ocean_skill_dirs(capabilities={LITERATURE_CAPABILITY})) == 2
 
 
+def test_acquisition_skills_use_existing_role_catalog_and_execution_tool():
+    role = "data_reproducibility_expert"
+    for name in ("ocean-data-acquisition", "modis-ocean-download",
+                 "seawifs-ocean-download", "cmems-data-acquisition"):
+        content, metadata = load_ocean_skill(name, role=role)
+        assert role in metadata.roles
+        assert "ocean_expert_run_code" in content
+        assert "ocean_remote_data" not in content
+    with pytest.raises(OceanResourceUnavailableError):
+        load_ocean_skill("cmems-data-acquisition", role="coordinator")
+    registry = create_ocean_expert_tool_registry(OceanToolServices(
+        workspace_id="ws_download_skills", provider_id="provider_fixture",
+        store=SimpleNamespace(), skill_role=role,
+        expert_code_execution=SimpleNamespace(),
+    ))
+    names = {tool.name for tool in registry.list_tools()}
+    assert "ocean_expert_run_code" in names
+    assert "ocean_remote_data" not in names
+
+
 def test_packaged_references_are_available_on_demand_without_entering_skill_metadata():
     references = ocean_reference_root()
 

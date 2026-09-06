@@ -1,0 +1,7 @@
+{
+  "id": "Q04",
+  "track": "data_analysis",
+  "title": "Subsurface salinity maximum",
+  "query": "Using the supplied Gulf of Mexico data, calculate the maximum salinity and its depth between 50 and 300 m. Map their seasonal distributions and quantify sensitivity to the available vertical resolution.",
+  "data_status": "pending_subset_selection"
+}

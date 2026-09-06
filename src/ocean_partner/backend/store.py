@@ -3771,6 +3771,7 @@ class RequestStore:
         source_experience_ids: tuple[str, ...],
         reviewer_model: str,
         review_reason: str,
+        expected_version: int | None = None,
     ) -> EvolvedSkillRevision:
         """Atomically install a full Skill and absorb exactly its cited notes."""
 
@@ -3808,7 +3809,10 @@ class RequestStore:
                 """,
                 (workspace_id, skill_name),
             ).fetchone()
-            version = int(version_row["version"]) + 1
+            previous_version = int(version_row["version"])
+            if expected_version is not None and previous_version != expected_version:
+                raise RequestStoreError("Skill changed during review; read the current version again")
+            version = previous_version + 1
             now = _utc_now()
             connection.execute(
                 """

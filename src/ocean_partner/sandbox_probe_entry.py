@@ -21,7 +21,8 @@ def run_sandbox_probe(
 
     try:
         outside_path.read_bytes()
-    except PermissionError:
+    except (PermissionError, FileNotFoundError):
+        # Seatbelt denies reads; a Linux mount namespace hides the path entirely.
         outside_read_denied = True
     else:
         outside_read_denied = False

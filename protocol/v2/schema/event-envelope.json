@@ -2557,6 +2557,120 @@
       "title": "TaskInteractionPayload",
       "type": "object"
     },
+    "TaskResultsChangedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "maxLength": 128,
+          "pattern": "^evt_[A-Za-z0-9_-]+$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/TaskResultsChangedPayload"
+        },
+        "protocol_version": {
+          "const": 2,
+          "title": "Protocol Version",
+          "type": "integer"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Id"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^task_[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "const": "task.results.changed",
+          "title": "Type",
+          "type": "string"
+        },
+        "workspace_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workspace Id"
+        }
+      },
+      "required": [
+        "protocol_version",
+        "event_id",
+        "sequence",
+        "timestamp",
+        "type",
+        "payload"
+      ],
+      "title": "TaskResultsChangedEvent",
+      "type": "object"
+    },
+    "TaskResultsChangedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "result_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Result Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "result_ids"
+      ],
+      "title": "TaskResultsChangedPayload",
+      "type": "object"
+    },
     "TaskSnapshotEvent": {
       "additionalProperties": false,
       "properties": {
@@ -4314,6 +4428,7 @@
       "system.error": "#/$defs/SystemErrorEvent",
       "system.ready": "#/$defs/SystemReadyEvent",
       "system.shutdown": "#/$defs/SystemShutdownEvent",
+      "task.results.changed": "#/$defs/TaskResultsChangedEvent",
       "task.snapshot": "#/$defs/TaskSnapshotEvent",
       "team.snapshot": "#/$defs/TeamSnapshotEvent",
       "tool.call.completed": "#/$defs/ToolCallCompletedEvent",
@@ -4363,6 +4478,9 @@
     },
     {
       "$ref": "#/$defs/TaskSnapshotEvent"
+    },
+    {
+      "$ref": "#/$defs/TaskResultsChangedEvent"
     },
     {
       "$ref": "#/$defs/TeamSnapshotEvent"

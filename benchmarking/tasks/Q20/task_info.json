@@ -1,0 +1,7 @@
+{
+  "id": "Q20",
+  "track": "autoresearch",
+  "title": "Sea level as a subsurface indicator",
+  "query": "Assess how reliably sea-surface height identifies subsurface thermal structure in the Gulf of Mexico. Evaluate its relationship with thermocline depth and upper-ocean heat content, and identify conditions under which the relationship becomes unreliable.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

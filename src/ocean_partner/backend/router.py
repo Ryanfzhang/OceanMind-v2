@@ -3051,8 +3051,7 @@ class OceanRequestRouter:
         if existing is not None:
             return existing.ref
         projector = self.task_workspace_projector or self.task_results.task_workspaces
-        task_root = projector.ensure_task_root(task_id)
-        supplementary_root = task_root / "supplementary"
+        supplementary_root = projector.supplementary_notebook_path(task_id, request_id).parent
         sources: list[FigureReproductionSource] = []
         provenance_refs: list[dict[str, Any]] = []
         for record in self._task_result_records(result_refs):
@@ -3100,6 +3099,7 @@ class OceanRequestRouter:
         )
         notebook_path = projector.write_supplementary_notebook(
             task_id=task_id,
+            request_id=request_id,
             content=(
                 json.dumps(notebook, ensure_ascii=False, indent=2) + "\n"
             ).encode("utf-8"),
@@ -3115,7 +3115,7 @@ class OceanRequestRouter:
                 "file": "analysis.ipynb",
                 "source_result_refs": [source.result_ref for source in sources],
                 "data_files": data_index,
-                "renderer": "nature-python-templates/v2",
+                "renderer": "nature-python-templates/v3",
             },
             workspace_files={"analysis.ipynb": notebook_path},
             source_refs=tuple(provenance_refs),

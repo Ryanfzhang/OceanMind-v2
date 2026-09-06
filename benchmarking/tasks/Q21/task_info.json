@@ -1,0 +1,7 @@
+{
+  "id": "Q21",
+  "track": "autoresearch",
+  "title": "Regional chlorophyll seasonality",
+  "query": "Characterize the seasonal cycle of surface chlorophyll across the South China Sea using MODIS-Aqua observations from 2003 to 2022. Determine how seasonal timing and amplitude differ between shelf and deep-basin waters.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

@@ -997,6 +997,7 @@ class ExpertCodeExecutionService:
                 temporary_root=temporary_root,
                 limits=self.limits,
                 allow_child_processes=False,
+                allow_network=True,
             ),
             # Relative output paths are ordinary in analysis code. Running
             # from the declared output root makes them durable automatically

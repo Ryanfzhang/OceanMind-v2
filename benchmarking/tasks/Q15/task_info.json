@@ -1,0 +1,7 @@
+{
+  "id": "Q15",
+  "track": "autoresearch",
+  "title": "Gulf of Mexico water-mass structure",
+  "query": "Characterize the upper and intermediate water masses represented in the supplied Gulf of Mexico reanalysis. Determine how their temperature–salinity signatures and vertical positions vary between eastern and western regions and between seasons.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

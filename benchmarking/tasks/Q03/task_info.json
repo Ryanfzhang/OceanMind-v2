@@ -1,0 +1,7 @@
+{
+  "id": "Q03",
+  "track": "data_analysis",
+  "title": "Mixed-layer depth from temperature and salinity",
+  "query": "Calculate density-based mixed-layer depth from the supplied Gulf of Mexico profiles using a density increase of 0.03 kg m−3 relative to 10 m. Report profiles for which the criterion cannot be resolved and compare summer and winter distributions.",
+  "data_status": "pending_subset_selection"
+}

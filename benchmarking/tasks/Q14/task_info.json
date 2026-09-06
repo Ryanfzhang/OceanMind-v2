@@ -1,0 +1,7 @@
+{
+  "id": "Q14",
+  "track": "autoresearch",
+  "title": "Climatological nitrate dynamics over the shelf",
+  "query": "Using daily CMOMS output for 2011–2022 and the supplied South China Sea shelf mask (water depth <200 m), investigate the seasonal balance of nitrate sources and sinks. Analyze the climatological monthly process contributions in the upper 10 m and annual-mean vertical profiles through the upper 100 m, limited by the local seabed. Determine how horizontal and vertical advection, diffusion, and available biological processes contribute, and assess budget residuals and limitations arising from missing terms or diagnostic coordinate definitions.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

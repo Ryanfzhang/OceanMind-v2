@@ -38,10 +38,7 @@ from ocean_partner.artifacts.models import ArtifactRef
 from ocean_partner.artifacts.service import ArtifactService
 from ocean_partner.backend.store import RequestStore, RequestStoreError
 from ocean_partner.expert_deliverables import ExpertDeliverableService
-from ocean_partner.expert_execution import (
-    ExpertCodeExecutionService,
-    ExpertRuntimeUnavailableError,
-)
+from ocean_partner.expert_execution import ExpertCodeExecutionService
 from ocean_partner.protocol.v2.models import EventEnvelope
 from ocean_partner.skills import (
     JINA_READER_CAPABILITY,
@@ -403,29 +400,12 @@ class OceanTeamOrchestrator:
             if self.expert_code_execution is None:
                 raise OceanTeamError("Expert code capability is unavailable")
             try:
-                self.expert_code_execution.require_runtime()
-            except ExpertRuntimeUnavailableError as exc:
-                terminal = ExpertResult(
+                # Source identity is checked without executing Python. Dataset inspection and
+                # sandbox availability are checked by the code tool only when actually used.
+                self.expert_code_execution.resolve_work_order_sources(
+                    workspace_id=workspace_id,
                     work_order_id=work_order.work_order_id,
-                    status=WorkStatus.FAILED,
-                    failure_code=WorkFailureCode.RUNTIME_UNAVAILABLE,
-                    error=f"Expert execution runtime is unavailable: {exc}",
                 )
-                self.store.complete_team_work(terminal)
-                await self._notify_progress(progress_sink)
-                return terminal
-            try:
-                if task_id is None:
-                    self.expert_code_execution.resolve_work_order_sources(
-                        workspace_id=workspace_id,
-                        work_order_id=work_order.work_order_id,
-                    )
-                else:
-                    analysis_context = await self.expert_code_execution.get_task_dataset_context(
-                        workspace_id=workspace_id,
-                        task_id=task_id,
-                        work_order_id=work_order.work_order_id,
-                    )
             except (RequestStoreError, RuntimeError, ValueError) as exc:
                 terminal = ExpertResult(
                     work_order_id=work_order.work_order_id,
@@ -665,7 +645,10 @@ class OceanTeamOrchestrator:
         payload["workstream_checkpoint"] = self._checkpoint_contract(binding)
         payload["analysis_context"] = self._participant_analysis_context(binding.analysis_context)
         prompt = (
-            "Own this bounded scientific question. analysis_context is the server-prepared, "
+            "Own this bounded scientific question. Python is required only if you choose to run code. "
+            "An empty analysis_context means no dataset probe has run yet, not that data are absent. "
+            "Your first code execution prepares the shared DatasetContext in its input manifest. "
+            "When present, analysis_context is the server-prepared, "
             "task-scoped DatasetContext shared by all queries and Experts. It is the authoritative "
             "description of input paths, dimensions, coordinates, variables, and "
             "units. An input with inspection=ready is conclusive: use its declared member paths "
@@ -962,7 +945,7 @@ class OceanTeamOrchestrator:
                 LITERATURE_CAPABILITY,
                 *(
                     (WEB_SEARCH_CAPABILITY, JINA_READER_CAPABILITY)
-                    if order.profile_id == "literature_reproduction_expert"
+                    if order.profile_id in {"literature_reproduction_expert", "data_reproducibility_expert"}
                     else ()
                 ),
             ),

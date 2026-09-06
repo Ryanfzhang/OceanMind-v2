@@ -1,0 +1,7 @@
+{
+  "id": "Q17",
+  "track": "autoresearch",
+  "title": "Evolution of the subsurface salinity core",
+  "query": "Track the subsurface salinity core of a Loop Current eddy through its resolved lifetime. Determine whether its salinity maximum weakens, strengthens, or remains stable, and assess how the evolution relates to mixed-layer deepening and changes in eddy position.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

@@ -1074,6 +1074,15 @@ class TaskSnapshotEvent(EventBase):
     payload: TaskSnapshotPayload
 
 
+class TaskResultsChangedPayload(StrictModel):
+    result_ids: tuple[str, ...]
+
+
+class TaskResultsChangedEvent(EventBase):
+    type: Literal["task.results.changed"]
+    payload: TaskResultsChangedPayload
+
+
 class TeamSnapshotEvent(EventBase):
     type: Literal["team.snapshot"]
     payload: TeamSnapshotPayload
@@ -1134,6 +1143,7 @@ EventEnvelope = Annotated[
         ToolCallCompletedEvent,
         ContextCompactionProgressEvent,
         TaskSnapshotEvent,
+        TaskResultsChangedEvent,
         TeamSnapshotEvent,
         WorkspaceSnapshotEvent,
         WorkspaceChangedEvent,

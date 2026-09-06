@@ -17,7 +17,7 @@ async def test_sandbox_self_check_proves_the_local_read_write_contract():
     report = await run_sandbox_self_check()
 
     assert report["schema_version"] == "ocean-sandbox-self-check/v1"
-    assert report["backend"] == "macos-seatbelt-rlimit-v1"
+    assert report["backend"] == capabilities.backend
     assert report["passed"] is True
     assert report["checks"] == {
         "declared_output_written": True,

@@ -1,0 +1,7 @@
+{
+  "id": "Q18",
+  "track": "autoresearch",
+  "title": "Seasonal upper-ocean stratification",
+  "query": "Investigate the seasonal evolution of mixed-layer depth and upper-ocean stratification in the supplied Gulf of Mexico period. Determine whether Loop Current-influenced waters and surrounding Gulf waters exhibit different seasonal responses.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

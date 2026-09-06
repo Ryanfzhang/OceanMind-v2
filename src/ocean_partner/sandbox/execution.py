@@ -3,8 +3,8 @@
 This module deliberately does not change the permissive shell-tool behavior.
 It provides the narrower contract that Ocean analysis runs need: an explicitly
 configured sandbox, a scrubbed environment, resource limits, bounded streams,
-and process-group cleanup.  The first supported backend is macOS Seatbelt;
-other platforms fail closed until their backend is implemented and tested.
+and process-group cleanup. Backends are macOS Seatbelt, Linux bubblewrap with
+seccomp, and the Windows broker. Missing isolation fails closed.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ import stat
 import subprocess
 import time
 from collections.abc import Callable, Mapping, Sequence
+from contextlib import ExitStack
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -144,6 +145,7 @@ class SandboxExecutionPolicy:
     temporary_root: Path | str
     limits: ResourceLimits = field(default_factory=ResourceLimits)
     allow_child_processes: bool = False
+    allow_network: bool = False
 
     def __post_init__(self) -> None:
         read_only_roots = _normalize_existing_paths(self.read_only_roots)
@@ -238,6 +240,31 @@ class _CapturedStream:
 def get_sandbox_execution_capabilities() -> SandboxExecutionCapabilities:
     """Report whether this host can run the supported fail-closed backend."""
     platform_name = get_platform()
+    if platform_name in {"linux", "wsl"}:
+        from ocean_partner.sandbox.linux import seccomp_filter
+
+        command = shutil.which("bwrap")
+        reason = None
+        if not command:
+            reason = "Linux execution requires bubblewrap (bwrap) and enabled unprivileged user namespaces"
+        elif resource is None or any(not hasattr(resource, name) for name in _RESOURCE_LIMIT_NAMES):
+            reason = "Required POSIX resource limits are unavailable"
+        else:
+            try:
+                with seccomp_filter(allow_child_processes=False):
+                    pass
+            except SandboxUnavailableError as exc:
+                reason = str(exc)
+        return SandboxExecutionCapabilities(
+            available=reason is None,
+            backend="linux-bubblewrap-seccomp-v1" if reason is None else None,
+            command=command,
+            reason=reason,
+            hard_limits=("wall_time", "cpu_time", "file_size", "process_count",
+                         "open_files", "stdout_bytes", "stderr_bytes") if reason is None else (),
+            postflight_limits=("memory_rss_monitor", "output_file_count",
+                               "output_total_bytes", "output_tree_safety") if reason is None else (),
+        )
     if platform_name == "windows":
         broker, reason = verify_packaged_windows_broker()
         if broker is None:
@@ -276,7 +303,7 @@ def get_sandbox_execution_capabilities() -> SandboxExecutionCapabilities:
             available=False,
             backend=None,
             command=None,
-            reason="Ocean sandboxed execution currently supports macOS Seatbelt only",
+            reason="Ocean sandboxed execution supports macOS, Linux/WSL and the Windows broker",
             hard_limits=(),
             postflight_limits=(),
         )
@@ -562,12 +589,18 @@ def _macos_package_manager_runtime_roots(
             if ancestor.name != "Cellar":
                 continue
             prefix = ancestor.parent
-            for candidate in (prefix / "Cellar", prefix / "opt"):
+            for candidate in (
+                prefix / "Cellar", prefix / "opt",
+                # OpenSSL's public CA bundle lives outside Homebrew's library
+                # trees. Permit the bundle, not all of etc (or private keys).
+                prefix / "etc" / "openssl@3" / "cert.pem",
+                prefix / "etc" / "openssl@3" / "certs",
+            ):
                 try:
                     candidate_resolved = candidate.resolve(strict=True)
                 except OSError:
                     continue
-                if candidate_resolved.is_dir():
+                if candidate_resolved.is_dir() or candidate_resolved.is_file():
                     roots.append(candidate_resolved)
             break
     return _unique_paths(tuple(roots))
@@ -578,16 +611,18 @@ def build_macos_seatbelt_profile(policy: SandboxExecutionPolicy) -> str:
 
     ``system.sb`` supplies narrowly scoped macOS runtime operations.  The
     profile adds only the declared interpreter, input, and writable roots, and
-    explicitly denies every network operation.
+    permits networking only when requested by the execution service.
     """
     lines = [
         "(version 1)",
         '(import "system.sb")',
-        "(deny network*)",
+        "(allow network*)" if policy.allow_network else "(deny network*)",
         "(allow process-exec)",
     ]
     if policy.allow_child_processes:
         lines.append("(allow process-fork)")
+    if policy.allow_network:
+        lines.append("(system-network)")
 
     for root in policy.readable_roots:
         lines.append(_seatbelt_allow_read(root))
@@ -618,6 +653,8 @@ async def run_sandboxed_command(
     argv = _normalize_command(command)
     env = _build_sanitized_environment(policy, environment)
     if capabilities.backend == "windows-appcontainer-job-v1":
+        if policy.allow_network:
+            raise SandboxUnavailableError("The Windows broker does not support networked execution")
         return await _run_windows_brokered_command(
             capabilities=capabilities,
             command=argv,
@@ -627,23 +664,37 @@ async def run_sandboxed_command(
         )
 
     _validate_resource_limits(policy.limits)
-    profile = build_macos_seatbelt_profile(policy)
     started_at = time.monotonic()
 
     try:
-        process = await asyncio.create_subprocess_exec(
-            capabilities.command or "sandbox-exec",
-            "-p",
-            profile,
-            *argv,
-            cwd=str(resolved_cwd),
-            stdin=asyncio.subprocess.DEVNULL,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            env=env,
-            start_new_session=True,
-            preexec_fn=_build_limit_preexec(policy.limits),
-        )
+        with ExitStack() as stack:
+            descriptors: tuple[int, ...] = ()
+            if capabilities.backend == "linux-bubblewrap-seccomp-v1":
+                from ocean_partner.sandbox.linux import build_bubblewrap_command, seccomp_filter
+
+                handle = stack.enter_context(seccomp_filter(
+                    allow_child_processes=policy.allow_child_processes,
+                    allow_network=policy.allow_network,
+                ))
+                descriptors = (handle.fileno(),)
+                sandbox_argv = build_bubblewrap_command(
+                    capabilities.command or "bwrap", argv, policy=policy,
+                    cwd=resolved_cwd, seccomp_fd=handle.fileno(),
+                )
+            else:
+                sandbox_argv = (capabilities.command or "sandbox-exec", "-p",
+                                build_macos_seatbelt_profile(policy), *argv)
+            process = await asyncio.create_subprocess_exec(
+                *sandbox_argv,
+                cwd=str(resolved_cwd),
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env=env,
+                start_new_session=True,
+                pass_fds=descriptors,
+                preexec_fn=_build_limit_preexec(policy.limits),
+            )
     except (OSError, subprocess.SubprocessError) as exc:
         raise SandboxUnavailableError(f"Failed to start sandboxed command: {exc}") from exc
 
@@ -911,6 +962,23 @@ async def _read_process_rss_bytes(pid: int | None) -> int | None:
     """
     if pid is None:
         return None
+    if get_platform() in {"linux", "wsl"}:
+        # The foreground PID is bubblewrap, not Python. Account for the whole
+        # group, including its namespace init and scientific process/children.
+        total = 0
+        page_size = os.sysconf("SC_PAGE_SIZE")
+        for entry in Path("/proc").iterdir():
+            if not entry.name.isdecimal():
+                continue
+            try:
+                # comm (field 2) can contain spaces/parentheses; parse after its
+                # final closing parenthesis. pgrp is field 5, RSS is field 24.
+                fields = (entry / "stat").read_text().rsplit(")", 1)[1].split()
+                if int(fields[2]) == pid:
+                    total += int(fields[21]) * page_size
+            except (OSError, ValueError, IndexError):
+                continue  # A process may exit between directory listing and read.
+        return total
     process = await asyncio.create_subprocess_exec(
         "/bin/ps",
         "-o",
@@ -1050,6 +1118,20 @@ def _build_sanitized_environment(
         "MPLCONFIGDIR": str(matplotlib),
         "PYTHONDONTWRITEBYTECODE": "1",
     }
+    if policy.allow_network:
+        # Homebrew cert.pem is a symlink outside its library trees. The policy
+        # mounts the canonical public bundle; OpenSSL must use that exact path.
+        for root in policy.runtime_read_roots:
+            if Path(root).name == "cert.pem" and Path(root).is_file():
+                sanitized["SSL_CERT_FILE"] = str(root)
+                break
+    if get_platform() in {"linux", "wsl"}:
+        # Linux RLIMIT_NPROC includes threads. Do not let BLAS eagerly allocate
+        # one worker per server CPU before the scientific program even starts.
+        sanitized.update({
+            "OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1", "NUMEXPR_NUM_THREADS": "1", "MPLBACKEND": "Agg",
+        })
     if get_platform() == "windows":
         # The native broker creates AppContainer-local HOME/TEMP variables and
         # never accepts the parent process PATH or user-profile variables.

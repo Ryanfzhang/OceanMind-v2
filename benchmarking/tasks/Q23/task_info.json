@@ -1,0 +1,7 @@
+{
+  "id": "Q23",
+  "track": "autoresearch",
+  "title": "Wind–chlorophyll variability across time scales",
+  "query": "Using monthly SeaWiFS chlorophyll and blended satellite wind observations for September 1997–April 2010, investigate wind–chlorophyll coupling across the South China Sea shelf and deep basin. Use ensemble empirical mode decomposition to distinguish seasonal, interannual, and longer-term variability, and assess which associations are supported by the record. Document missing-month treatment, product versions, and the limitations of inferring long-term change or causality from this record.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

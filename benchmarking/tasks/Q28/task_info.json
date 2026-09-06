@@ -1,0 +1,7 @@
+{
+  "id": "Q28",
+  "track": "idea_hypothesis",
+  "title": "Robustness of a satellite-derived ecological conclusion",
+  "query": "Using the supplied satellite literature and MODIS data, propose and test a hypothesis about how observation coverage changes an inferred ecological relationship or seasonal pattern. Determine whether the conclusion survives a defensible coverage-sensitivity analysis.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
+  "data_status": "pending_subset_selection"
+}

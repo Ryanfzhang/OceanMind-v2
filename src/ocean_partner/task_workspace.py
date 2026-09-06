@@ -117,9 +117,10 @@ class TaskWorkspaceProjector:
         self,
         *,
         task_id: str,
+        request_id: str,
         content: bytes,
     ) -> Path:
-        """Write the task's single user-editable analysis notebook.
+        """Create one editable notebook per analysis round, never overwrite user edits.
 
         Scientific payloads remain in their accepted TaskResult locations.  The
         notebook refers to those files and is the only supplementary file
@@ -127,14 +128,22 @@ class TaskWorkspaceProjector:
         """
 
         with self._lock:
-            root = self.ensure_task_root(task_id)
-            target = root / "supplementary" / "analysis.ipynb"
-            if target.exists() and (target.is_symlink() or not target.is_file()):
+            target = self.supplementary_notebook_path(task_id, request_id)
+            self._ensure_directory(target.parent)
+            if target.is_symlink() or (target.exists() and not target.is_file()):
                 raise TaskWorkspaceProjectionError(
                     "Supplementary analysis notebook path is not a regular file"
                 )
-            self._atomic_bytes(target, content)
+            if not target.exists():
+                self._atomic_bytes(target, content, overwrite=False)
             return target
+
+    def supplementary_notebook_path(self, task_id: str, request_id: str) -> Path:
+        if not request_id.strip():
+            raise TaskWorkspaceProjectionError("An analysis notebook needs a request identity")
+        root = self.ensure_task_root(task_id)
+        round_name = "analysis-" + hashlib.sha256(request_id.encode()).hexdigest()[:20]
+        return root / "supplementary" / round_name / "analysis.ipynb"
 
     def expert_session_root(self, task_id: str, session_key: str) -> Path:
         """Return one stable root for a logical Expert session.
@@ -411,7 +420,7 @@ class TaskWorkspaceProjector:
                 "- `outputs/`: derived data and supporting evidence",
                 "- `views/`: interactive-view data and previews",
                 "- `report/`: conclusions and formal reports",
-                "- `supplementary/analysis.ipynb`: the single editable notebook for this analysis",
+                "- `supplementary/analysis-*/analysis.ipynb`: one editable notebook per analysis round; existing notebooks are never overwritten",
                 "- `results/`: internal accepted-result storage used by the notebook (normally do not browse)",
                 "",
                 _README_END,
@@ -478,7 +487,7 @@ class TaskWorkspaceProjector:
             temporary.unlink(missing_ok=True)
 
     @staticmethod
-    def _atomic_bytes(path: Path, content: bytes) -> None:
+    def _atomic_bytes(path: Path, content: bytes, *, overwrite: bool = True) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         descriptor, name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
         temporary = Path(name)
@@ -488,7 +497,16 @@ class TaskWorkspaceProjector:
                 target.flush()
                 os.fsync(target.fileno())
             temporary.chmod(0o644)
-            os.replace(temporary, path)
+            if overwrite:
+                os.replace(temporary, path)
+            else:
+                # Publish the complete file exclusively, even if another process created
+                # this round's notebook after our existence check.
+                try:
+                    os.link(temporary, path)
+                except FileExistsError:
+                    if path.is_symlink() or not path.is_file():
+                        raise TaskWorkspaceProjectionError("Notebook target became unsafe")
         finally:
             temporary.unlink(missing_ok=True)
 

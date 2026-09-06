@@ -40,6 +40,15 @@ export function shouldApplyTaskSnapshot(
   return selectedTaskId === null || selectedTaskId === snapshotTaskId;
 }
 
+/** Background result commits refresh data, never change the active conversation. */
+export function changedResultsTaskId(
+  selectedTaskId: string | null,
+  event: {type?: string; task_id?: string | null},
+): string | null {
+  return event.type === 'task.results.changed' && event.task_id && event.task_id === selectedTaskId
+    ? event.task_id : null;
+}
+
 /** A ready backend context is not enough: task writes require an opened workspace. */
 export function isTaskCreationReady(
   targetProjectPath: string,

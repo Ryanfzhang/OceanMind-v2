@@ -1,0 +1,7 @@
+{
+  "id": "Q13",
+  "track": "autoresearch",
+  "title": "Oxygen-budget diagnosis",
+  "query": "Use the supplied CMOMS oxygen tendency diagnostics to determine which resolved physical processes contribute to oxygen loss and recovery in the designated shelf control volume. Quantify budget closure and explain what cannot be attributed from the available terms.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

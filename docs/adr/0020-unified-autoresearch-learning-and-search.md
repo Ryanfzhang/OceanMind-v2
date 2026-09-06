@@ -27,18 +27,18 @@ private model reasoning or an unbounded transcript. Recorded kinds include data,
 literature, method, quality checks, search, execution, results, evaluation,
 limitations, and evidence gaps.
 
-Task-local observations help the current investigation immediately. Cross-task
-learning has a stricter boundary:
+Task-local observations help the current investigation. The current cross-task learning
+path is an explicit Agent-authored experience inbox, not automatic promotion of observations:
 
-`Observation -> repeated cross-task evidence -> ExperienceCandidate -> historical replay evaluation -> versioned promotion`
+`save_experience -> periodic LLM Curator -> read relevant Skills -> versioned Skill commit`
 
-A candidate requires support from at least three distinct tasks. It remains
-inert until an evaluation beats its baseline by at least 0.05 on at least three
-replays with no safety regression. Rejected candidates stay rejected. Promoted
-revisions are versioned, older revisions remain available for rollback, and only
-active promoted revisions enter later Coordinator and Expert prompts.
-
-This is self-evolving behavior with an evaluation gate, not live prompt mutation.
+The Curator receives short notes and Skill metadata across all roles, then reads full
+documents on demand. It decides whether to ignore, defer, create, update, or report a product
+bug. There is no fixed repetition count or numerical scientific-value threshold. Updating
+requires reading the current Skill; an optimistic version check prevents overwriting a newer
+revision. A failed review leaves experience pending. Installed Skills remain role-scoped and
+Agents decide which ones to load. This does not alter an active research workflow or its
+completion authority.
 
 ## Search boundary
 
@@ -63,5 +63,6 @@ removed.
 No research-mode UI is added. Existing task workflow activity presents search
 and evidence-review progress, existing tool events carry search execution, and
 the existing Research runtime settings section reports whether Web search is
-available. Research observations and evolution candidates remain backend state
-until a concrete review workflow requires exposing them.
+available. Research observations remain backend state
+for task-local traceability. Skill Curator commits are presented in the affected task's
+results, with a background result-change notification for an already-open Desktop task.

@@ -1,0 +1,7 @@
+{
+  "id": "Q10",
+  "track": "autoresearch",
+  "title": "Spatially intensified coastal upwelling",
+  "query": "Investigate why summer upwelling is spatially uneven along the eastern Guangdong shelf in the 2011 CMOMS simulation. Evaluate the roles of shelf geometry and cross-shelf circulation using the available hydrographic and velocity fields.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
+  "data_status": "pending_subset_selection"
+}

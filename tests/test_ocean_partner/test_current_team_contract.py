@@ -1443,7 +1443,7 @@ def test_finalizer_prefers_the_report_and_builds_one_figure_notebook(
             supplement = host.task_results.get(supplement_ref)
             assert supplement.kind == "file"
             assert supplement.content["role"] == "supplementary_figure_notebook"
-            assert supplement.content["renderer"] == "nature-python-templates/v2"
+            assert supplement.content["renderer"] == "nature-python-templates/v3"
             assert len(supplement.content["data_files"]) == 2
             assert len(supplement.files) == 1
             assert supplement.files[0].mime_type == "application/x-ipynb+json"
@@ -1451,9 +1451,9 @@ def test_finalizer_prefers_the_report_and_builds_one_figure_notebook(
                 ref=supplement.ref,
                 relative_path="analysis.ipynb",
             )
-            assert notebook_path.parent.name == "supplementary"
+            assert notebook_path.parent.parent.name == "supplementary"
             assert not tuple(notebook_path.parent.glob("*.nc"))
-            task_root = notebook_path.parent.parent
+            task_root = notebook_path.parent.parent.parent
             assert list(task_root.rglob("analysis.ipynb")) == [notebook_path]
             supplementary_result_root = (
                 task_root / "results" / supplement.ref.result_id / "v0001"
@@ -1498,6 +1498,28 @@ def test_finalizer_prefers_the_report_and_builds_one_figure_notebook(
                 (notebook_path.parent / first_data_file).resolve(strict=True)
             )
             assert len(figure.axes) >= 2
+
+            # A follow-up analysis gets its own editable notebook. Neither a retry nor
+            # a new round may replace the researcher's edits or redirect the old link.
+            edited = notebook_path.read_text() + "\n"
+            notebook_path.write_text(edited)
+            retry_ref = host.router._materialize_figure_reproduction_notebook(
+                workspace_id="ws_final_delivery", task_id=task.task_id,
+                request_id="req_final_delivery", result_refs=(first_view.ref,),
+            )
+            assert retry_ref == supplement_ref
+            next_ref = host.router._materialize_figure_reproduction_notebook(
+                workspace_id="ws_final_delivery", task_id=task.task_id,
+                request_id="req_followup_delivery", result_refs=(second_view.ref,),
+            )
+            next_path = host.task_results.file_path(ref=next_ref, relative_path="analysis.ipynb")
+            assert next_path != notebook_path
+            assert notebook_path.read_text() == edited
+            assert host.task_results.file_path(ref=supplement_ref, relative_path="analysis.ipynb") == notebook_path
+            projector = host.task_workspace_projector
+            assert projector.write_supplementary_notebook(
+                task_id=task.task_id, request_id="req_final_delivery", content=b"replacement",
+            ).read_text() == edited
 
             answer = host.router._canonical_user_answer(
                 candidate=(
@@ -2631,7 +2653,7 @@ def test_only_transient_transport_failures_are_automatically_continued() -> None
     assert not OceanTeamOrchestrator._should_continue_workstream(result(WorkFailureCode.UNKNOWN))
 
 
-def test_unavailable_python_runtime_fails_before_starting_expert(tmp_path, monkeypatch) -> None:
+def test_literature_expert_starts_without_python_but_code_still_fails_closed(tmp_path, monkeypatch) -> None:
     from ocean_partner.backend.host import OceanBackendHost
     from ocean_partner.sandbox import SandboxUnavailableError
 
@@ -2651,7 +2673,18 @@ def test_unavailable_python_runtime_fails_before_starting_expert(tmp_path, monke
                 workspace_id="ws_runtime_unavailable",
                 path=tmp_path,
             )
-            order = _order("work_runtime_unavailable").model_copy(update={"workspace_revision": 1})
+            started = []
+
+            async def text_only_participant(binding):
+                started.append(binding)
+                return _ParticipantRunResult(
+                    child_id=binding.child_id,
+                    state=_ParticipantState.COMPLETED,
+                    last_assistant_text="The literature search identified a relevant paper.",
+                )
+
+            monkeypatch.setattr(host.team, "_run_participant", text_only_participant)
+            order = _order("work_runtime_unavailable", "literature_reproduction_expert").model_copy(update={"workspace_revision": 1})
             result = await host.team.delegate(
                 workspace_id="ws_runtime_unavailable",
                 workspace_path=tmp_path,
@@ -2660,9 +2693,11 @@ def test_unavailable_python_runtime_fails_before_starting_expert(tmp_path, monke
                 work_order=order,
             )
 
-            assert result.status is WorkStatus.FAILED
-            assert result.failure_code is WorkFailureCode.RUNTIME_UNAVAILABLE
-            assert "fixture interpreter was removed" in (result.error or "")
+            assert result.status is WorkStatus.COMPLETED
+            assert len(started) == 1
+            from ocean_partner.expert_execution import ExpertRuntimeUnavailableError
+            with pytest.raises(ExpertRuntimeUnavailableError, match="fixture interpreter was removed"):
+                host.expert_code_execution.require_runtime()
             assert host.store.list_code_executions(order.work_order_id) == ()
         finally:
             await host.close()
@@ -4106,6 +4141,67 @@ def test_exact_retry_reuses_formal_execution_without_starting_python(tmp_path) -
     assert reused.execution_id == execution_id
     assert reused.reused_existing_execution is True
     assert reused.result_fingerprint == "b" * 64
+
+
+def test_expert_download_script_persists_for_next_analysis_call(tmp_path) -> None:
+    from ocean_partner.backend.host import OceanBackendHost
+
+    async def scenario():
+        async def serve(reader, writer):
+            await reader.readuntil(b"\r\n\r\n")
+            writer.write(b"HTTP/1.1 200 OK\r\nContent-Length: 6\r\nConnection: close\r\n\r\n1,2,3\n")
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+
+        host = OceanBackendHost(tmp_path / "state", write_frame=lambda _frame: None)
+        server = await asyncio.start_server(serve, "127.0.0.1", 0)
+        try:
+            workspace_id = "ws_script_download"
+            await _open_test_workspace(host, workspace_id=workspace_id, path=tmp_path)
+            task = host.store.create_research_task(workspace_id=workspace_id, title="Download fixture")
+            order = _order("work_script_download").model_copy(update={
+                "task_id": task.task_id,
+                "workspace_revision": host.store.workspace_snapshot(workspace_id).revision,
+            })
+            host.store.create_team_work_order(workspace_id=workspace_id, work_order=order)
+            host.store.mark_team_work_running(order.work_order_id)
+            port = server.sockets[0].getsockname()[1]
+            common = {"workspace_id": workspace_id, "task_id": task.task_id,
+                      "work_order_id": order.work_order_id, "child_id": f"{order.work_order_id}:run:1"}
+            downloaded = await host.expert_code_execution.run_python(
+                **common, purpose="Download a small public fixture using Python.",
+                code=(
+                    "import os, pathlib, urllib.request\n"
+                    "folder = pathlib.Path(os.environ['OCEAN_WORK_DIR']) / 'downloads'\n"
+                    "folder.mkdir(exist_ok=True)\n"
+                    f"with urllib.request.urlopen('http://127.0.0.1:{port}/data.csv', timeout=3) as r:\n"
+                    "    (folder / 'data.csv').write_bytes(r.read())\n"
+                    "print('downloaded fixture')\n"
+                ),
+            )
+            assert downloaded.state == "succeeded", downloaded.stderr
+            # The server is gone: the next call must use the durable download.
+            server.close()
+            await server.wait_closed()
+            analyzed = await host.expert_code_execution.run_python(
+                **common, purpose="Analyze the cached download without transferring it again.",
+                code=(
+                    "import os, pathlib\n"
+                    "source = pathlib.Path(os.environ['OCEAN_WORK_DIR']) / 'downloads' / 'data.csv'\n"
+                    "assert sum(map(int, source.read_text().strip().split(','))) == 6\n"
+                    "print('sum=6')\n"
+                ),
+            )
+            assert analyzed.state == "succeeded", analyzed.stderr
+            assert "sum=6" in analyzed.stdout
+            assert downloaded.work_root == analyzed.work_root
+        finally:
+            server.close()
+            await server.wait_closed()
+            await host.close()
+
+    asyncio.run(scenario())
 
 
 def test_followup_work_order_reuses_same_expert_session_evidence(tmp_path) -> None:

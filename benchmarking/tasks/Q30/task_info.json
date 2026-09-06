@@ -1,0 +1,7 @@
+{
+  "id": "Q30",
+  "track": "idea_hypothesis",
+  "title": "Improving a surface-based subsurface estimate",
+  "query": "Using the supplied papers and Gulf of Mexico data, propose and test one interpretable modification to an SSH-based estimate of subsurface thermal structure. Evaluate whether it improves performance on withheld periods or eddies rather than only fitting the training data.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
+  "data_status": "pending_subset_selection"
+}

@@ -27,6 +27,7 @@ import json
 import math
 
 import matplotlib as mpl
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
@@ -135,24 +136,82 @@ def _values(dataset, spec, field):
     return np.asarray(dataset[variable].values)
 
 
+def _coordinates(dataset, spec, field, dimension):
+    values = _values(dataset, spec, field)
+    axis = spec.get("_axes", {}).get(dimension, {})
+    if axis.get("scale") == "time":
+        return mdates.date2num(values.astype("datetime64[ms]"))
+    if axis.get("scale") == "category":
+        labels = list(dict.fromkeys(str(value) for value in _values(dataset, spec, axis["field"])))
+        return np.asarray([labels.index(str(value)) for value in values])
+    return values
+
+
+def _colormap(palette):
+    palettes = {
+        "depth": ["#f3edc9", "#cdddc8", "#93c4bd", "#5a9ea5", "#477992", "#455777", "#66516d"],
+        "thermal": ["#243c62", "#47759a", "#82afb5", "#e8e2cd", "#da9a70", "#a94b42"],
+        "haline": ["#f4f0e5", "#c6dcd5", "#83b9b2", "#47888e", "#27536d"],
+        "diverging": ["#315f91", "#8cb5ca", "#f4f3ed", "#dda17d", "#9f443f"],
+        "chlorophyll": ["#f1edc8", "#c8dda7", "#83b984", "#4b8c6c", "#285c56"],
+        "default": ["#edf0d6", "#bdd7c1", "#7db5ad", "#518d98", "#4b6282", "#70566f"],
+        "categorical": ["#154f70", "#bd6840", "#4a8e92", "#7775a7", "#9d7b36", "#5d7e68", "#a64f68", "#52719b"],
+    }
+    palettes["balance"] = palettes["diverging"]
+    if isinstance(palette, str):
+        palette = palettes.get(palette, palette)
+    if isinstance(palette, (list, tuple)):
+        return mpl.colors.LinearSegmentedColormap.from_list("oceanmind", palette)
+    return mpl.colormaps[palette]
+
+
+def _normalization(layer):
+    domain = layer.get("color_domain")
+    limits = {"vmin": float(domain[0]), "vmax": float(domain[1])} if domain else {}
+    norm_type = mpl.colors.LogNorm if layer.get("color_scale") == "log" else mpl.colors.Normalize
+    return norm_type(**limits)
+
+
+def _linestyle(style):
+    dash = style.get("dash")
+    if not dash:
+        return "-"
+    if dash in {"solid", "dashed", "dotted", "dashdot", "-", "--", ":", "-."}:
+        return dash
+    return (0, tuple(float(value) for value in dash.replace(",", " ").split()))
+
+
 def _axis_label(axis):
     label = str(axis.get("label") or "")
     units = str(axis.get("units") or "")
     return f"{label} ({units})" if label and units else label or units
 
 
-def _configure_axis(ax, axis, *, dimension):
+def _configure_axis(ax, axis, *, dimension, values=None):
     label = _axis_label(axis)
     if dimension == "x":
         ax.set_xlabel(label)
     else:
         ax.set_ylabel(label)
+    scale = axis.get("scale", "linear")
+    if scale not in {"linear", "log", "time", "category"}:
+        raise ValueError(f"Unsupported axis scale: {scale}")
+    (ax.set_xscale if dimension == "x" else ax.set_yscale)("log" if scale == "log" else "linear")
+    if scale == "time":
+        (ax.xaxis_date if dimension == "x" else ax.yaxis_date)()
+    if scale == "category" and values is not None:
+        labels = list(dict.fromkeys(str(value) for value in values))
+        (ax.set_xticks if dimension == "x" else ax.set_yticks)(range(len(labels)), labels)
     limits = axis.get("range")
     if isinstance(limits, list) and len(limits) == 2:
         setter = ax.set_xlim if dimension == "x" else ax.set_ylim
-        setter(float(limits[0]), float(limits[1]))
-    if dimension == "y" and axis.get("reverse") and not ax.yaxis_inverted():
-        ax.invert_yaxis()
+        if scale == "time":
+            setter(*(np.datetime64(int(value), "ms") for value in limits))
+        else:
+            setter(float(limits[0]), float(limits[1]))
+    inverted = ax.xaxis_inverted if dimension == "x" else ax.yaxis_inverted
+    if axis.get("reverse") and not inverted():
+        (ax.invert_xaxis if dimension == "x" else ax.invert_yaxis)()
     if axis.get("grid"):
         ax.grid(True, color="#D9E2E8", linewidth=0.55, alpha=0.65)
 
@@ -164,7 +223,7 @@ def _render_spatial_map(dataset, spec):
     field = np.asarray(dataset[variable].values)
     colorbar = spec.get("colorbar", {})
     levels = colorbar.get("levels")
-    palette = colorbar.get("colormap", "cividis")
+    palette = _colormap(colorbar.get("colormap", "cividis"))
 
     fig, ax = plt.subplots(
         figsize=(FIGURE_WIDTH, FIGURE_WIDTH * 0.62),
@@ -210,12 +269,14 @@ def _render_layer(ax, dataset, spec, layer):
     style = layer.get("style") or {}
     if layer_type == "line":
         return ax.plot(
-            _values(dataset, spec, layer["x"]),
-            _values(dataset, spec, layer["y"]),
+            _coordinates(dataset, spec, layer["x"], "x"),
+            _coordinates(dataset, spec, layer["y"], "y"),
             color=style.get("color"),
             linewidth=float(style.get("width", 1.6)),
             solid_capstyle="round",
             label=layer.get("label"),
+            alpha=float(style.get("opacity", 1.0)),
+            linestyle=_linestyle(style),
         )[0]
     if layer_type == "scatter":
         color_field = layer.get("color")
@@ -226,28 +287,28 @@ def _render_layer(ax, dataset, spec, layer):
             "alpha": float(style.get("opacity", 0.62)),
             "linewidths": 0,
             "rasterized": True,
+            "marker": {"circle": "o", "square": "s", "triangle": "^", "diamond": "D"}.get(style.get("marker", "circle"), "o"),
+            "label": layer.get("label"),
         }
         if color_field:
             scatter_kwargs.update({
                 "c": colors,
-                "cmap": style.get("palette", "cividis"),
+                "cmap": _colormap(style.get("palette", "cividis")),
+                "norm": _normalization(layer),
             })
         else:
             scatter_kwargs["color"] = style.get("color", NATURE_COLORS[0])
         return ax.scatter(
-            _values(dataset, spec, layer["x"]),
-            _values(dataset, spec, layer["y"]),
+            _coordinates(dataset, spec, layer["x"], "x"),
+            _coordinates(dataset, spec, layer["y"], "y"),
             **scatter_kwargs,
         )
     if layer_type in {"field2d", "heatmap"}:
-        x = _values(dataset, spec, layer["x"])
-        y = _values(dataset, spec, layer["y"])
+        x = _coordinates(dataset, spec, layer["x"], "x")
+        y = _coordinates(dataset, spec, layer["y"], "y")
         z = _values(dataset, spec, layer["z"])
-        palette = style.get("palette", "cividis")
-        domain = layer.get("color_domain")
-        limits = {}
-        if isinstance(domain, list) and len(domain) == 2:
-            limits = {"vmin": float(domain[0]), "vmax": float(domain[1])}
+        palette = _colormap(style.get("palette", "cividis"))
+        limits = {"norm": _normalization(layer)}
         if layer.get("render") in {"filled_contour", "contourf"}:
             return ax.contourf(
                 x,
@@ -268,6 +329,66 @@ def _render_layer(ax, dataset, spec, layer):
             rasterized=True,
             **limits,
         )
+    if layer_type == "band":
+        return ax.fill_between(
+            _coordinates(dataset, spec, layer["x"], "x"),
+            _values(dataset, spec, layer["y0"]), _values(dataset, spec, layer["y1"]),
+            color=style.get("fill") or style.get("color", NATURE_COLORS[0]),
+            alpha=float(style.get("fill_opacity", style.get("opacity", 0.18))),
+            label=layer.get("label"), linewidth=0,
+        )
+    if layer_type == "vector":
+        u = _values(dataset, spec, layer["u"])
+        v = _values(dataset, spec, layer["v"])
+        # The interactive contract expresses vector scale as screen length per unit,
+        # not as the reciprocal scale used by Matplotlib quiver.
+        factor = layer.get("scale", 34.0 / max(float(np.nanmax(np.hypot(u, v))), 1e-12))
+        return ax.quiver(
+            _coordinates(dataset, spec, layer["x"], "x"),
+            _coordinates(dataset, spec, layer["y"], "y"),
+            u, -v if spec.get("_axes", {}).get("y", {}).get("reverse") else v,
+            angles="uv", scale_units="dots", scale=1.0 / float(factor),
+            color=style.get("color", NATURE_COLORS[0]),
+            alpha=float(style.get("opacity", 1.0)), label=layer.get("label"),
+        )
+    if layer_type == "categories":
+        categories = _values(dataset, spec, layer["category"])
+        x = _coordinates(dataset, spec, layer["x"], "x")
+        y = _coordinates(dataset, spec, layer["y"], "y")
+        labels = layer.get("labels", {})
+        palette = style.get("palette", "categorical")
+        colors = palette if isinstance(palette, list) else [_colormap(palette)(i / 7) for i in range(8)]
+        artists = []
+        for index, category in enumerate(dict.fromkeys(str(value) for value in categories if value is not None and str(value) not in {"", "nan"})):
+            mask = np.asarray([str(value) == category for value in categories])
+            artists.append(ax.scatter(x[mask], y[mask], color=colors[index % len(colors)],
+                s=max(SCATTER_SIZE_MIN, float(style.get("radius", 2)) ** 2 * 7),
+                alpha=float(style.get("opacity", 1)), label=labels.get(category, category)))
+            if layer.get("show_labels"):
+                ax.annotate(labels.get(category, category),
+                    (np.mean(x[mask]), np.mean(y[mask])), fontsize=BASE_FONT_SIZE)
+        return artists
+    if layer_type == "contour":
+        paths = layer.get("paths", [])
+        if layer.get("path_data"):
+            fields = {key: _values(dataset, spec, field) for key, field in layer["path_data"].items()}
+            paths = []
+            for index, (start, count) in enumerate(zip(fields["start"], fields["count"])):
+                section = slice(int(start), int(start + count))
+                paths.append({"points": list(zip(fields["x"][section], fields["y"][section])),
+                    "label": (str(fields["label"][index]) if "label" in fields else "") or str(fields["level"][index])})
+        artists = []
+        for path in paths:
+            points = np.asarray(path["points"])
+            line = ax.plot(points[:, 0], points[:, 1], color=style.get("color", "#7b858a"),
+                linewidth=float(style.get("width", 1.0)), alpha=float(style.get("opacity", 1.0)),
+                linestyle=_linestyle(style))[0]
+            artists.append(line)
+            if path.get("label"):
+                middle = points[len(points) // 2]
+                ax.annotate(str(path["label"]), middle, fontsize=BASE_FONT_SIZE - 1,
+                    color=style.get("color", "#7b858a"))
+        return artists
     if layer_type == "reference":
         value = float(layer["value"])
         color = style.get("color", "#767676")
@@ -283,7 +404,8 @@ def _render_layer(ax, dataset, spec, layer):
                 fontweight="bold",
                 color="#272727",
             )
-    return None
+        return None
+    raise ValueError(f"Unsupported OceanMind layer: {layer_type!r}; figure rendering stopped")
 
 
 def _render_scientific_figure(dataset, spec):
@@ -303,15 +425,18 @@ def _render_scientific_figure(dataset, spec):
 
     for panel_index, (ax, panel) in enumerate(zip(flat_axes, panels)):
         axis_spec = panel.get("axes") or {}
+        panel_spec = {**spec, "_axes": axis_spec}
         last_mappable = None
         has_label = False
         for layer in panel.get("layers") or []:
-            artist = _render_layer(ax, dataset, spec, layer)
-            if layer.get("type") in {"scatter", "field2d", "heatmap"} and artist is not None:
+            artist = _render_layer(ax, dataset, panel_spec, layer)
+            if (layer.get("type") in {"field2d", "heatmap"} or layer.get("type") == "scatter" and layer.get("color")) and artist is not None:
                 last_mappable = artist
-            has_label = has_label or bool(layer.get("label"))
-        _configure_axis(ax, axis_spec.get("x") or {}, dimension="x")
-        _configure_axis(ax, axis_spec.get("y") or {}, dimension="y")
+            has_label = has_label or bool(layer.get("label")) or layer.get("type") == "categories"
+        for dimension in ("x", "y"):
+            axis = axis_spec.get(dimension) or {}
+            values = _values(dataset, spec, axis["field"]) if axis.get("field") else None
+            _configure_axis(ax, axis, dimension=dimension, values=values)
         _style_axis(ax)
         if panel.get("title"):
             ax.set_title(panel["title"], loc="left", pad=7)
@@ -461,7 +586,7 @@ def build_figure_reproduction_notebook(
                 "schema_version": "ocean-supplementary-analysis-notebook/v1",
                 "request_id": request_id,
                 "data_files": data_index,
-                "renderer": "nature-python-templates/v2",
+                "renderer": "nature-python-templates/v3",
             },
         },
         "nbformat": 4,

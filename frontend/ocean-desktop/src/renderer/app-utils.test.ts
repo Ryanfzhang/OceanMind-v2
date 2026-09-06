@@ -1,8 +1,16 @@
 import {describe, expect, it} from 'vitest';
 
-import {isActiveForegroundRequest, isTaskCreationReady, shouldApplyTaskSnapshot} from './app-utils.js';
+import {changedResultsTaskId, isActiveForegroundRequest, isTaskCreationReady, shouldApplyTaskSnapshot} from './app-utils.js';
 
 describe('foreground request completion', () => {
+  it('refreshes background Skill results only for the currently selected task', () => {
+    const event = {type: 'task.results.changed', task_id: 'task_8'};
+    expect(changedResultsTaskId('task_8', event)).toBe('task_8');
+    expect(changedResultsTaskId('task_7', event)).toBeNull();
+    expect(changedResultsTaskId(null, event)).toBeNull();
+    expect(changedResultsTaskId('task_8', {...event, task_id: null})).toBeNull();
+    expect(changedResultsTaskId('task_8', {...event, type: 'team.snapshot'})).toBeNull();
+  });
   it('refreshes the task only for the active research request', () => {
     expect(isActiveForegroundRequest('session_submit_1', 'session_submit_1')).toBe(true);
     expect(isActiveForegroundRequest('task_result_resource_grant_1', 'session_submit_1')).toBe(false);

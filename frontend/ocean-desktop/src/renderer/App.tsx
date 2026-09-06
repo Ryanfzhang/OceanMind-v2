@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {Check, Database, FileText, Plus, SendHorizontal, Square, Trash2, X} from 'lucide-react';
 
 import type {BackendFrame, DesktopUpdateStatus, ModelProviderSetup, ModelProviderStatus} from '../shared/bridge.js';
-import {artifactFileName, asRecord, isActiveForegroundRequest, isTaskCreationReady, parseDesktopRuntimeCapabilities, projectNameFromPath, shouldApplyTaskSnapshot, sourceTitleFromPath} from './app-utils.js';
+import {artifactFileName, asRecord, changedResultsTaskId, isActiveForegroundRequest, isTaskCreationReady, parseDesktopRuntimeCapabilities, projectNameFromPath, shouldApplyTaskSnapshot, sourceTitleFromPath} from './app-utils.js';
 import {ConversationTranscript, taskResultKeys} from './components/ConversationTranscript.js';
 import {InteractionDrawer} from './components/InteractionDrawer.js';
 import {LocalSourceImportDrawer} from './components/LocalSourceImportDrawer.js';
@@ -139,6 +139,7 @@ export function App(): React.JSX.Element {
   const workspacePathRef = useRef<string | null>(null);
   const projectsRef = useRef<ProjectCatalogEntry[]>(projects);
   const selectedTaskIdRef = useRef<string | null>(null);
+  const resultLoadSequence = useRef(0);
   const seenEvents = useRef(new Set<string>());
   const backendCapabilities = useRef(new Set<string>());
   const taskResultDataCache = useRef(new Map<string, unknown>());
@@ -270,8 +271,9 @@ export function App(): React.JSX.Element {
     if (!id && selectedTaskIdRef.current === taskId) setTaskLoading(false);
   }, [request, resetTaskPresentation]);
   const loadTaskResults = useCallback((taskId: string) => {
+    const sequence = ++resultLoadSequence.current;
     request('task.output.list', {task_id: taskId, limit: 500}, (result) => {
-      if (selectedTaskIdRef.current !== taskId) return;
+      if (selectedTaskIdRef.current !== taskId || sequence !== resultLoadSequence.current) return;
       setOutputs(Array.isArray(result.outputs) ? result.outputs as TaskOutput[] : []);
       setManifests(Array.isArray(result.delivery_manifests) ? result.delivery_manifests as DeliveryManifest[] : []);
       setTaskResults(Array.isArray(result.task_results) ? result.task_results as TaskResultRecord[] : []);
@@ -335,7 +337,13 @@ export function App(): React.JSX.Element {
       if (event.request_id) {handlers.current.delete(event.request_id); errorHandlers.current.delete(event.request_id);}
       errorHandler?.(message);
       setInlineStatus(message);
-      if (isActiveForegroundRequest(event.request_id, activeRequestRef.current)) {setActiveRequestId(null); setStreaming(''); refreshTasks();}
+      if (isActiveForegroundRequest(event.request_id, activeRequestRef.current)) {
+        setActiveRequestId(null); setStreaming('');
+        setPendingInteraction(null); setInteractionAnswer('');
+        const taskId = event.task_id ?? taskRef.current?.task_id;
+        if (taskId) openTask(taskId);
+        refreshTasks();
+      }
       setTaskLoading(false);
       return;
     }
@@ -392,6 +400,11 @@ export function App(): React.JSX.Element {
     }
     const visible = !event.task_id || event.task_id === taskRef.current?.task_id;
     if (!visible) {if (event.type === 'request.completed' || event.type === 'request.failed') refreshTasks(); return;}
+    const resultsTaskId = changedResultsTaskId(selectedTaskIdRef.current, event);
+    if (resultsTaskId) {
+      loadTaskResults(resultsTaskId);
+      return;
+    }
     if (event.type === 'team.snapshot') {
       const snapshotTeam = {...payload as unknown as TeamSnapshot, request_id: event.request_id ?? (payload.request_id as string | undefined)};
       setTeam(snapshotTeam);

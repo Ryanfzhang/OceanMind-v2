@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -242,7 +243,7 @@ def test_output_summary_marks_a_reparse_directory_without_descending_into_it(tmp
 
 
 def test_execution_capabilities_fail_closed_off_supported_platform(monkeypatch):
-    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "linux")
+    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "unknown")
 
     capabilities = get_sandbox_execution_capabilities()
 
@@ -401,7 +402,7 @@ async def test_sandboxed_command_writes_only_declared_output_root(tmp_path: Path
         "import os\n"
         "try:\n"
         "    Path(os.environ['OUTSIDE_PATH']).read_text()\n"
-        "except PermissionError:\n"
+        "except (PermissionError, FileNotFoundError):\n"
         "    pass\n"
         "else:\n"
         "    raise SystemExit('outside path was readable')\n"
@@ -700,6 +701,107 @@ async def test_sandboxed_command_stops_at_file_size_limit(tmp_path: Path):
 
 
 @pytest.mark.asyncio
+async def test_networked_code_downloads_but_cannot_modify_sources(tmp_path: Path):
+    capabilities = get_sandbox_execution_capabilities()
+    if not capabilities.available or sys.platform == "win32":
+        pytest.skip(capabilities.reason or "Requires macOS or Linux sandbox")
+
+    requests = []
+
+    async def serve(reader, writer):
+        requests.append(await reader.readuntil(b"\r\n\r\n"))
+        writer.write(b"HTTP/1.1 200 OK\r\nContent-Length: 6\r\nConnection: close\r\n\r\n1,2,3\n")
+        await writer.drain()
+        writer.close()
+        await writer.wait_closed()
+
+    server = await asyncio.start_server(serve, "127.0.0.1", 0)
+    try:
+        policy, work = _policy(tmp_path)
+        policy = replace(policy, allow_network=True)
+        source = work / "original.txt"
+        source.write_text("original", encoding="utf-8")
+        secret = tmp_path / "unrelated.txt"
+        secret.write_text("private", encoding="utf-8")
+        script = work / "download.py"
+        script.write_text(
+            "import pathlib, sys, urllib.request\n"
+            "source, secret, target = map(pathlib.Path, sys.argv[2:])\n"
+            "assert source.read_text() == 'original'\n"
+            "with urllib.request.urlopen(sys.argv[1], timeout=2) as response:\n"
+            "    target.write_bytes(response.read())\n"
+            "assert sum(map(int, target.read_text().strip().split(','))) == 6\n"
+            "for action in (lambda: source.write_text('changed'), source.unlink, secret.read_text):\n"
+            "    try: action()\n"
+            "    except OSError: pass\n"
+            "    else: raise AssertionError('filesystem boundary lost')\n",
+            encoding="utf-8",
+        )
+        port = server.sockets[0].getsockname()[1]
+        target = policy.output_root / "download.csv"
+        result = await run_sandboxed_command(
+            _python_command(script, f"http://127.0.0.1:{port}/data.csv",
+                            str(source), str(secret), str(target)),
+            policy=policy, cwd=work,
+        )
+    finally:
+        server.close()
+        await server.wait_closed()
+    assert result.status is SandboxExecutionStatus.SUCCEEDED, result.stderr.decode()
+    assert source.read_text() == "original"
+    assert target.read_text() == "1,2,3\n"
+    assert len(requests) == 1 and requests[0].startswith(b"GET /data.csv ")
+
+
+def test_network_permission_does_not_change_macos_filesystem_rules(tmp_path):
+    policy, _ = _policy(tmp_path)
+    offline = build_macos_seatbelt_profile(policy)
+    online = build_macos_seatbelt_profile(replace(policy, allow_network=True))
+    assert "(deny network*)" in offline
+    assert "(allow network*)" in online
+    assert "(system-network)" in online
+    assert [line for line in offline.splitlines() if "file-" in line] == [
+        line for line in online.splitlines() if "file-" in line
+    ]
+
+
+def test_homebrew_runtime_exposes_public_ca_not_private_configuration(tmp_path):
+    prefix = tmp_path / "brew"
+    runtime = prefix / "Cellar" / "python" / "3.13"
+    runtime.mkdir(parents=True)
+    openssl = prefix / "etc" / "openssl@3"
+    openssl.mkdir(parents=True)
+    bundle = openssl / "cert.pem"
+    bundle.write_text("public CA fixture")
+    private = openssl / "private"
+    private.mkdir()
+    roots = _macos_package_manager_runtime_roots((runtime,))
+    assert bundle in roots
+    assert openssl not in roots and private not in roots and prefix / "etc" not in roots
+
+
+@pytest.mark.skipif(not os.environ.get("OCEAN_TEST_PUBLIC_HTTPS"), reason="Opt-in live HTTPS smoke test")
+async def test_networked_code_public_https(tmp_path):
+    policy, work = _policy(tmp_path, limits=_resource_limits(wall_time_seconds=30, stderr_bytes=16384))
+    policy = replace(policy, allow_network=True)
+    script = work / "https.py"
+    script.write_text(
+        "import pathlib, ssl, sys, urllib.request\n"
+        "print(ssl.get_default_verify_paths(), ssl.create_default_context().cert_store_stats(), flush=True)\n"
+        "with urllib.request.urlopen(sys.argv[1], timeout=15) as response:\n"
+        "    assert response.status == 200\n"
+        "    pathlib.Path(sys.argv[2]).write_bytes(response.read(1024))\n",
+        encoding="utf-8",
+    )
+    result = await run_sandboxed_command(
+        _python_command(script, os.environ["OCEAN_TEST_PUBLIC_HTTPS"],
+                        str(policy.output_root / "public.txt")),
+        policy=policy, cwd=work,
+    )
+    assert result.status is SandboxExecutionStatus.SUCCEEDED, result.stdout.decode() + result.stderr.decode()
+    assert (policy.output_root / "public.txt").stat().st_size > 0
+
+
 async def test_sandboxed_command_cannot_open_network_connections(tmp_path: Path):
     capabilities = get_sandbox_execution_capabilities()
     if not capabilities.available:
