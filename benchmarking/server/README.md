@@ -15,6 +15,20 @@ merely because a download endpoint exists. Current canonical queries remain in
 
 ## 1. Conda environment
 
+For Claude Science's user-level Linux launcher/sandbox dependencies, use the
+separate **Conda** spec file (not `pip install -r`):
+
+```bash
+conda create -n claude-science-tools --override-channels -c conda-forge \
+  --file benchmarking/server/claude-science-requirements.txt
+conda activate claude-science-tools
+```
+
+This does not require sudo. It does not install the Science/CC Switch applications,
+replace Science's managed analysis environments, enable kernel user namespaces,
+or provide a graphical desktop for CC Switch. This user-level dependency route
+must still pass the actual Science startup checks on the target Linux host.
+
 From the repository root on Linux:
 
 ```bash
