@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from ocean_partner.sandbox import ResourceLimits, SandboxExecutionPolicy
-from ocean_partner.sandbox.windows_broker import (
+from oceanx.sandbox import ResourceLimits, SandboxExecutionPolicy
+from oceanx.sandbox.windows_broker import (
     BROKER_PROTOCOL_VERSION,
     BROKER_RESPONSE_VERSION,
     WindowsBrokerProtocolError,

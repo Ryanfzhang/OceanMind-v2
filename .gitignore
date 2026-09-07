@@ -3,9 +3,9 @@ __pycache__/
 *$py.class
 *.egg-info/
 dist/
-!src/ocean_partner/_ocean_terminal/
-!src/ocean_partner/_ocean_terminal/dist/
-!src/ocean_partner/_ocean_terminal/dist/ocean-terminal.mjs
+!src/oceanx/_ocean_terminal/
+!src/oceanx/_ocean_terminal/dist/
+!src/oceanx/_ocean_terminal/dist/ocean-terminal.mjs
 build/
 .eggs/
 *.egg

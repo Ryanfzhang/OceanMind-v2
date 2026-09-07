@@ -109,7 +109,7 @@ The shared output inventory already rejects symlink, hardlink, non-regular,
 junction/reparse, and ADS-shaped outputs, and macOS exercises the current
 Seatbelt contract. The native source now lives in
 `native/windows-sandbox-broker`: it has a strict, bounded JSON v1 request/result
-contract shared with `ocean_partner.sandbox.windows_broker`, cross-compiles for
+contract shared with `oceanx.sandbox.windows_broker`, cross-compiles for
 Windows x64, validates its input shape without a shell, and probes real
 AppContainer-profile creation plus a Job Object carrying
 `KILL_ON_JOB_CLOSE`/active-process limits. Before it launches a child, `run`

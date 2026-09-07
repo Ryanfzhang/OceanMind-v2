@@ -93,7 +93,7 @@ npm run build
 Run the OceanMind backend tests:
 
 ```bash
-.venv/bin/python -m pytest -q tests/test_ocean_partner
+.venv/bin/python -m pytest -q tests/test_oceanx
 ```
 
 The macOS scientific sandbox starts a nested Seatbelt process. When tests are themselves running
@@ -106,4 +106,4 @@ Build and inspect the Python wheel:
 .venv/bin/python scripts/check_ocean_wheel_contents.py
 ```
 
-The wheel contains only `ocean_partner`; the former agent-runtime package is not shipped.
+The wheel contains only `oceanx`; the former agent-runtime package is not shipped.

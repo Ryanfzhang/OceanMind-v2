@@ -2,6 +2,13 @@
 
 Initial English task catalogue: 30 tasks across three evaluation tracks.
 
+For the current non-CMOMS OceanX / Claude Science comparison, see the
+[server evaluation guide](server/README.md). Shared result packaging, bounded LLM
+judging and scalar reference comparison are implemented in `evaluation/bench_eval.py`.
+The 13-task subset still needs frozen data/references; Claude Science installation
+and unattended submission/export are not yet verified. No scoring API is called
+without the explicit evaluator `--send` option.
+
 ## Status
 
 This is a query draft, not a runnable or validated benchmark release. Data subsets, exact spatial masks, event availability, dataset versions, background papers, reference results, reference figures, and scoring rubrics have not yet been finalized. Dates and regions in the queries preserve the proposed design and must be checked against the selected data before release.

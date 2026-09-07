@@ -90,6 +90,6 @@ are the decision, not the temporary key name.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_spatial_layer_publishing.py`
-- `tests/test_ocean_partner/test_plot_studio_browser.py`
+- `tests/test_oceanx/test_spatial_layer_publishing.py`
+- `tests/test_oceanx/test_plot_studio_browser.py`
 - `npm run visual-check`

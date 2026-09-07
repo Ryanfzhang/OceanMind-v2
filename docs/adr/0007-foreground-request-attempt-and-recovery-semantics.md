@@ -69,6 +69,6 @@ runtime, transport, and persistent store are generalized.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_request_store.py`
-- `tests/test_ocean_partner/test_router.py`
-- `tests/test_ocean_partner/test_stdio_host.py`
+- `tests/test_oceanx/test_request_store.py`
+- `tests/test_oceanx/test_router.py`
+- `tests/test_oceanx/test_stdio_host.py`

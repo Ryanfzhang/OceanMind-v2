@@ -14,8 +14,8 @@ import socket
 import sys
 from pathlib import Path
 
-from ocean_partner.agent import OceanAgentRuntime
-from ocean_partner.agent_contract import (
+from oceanx.agent import OceanAgentRuntime
+from oceanx.agent_contract import (
     AssistantTextDelta,
     AssistantTurnComplete,
     ConversationMessage,
@@ -25,16 +25,16 @@ from ocean_partner.agent_contract import (
     ToolUseBlock,
     UsageSnapshot,
 )
-from ocean_partner.agent_tools import ToolExecutionContext
-from ocean_partner.backend.host import OceanBackendHost
-from ocean_partner.skill_curator import SkillCuratorDecision
-from ocean_partner.team.models import CoordinatorDecision, CoordinatorResult
-from ocean_partner.team.orchestrator import (
+from oceanx.agent_tools import ToolExecutionContext
+from oceanx.backend.host import OceanBackendHost
+from oceanx.skill_curator import SkillCuratorDecision
+from oceanx.team.models import CoordinatorDecision, CoordinatorResult
+from oceanx.team.orchestrator import (
     OceanTeamSettings,
     _ParticipantRunResult,
     _ParticipantState,
 )
-from ocean_partner.tools import OceanAssignmentInput
+from oceanx.tools import OceanAssignmentInput
 
 
 def deny_network(*_args, **_kwargs):
@@ -282,7 +282,7 @@ async def main():
     host.router.model_id_resolver = lambda: "fixture"
     host.team._run_participant = participant
 
-    async def reviewer(payload, _read_skill):
+    async def reviewer(payload, _read_skill, _read_evidence):
         return [
             SkillCuratorDecision(
                 decision="create",

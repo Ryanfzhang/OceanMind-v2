@@ -325,7 +325,7 @@ export function ConversationTranscript({
         /> : null}
         {group.finalItem ? <article className="message assistant"><MessageMarkdown content={final} artifactLinks={links} resultLinks={resultLinks} />
           {skillUpdates.length ? <section className="skill-updates" aria-label="OceanMind learned from this task">
-            <header><Sparkles size={18} /><div><h3>{uiText('OceanMind learned from this task', 'OceanMind 从本次任务中学习了经验')}</h3><p>{uiText('A stronger reviewer approved these reusable workspace practices.', '更强的审核模型批准了这些可复用的工作区实践。')}</p></div></header>
+            <header><Sparkles size={18} /><div><h3>{uiText('OceanMind learned from this task', 'OceanMind 从本次任务中学习了经验')}</h3><p>{uiText('Skill Curator reviewed these reusable practices after the research round ended.', 'Skill Curator 在研究回合结束后审核了这些可复用经验。')}</p></div></header>
             {skillUpdates.map((result) => <article key={taskResultRefKey(result.result_ref)}>
               <strong>{typeof result.content.skill_name === 'string' ? result.content.skill_name : result.title}</strong>
               <small>{typeof result.content.operation === 'string' && result.content.operation === 'update' ? uiText('Updated', '已更新') : uiText('Created', '已创建')} · {uiText('version', '版本')} {typeof result.content.version === 'number' ? result.content.version : 1}</small>

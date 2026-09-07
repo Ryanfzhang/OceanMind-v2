@@ -462,7 +462,7 @@ class OceanBackendSidecar {
     const executable = defaultPythonExecutable();
     const argumentsForHelper = app.isPackaged
       ? [command]
-      : ['-m', 'ocean_partner', command];
+      : ['-m', 'oceanx', command];
     const helperEnvironment = process.env.OCEAN_DESKTOP_TEST_ISOLATED_PROFILE === '1'
       ? {...process.env, OCEANMIND_CONFIG_DIR: join(app.getPath('userData'), 'oceanmind')}
       : process.env;
@@ -519,7 +519,7 @@ class OceanBackendSidecar {
       ? [testBackendScript, '--state-dir', stateDirectory, '--client-kind', 'desktop']
       : usesFrozenSidecar
         ? ['backend', '--state-dir', stateDirectory, '--client-kind', 'desktop']
-        : ['-m', 'ocean_partner', 'backend', '--state-dir', stateDirectory, '--client-kind', 'desktop'];
+        : ['-m', 'oceanx', 'backend', '--state-dir', stateDirectory, '--client-kind', 'desktop'];
     const child = spawn(
       executable,
       argumentsForBackend,

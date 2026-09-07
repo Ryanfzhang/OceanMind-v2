@@ -48,7 +48,7 @@ without turning the agent into an arbitrary web client.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_remote_oisst_dataset.py` exercises discovery,
+- `tests/test_oceanx/test_remote_oisst_dataset.py` exercises discovery,
   preview, confirmed import and the no-candidate path.
-- `tests/test_ocean_partner/test_ocean_runtime.py` proves that the
+- `tests/test_oceanx/test_ocean_runtime.py` proves that the
   model-visible registry contains only generic source tools and no OISST tool.

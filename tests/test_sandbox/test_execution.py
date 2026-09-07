@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from ocean_partner.sandbox import (
+from oceanx.sandbox import (
     ExecutionTrust,
     OutputTreeSummary,
     ResourceLimits,
@@ -25,8 +25,8 @@ from ocean_partner.sandbox import (
     run_sandboxed_command,
     summarize_output_tree,
 )
-from ocean_partner.sandbox.execution import _macos_package_manager_runtime_roots
-from ocean_partner.sandbox.windows_broker import WindowsBrokerInstallation
+from oceanx.sandbox.execution import _macos_package_manager_runtime_roots
+from oceanx.sandbox.windows_broker import WindowsBrokerInstallation
 
 
 def _resource_limits(**updates: int | float) -> ResourceLimits:
@@ -233,7 +233,7 @@ def test_output_summary_marks_a_reparse_directory_without_descending_into_it(tmp
     (junction / "escaped.nc").write_bytes(b"unsafe")
 
     monkeypatch.setattr(
-        "ocean_partner.sandbox.execution._is_reparse_point",
+        "oceanx.sandbox.execution._is_reparse_point",
         lambda path: path.name == "junction",
     )
     summary = summarize_output_tree(root, _resource_limits())
@@ -243,7 +243,7 @@ def test_output_summary_marks_a_reparse_directory_without_descending_into_it(tmp
 
 
 def test_execution_capabilities_fail_closed_off_supported_platform(monkeypatch):
-    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "unknown")
+    monkeypatch.setattr("oceanx.sandbox.execution.get_platform", lambda: "unknown")
 
     capabilities = get_sandbox_execution_capabilities()
 
@@ -294,9 +294,9 @@ def test_macos_runtime_roots_include_homebrew_native_library_trees(tmp_path: Pat
 
 
 def test_windows_execution_capabilities_remain_closed_when_broker_verification_fails(monkeypatch):
-    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "windows")
+    monkeypatch.setattr("oceanx.sandbox.execution.get_platform", lambda: "windows")
     monkeypatch.setattr(
-        "ocean_partner.sandbox.execution.verify_packaged_windows_broker",
+        "oceanx.sandbox.execution.verify_packaged_windows_broker",
         lambda: (None, "broker Authenticode verification failed"),
     )
 
@@ -311,9 +311,9 @@ def test_windows_execution_capabilities_remain_closed_when_broker_verification_f
 def test_windows_execution_capabilities_require_a_verified_packaged_broker(tmp_path: Path, monkeypatch):
     broker = tmp_path / "ocean-sandbox-broker.exe"
     broker.write_bytes(b"fixture")
-    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "windows")
+    monkeypatch.setattr("oceanx.sandbox.execution.get_platform", lambda: "windows")
     monkeypatch.setattr(
-        "ocean_partner.sandbox.execution.verify_packaged_windows_broker",
+        "oceanx.sandbox.execution.verify_packaged_windows_broker",
         lambda: (
             WindowsBrokerInstallation(
                 executable=broker,
@@ -341,9 +341,9 @@ async def test_windows_execution_dispatches_only_to_the_verified_broker(tmp_path
     broker.write_bytes(b"fixture")
     captured: dict[str, object] = {}
 
-    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "windows")
+    monkeypatch.setattr("oceanx.sandbox.execution.get_platform", lambda: "windows")
     monkeypatch.setattr(
-        "ocean_partner.sandbox.execution.verify_packaged_windows_broker",
+        "oceanx.sandbox.execution.verify_packaged_windows_broker",
         lambda: (
             WindowsBrokerInstallation(
                 executable=broker,
@@ -367,7 +367,7 @@ async def test_windows_execution_dispatches_only_to_the_verified_broker(tmp_path
             output_summary=OutputTreeSummary(0, 0, (), None),
         )
 
-    monkeypatch.setattr("ocean_partner.sandbox.execution._run_windows_brokered_command", fake_broker_runner)
+    monkeypatch.setattr("oceanx.sandbox.execution._run_windows_brokered_command", fake_broker_runner)
 
     result = await run_sandboxed_command(
         (str(executable), str(work / "analysis.py")),

@@ -13,10 +13,10 @@ from zipfile import ZipFile
 
 
 REQUIRED_PATHS = (
-    "ocean_partner/__init__.py",
-    "ocean_partner/cli.py",
-    "ocean_partner/resources/skills/core/ocean-analysis-design/SKILL.md",
-    "ocean_partner/resources/references/coding/xarray.md",
+    "oceanx/__init__.py",
+    "oceanx/cli.py",
+    "oceanx/resources/skills/core/ocean-analysis-design/SKILL.md",
+    "oceanx/resources/references/coding/xarray.md",
 )
 
 
@@ -44,7 +44,7 @@ def check_wheel(wheel: Path) -> dict[str, object]:
         entry_points = archive.read(entry_points_path).decode("utf-8") if entry_points_path else ""
 
     problems = [f"missing wheel entry: {path}" for path in missing]
-    if "ocean = ocean_partner.cli:app" not in entry_points:
+    if "ocean = oceanx.cli:app" not in entry_points:
         problems.append("missing ocean console entry point")
     if problems:
         raise SystemExit("\n".join(problems))
@@ -95,11 +95,11 @@ def smoke_wheel_runtime(wheel: Path) -> dict[str, object]:
 import json
 from pathlib import Path
 
-import ocean_partner
-from ocean_partner.doctor import ocean_doctor
+import oceanx
+from oceanx.doctor import ocean_doctor
 
 target = Path(__import__("os").environ["PYTHONPATH"]).resolve()
-module_path = Path(ocean_partner.__file__).resolve()
+module_path = Path(oceanx.__file__).resolve()
 report = ocean_doctor()
 if not module_path.is_relative_to(target):
     raise RuntimeError(f"Ocean imported outside isolated wheel target: {module_path}")

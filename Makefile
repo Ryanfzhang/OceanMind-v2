@@ -1,18 +1,18 @@
 PYTHON ?= .venv/bin/python
 PYTEST = PYTHONPATH=src $(PYTHON) -m pytest
 RUFF_TARGETS = \
-	src/ocean_partner/agent.py \
-	src/ocean_partner/agent_contract.py \
-	src/ocean_partner/agent_tools.py \
-	src/ocean_partner/deep_runtime.py \
-	src/ocean_partner/model_config.py \
-	src/ocean_partner/tool_history.py \
-	src/ocean_partner/web_search.py \
-	src/ocean_partner/runtime.py \
-	src/ocean_partner/tools.py \
-	src/ocean_partner/team/orchestrator.py \
-	src/ocean_partner/sandbox \
-	tests/test_ocean_partner/test_deep_agent_runtime.py
+	src/oceanx/agent.py \
+	src/oceanx/agent_contract.py \
+	src/oceanx/agent_tools.py \
+	src/oceanx/deep_runtime.py \
+	src/oceanx/model_config.py \
+	src/oceanx/tool_history.py \
+	src/oceanx/web_search.py \
+	src/oceanx/runtime.py \
+	src/oceanx/tools.py \
+	src/oceanx/team/orchestrator.py \
+	src/oceanx/sandbox \
+	tests/test_oceanx/test_deep_agent_runtime.py
 
 .PHONY: lint typecheck test test-contract test-e2e-offline test-wheel build release-manifest
 
@@ -30,7 +30,7 @@ test-contract:
 	cd frontend/ocean-desktop && npm run check
 
 test-e2e-offline:
-	$(PYTEST) -q tests/test_ocean_partner
+	$(PYTEST) -q tests/test_oceanx
 
 test-wheel:
 	$(PYTHON) scripts/check_ocean_wheel_contents.py --dist dist

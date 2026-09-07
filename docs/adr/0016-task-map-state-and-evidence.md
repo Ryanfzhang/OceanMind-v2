@@ -24,5 +24,5 @@ zoom or opacity changes only `TaskMapState`.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_research_tasks.py`
-- `tests/test_ocean_partner/test_task_router.py`
+- `tests/test_oceanx/test_research_tasks.py`
+- `tests/test_oceanx/test_task_router.py`

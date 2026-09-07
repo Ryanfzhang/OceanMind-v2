@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from ocean_partner.scientific_runtime import (
+from oceanx.scientific_runtime import (
     FROZEN_SCIENTIFIC_RUNTIME_MODULES,
     capture_frozen_scientific_runtime_manifest,
 )

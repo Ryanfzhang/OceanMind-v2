@@ -579,7 +579,7 @@ coordinator_results
 - 执行历史任务离线迁移；
 - 确认生产代码不存在旧路径 fallback。
 
-完成标准：`src/ocean_partner` 的生产 runtime 不再引用 `ExecutorTodo`、`lightweight_executor`、`build_ocean_executor_runtime` 或 `analysis_run_*` 工具。
+完成标准：`src/oceanx` 的生产 runtime 不再引用 `ExecutorTodo`、`lightweight_executor`、`build_ocean_executor_runtime` 或 `analysis_run_*` 工具。
 
 ### Phase 7：真实任务验收
 

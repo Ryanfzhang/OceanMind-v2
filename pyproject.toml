@@ -82,10 +82,11 @@ desktop-build = [
 ]
 
 [project.scripts]
-ocean = "ocean_partner.cli:app"
+ocean = "oceanx.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ocean_partner"]
+packages = ["src/oceanx"]
+dev-mode-dirs = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

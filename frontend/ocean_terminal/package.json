@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.tsx",
-    "build": "esbuild src/index.tsx --bundle --platform=node --format=esm --target=node18 --alias:react-devtools-core=./src/react-devtools-stub.ts '--banner:js=import {createRequire} from \"node:module\";const require=createRequire(import.meta.url);' --outfile=../../src/ocean_partner/_ocean_terminal/dist/ocean-terminal.mjs",
+    "build": "esbuild src/index.tsx --bundle --platform=node --format=esm --target=node18 --alias:react-devtools-core=./src/react-devtools-stub.ts '--banner:js=import {createRequire} from \"node:module\";const require=createRequire(import.meta.url);' --outfile=../../src/oceanx/_ocean_terminal/dist/ocean-terminal.mjs",
     "check": "tsc --noEmit",
     "protocol-fixtures": "tsx scripts/validate-protocol-fixtures.ts",
     "transport-check": "tsx scripts/verify-transport.ts",

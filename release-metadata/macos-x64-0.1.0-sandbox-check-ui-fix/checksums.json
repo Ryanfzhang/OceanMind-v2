@@ -3216,212 +3216,212 @@
         "size_bytes": 586608
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/_ocean_terminal/dist/ocean-terminal.mjs",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/_ocean_terminal/dist/ocean-terminal.mjs",
         "sha256": "dc8c5c32f44896e07cd37f502e104d60029eebc61cb55d7a5d806dea32ab06ee",
         "size_bytes": 1514415
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/_plot_studio/assets/index-Bc13BaoQ.js",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/_plot_studio/assets/index-Bc13BaoQ.js",
         "sha256": "bb7f2bd421fd12162612fc92bbcf0e9c588c68b9357eee4c0b7faff544b7426f",
         "size_bytes": 1259328
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/_plot_studio/assets/index-DE08EenK.css",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/_plot_studio/assets/index-DE08EenK.css",
         "sha256": "1b04f32a0672c9fe5e9e28d9239879e1b6219d71cca8990af3a4fd84ed56fd4f",
         "size_bytes": 79368
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/_plot_studio/index.html",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/_plot_studio/index.html",
         "sha256": "823113506723ea727a0e4db37bed1720ad22eed47ae8400f3f3e1c0b93c9214a",
         "size_bytes": 457
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase4-local-netcdf-v1.json",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase4-local-netcdf-v1.json",
         "sha256": "68ffa9977e2d218aff79d8aeb480b008f2732e877528db4d8e788186fdc3b940",
         "size_bytes": 6319
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase4-local-netcdf-v1.json.sha256",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase4-local-netcdf-v1.json.sha256",
         "sha256": "c55907422556662a25f0511b7ed4cd1624cd29d14581165496645c1ae705fb19",
         "size_bytes": 94
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-anomaly-map-v1.json",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-anomaly-map-v1.json",
         "sha256": "cc031eac94a5c8b38a074ef01d369e768d31e6091ba5cf8daa34ea1913dfd1e1",
         "size_bytes": 7215
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-anomaly-map-v1.json.sha256",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-anomaly-map-v1.json.sha256",
         "sha256": "c60aa1533268ca39af39c3b2339aa716b0e21e8f26a9d6df3db7e4d47def23bb",
         "size_bytes": 93
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-linked-plots-v1.json",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-linked-plots-v1.json",
         "sha256": "35aeec54da80feff8076c386c3e6204d6d2998297a38d858fc4b3c06cd6fb3ce",
         "size_bytes": 16452
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-linked-plots-v1.json.sha256",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-linked-plots-v1.json.sha256",
         "sha256": "e423b465cc8087a7414f1306e07fae87e14e9ec73fa680bd5f595f8b0f465024",
         "size_bytes": 94
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-seasonal-panels-v1.json",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-seasonal-panels-v1.json",
         "sha256": "919b217c79b43d46ea69f9634cb2069af2d1540dfea33828ce830c8a6fb3c62a",
         "size_bytes": 6774
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-seasonal-panels-v1.json.sha256",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-seasonal-panels-v1.json.sha256",
         "sha256": "5a59e0799021e1de173fa77f3c261ff4d37d2b326f8e21b9d2cce5bfe4d63bee",
         "size_bytes": 97
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-spatial-field-v1.json",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-spatial-field-v1.json",
         "sha256": "6755f9c4a20afdb81753266218816882ba71c3c56b61d1f70e4fd8ddd88c5593",
         "size_bytes": 7189
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/evals/phase5-spatial-field-v1.json.sha256",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/evals/phase5-spatial-field-v1.json.sha256",
         "sha256": "4b3b2e66d5a1e7af4fe300f2bf72e151d5fd3ff3ad428129388d6dacca12cef9",
         "size_bytes": 95
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/coding/cartopy.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/coding/cartopy.md",
         "sha256": "1c8d73e89734fa4d04f03e5c68e128fc8557af2884bad930d404d5fdfa46ace7",
         "size_bytes": 400
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/coding/gsw.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/coding/gsw.md",
         "sha256": "60aa98178c108c99afbd7a857a88e971cef2d09d0a0fdb7b3be6114dddb3aef4",
         "size_bytes": 375
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/coding/large-array-practices.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/coding/large-array-practices.md",
         "sha256": "ef2176f5e87d8bd270482b198dfa7cc36ef44742b9594e3a1b7c9b689de8e6db",
         "size_bytes": 402
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/coding/matplotlib.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/coding/matplotlib.md",
         "sha256": "40eb4ea823606473b75dfd9c000d525dc57633a6edc5d2c7124f1c2ad4f57fea",
         "size_bytes": 880
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/coding/xarray.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/coding/xarray.md",
         "sha256": "2b28f690913b3ce4042f527daf37e8d9cfd11f65d6759f4981129e58702d4aa5",
         "size_bytes": 407
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/data/calendars.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/data/calendars.md",
         "sha256": "660fc3a6131a068dbd211692b71300e94c4e384b35133109384cc78252ad1134",
         "size_bytes": 335
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/data/cf-conventions.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/data/cf-conventions.md",
         "sha256": "a171ebb07521d50c2883f646c84697b608101c94c7d696a790a234df9a74333d",
         "size_bytes": 373
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/data/common-datasets.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/data/common-datasets.md",
         "sha256": "033021f648ec7b2217bdd71b27e1608eb27832a8a54e1a2d2d99474f4c8f8a95",
         "size_bytes": 338
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/data/common-variables-and-units.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/data/common-variables-and-units.md",
         "sha256": "9b63f6b0e472409f31c80a1a773989bf05953978282b389aaff6e50277a27121",
         "size_bytes": 418
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/data/grids-and-coordinates.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/data/grids-and-coordinates.md",
         "sha256": "7ea73bbf4b51bbc229d2df0eb216a40189e2c23abc410beb896dfd0f7ff22122",
         "size_bytes": 384
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/methods/anomaly.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/methods/anomaly.md",
         "sha256": "8624a540eb95608329c25db6e51028cd63a694769989059b8539e8b8394f8797",
         "size_bytes": 816
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/methods/eof.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/methods/eof.md",
         "sha256": "91f7a128670635a8576b4c2db52636a015655fd83888b73e1935d01f54211827",
         "size_bytes": 368
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/methods/mixed-layer-depth.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/methods/mixed-layer-depth.md",
         "sha256": "39f457dfe398fa9a756d9dd5ab223b1b3839b9e75950fe7f790a9bbb81a79cde",
         "size_bytes": 332
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/methods/transport.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/methods/transport.md",
         "sha256": "1ce26a4ebc5b8b553980da8ba993de03135a7db7f42b42939ee4367a6c49abbc",
         "size_bytes": 419
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/methods/trend.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/methods/trend.md",
         "sha256": "090d3ce49c8d245a26f438c171647d2754400ed8a06eec42c2e398dead55eeed",
         "size_bytes": 382
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/methods/water-mass.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/methods/water-mass.md",
         "sha256": "7027f99cc6db3afc02f58a39832dde6584656c29857fb944ea0d8c3ea1ae6fa8",
         "size_bytes": 395
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/review/map-quality.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/review/map-quality.md",
         "sha256": "8eaa063667ec7becd80d3778ffd7e7e809c0a85774e8c30289e879cbdeb32979",
         "size_bytes": 359
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/review/physical-consistency.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/review/physical-consistency.md",
         "sha256": "6d99398791e0edb72b3cc4f2ac4ca8f441b5120b7cb8a445c561def86b8b545b",
         "size_bytes": 376
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/references/review/reproducibility.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/references/review/reproducibility.md",
         "sha256": "9dd531197cc4c0b9d7b45f71c8e1787329c8e9d0d92c8971d54501353008b615",
         "size_bytes": 356
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/claim-grounded-writing/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/claim-grounded-writing/SKILL.md",
         "sha256": "9843a0cb34ce51598adda88d2ccb79445e5ac70585e7d1d6a674375873700907",
         "size_bytes": 1490
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/hypothesis-experiment-design/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/hypothesis-experiment-design/SKILL.md",
         "sha256": "d32225f921e0cccff6950c175373ba3c5ff021c69dd06ad6461b2b88689447f6",
         "size_bytes": 1513
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/ocean-analysis-design/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/ocean-analysis-design/SKILL.md",
         "sha256": "2e9093030f8a1392ec90a07d2a4c1af9b242c8c919782c58d4052af81d930d05",
         "size_bytes": 1662
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/ocean-dataset-diagnosis/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/ocean-dataset-diagnosis/SKILL.md",
         "sha256": "a38a17af87839cbf86d85a24e3b254f11b037afda94683e1915760adadc608c6",
         "size_bytes": 1676
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/ocean-map-and-figure-review/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/ocean-map-and-figure-review/SKILL.md",
         "sha256": "30f495e21e7d7de212d4b5b4816effb4b58d3d361522a999587ebe499b7ccece",
         "size_bytes": 1631
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/ocean-physical-consistency-review/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/ocean-physical-consistency-review/SKILL.md",
         "sha256": "20b9c8564d22782fb23923f64627a49487c40ad4d3e87c2542415a0e2a27099f",
         "size_bytes": 1600
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/ocean-question-and-scale-framing/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/ocean-question-and-scale-framing/SKILL.md",
         "sha256": "b0d7f1ad5fee62f697d5d3f6a189cdeab8c5605efe6e6cd76ea6f51083f23471",
         "size_bytes": 1674
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/core/reproducibility-audit/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/core/reproducibility-audit/SKILL.md",
         "sha256": "318998780722ea5504749581592e60ee641406c4f4e960ec5758bef0692ba638",
         "size_bytes": 1572
       },
       {
-        "path": "Contents/Resources/sidecar/ocean-backend/_internal/ocean_partner/resources/skills/gated/literature-evidence-synthesis/SKILL.md",
+        "path": "Contents/Resources/sidecar/ocean-backend/_internal/oceanx/resources/skills/gated/literature-evidence-synthesis/SKILL.md",
         "sha256": "e804420d35ec68a1a054f08dfe278b5758a4b17b69c6ccd94be7d5dae308a1a9",
         "size_bytes": 1615
       },

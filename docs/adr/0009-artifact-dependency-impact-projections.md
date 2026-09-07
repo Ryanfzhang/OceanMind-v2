@@ -58,6 +58,6 @@ verification, human review, and dependency impact.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_impact_projection.py`
-- `tests/test_ocean_partner/test_artifact_store.py`
-- `tests/test_ocean_partner/test_portable_export.py`
+- `tests/test_oceanx/test_impact_projection.py`
+- `tests/test_oceanx/test_artifact_store.py`
+- `tests/test_oceanx/test_portable_export.py`

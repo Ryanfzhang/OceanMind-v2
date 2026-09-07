@@ -61,6 +61,6 @@ multi-user isolation that the application does not provide.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_storage_policy.py`
-- `tests/test_ocean_partner/test_artifact_store.py`
-- `tests/test_ocean_partner/test_portable_export.py`
+- `tests/test_oceanx/test_storage_policy.py`
+- `tests/test_oceanx/test_artifact_store.py`
+- `tests/test_oceanx/test_portable_export.py`

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ocean_partner.protocol.v2.schema import write_protocol_artifacts
+from oceanx.protocol.v2.schema import write_protocol_artifacts
 
 
 def main() -> None:

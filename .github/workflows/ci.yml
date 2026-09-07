@@ -36,7 +36,7 @@ jobs:
       - name: Run test suite
         run: >-
           uv run pytest -q
-          tests/test_ocean_partner
+          tests/test_oceanx
           tests/test_sandbox/test_execution.py
           tests/test_sandbox/test_windows_broker.py
 
@@ -63,18 +63,18 @@ jobs:
       - name: Ruff
         run: >-
           uv run ruff check
-          src/ocean_partner/agent.py
-          src/ocean_partner/agent_contract.py
-          src/ocean_partner/agent_tools.py
-          src/ocean_partner/deep_runtime.py
-          src/ocean_partner/model_config.py
-          src/ocean_partner/tool_history.py
-          src/ocean_partner/web_search.py
-          src/ocean_partner/runtime.py
-          src/ocean_partner/tools.py
-          src/ocean_partner/team/orchestrator.py
-          src/ocean_partner/sandbox
-          tests/test_ocean_partner/test_deep_agent_runtime.py
+          src/oceanx/agent.py
+          src/oceanx/agent_contract.py
+          src/oceanx/agent_tools.py
+          src/oceanx/deep_runtime.py
+          src/oceanx/model_config.py
+          src/oceanx/tool_history.py
+          src/oceanx/web_search.py
+          src/oceanx/runtime.py
+          src/oceanx/tools.py
+          src/oceanx/team/orchestrator.py
+          src/oceanx/sandbox
+          tests/test_oceanx/test_deep_agent_runtime.py
 
   ocean-desktop:
     name: Ocean Desktop checks
@@ -111,8 +111,8 @@ jobs:
         run: >-
           .venv/bin/python -m pytest -q
           tests/test_sandbox/test_execution.py
-          tests/test_ocean_partner/test_sandbox_self_check.py
-          tests/test_ocean_partner/test_current_team_contract.py
+          tests/test_oceanx/test_sandbox_self_check.py
+          tests/test_oceanx/test_current_team_contract.py
 
       - name: Typecheck and unit tests
         working-directory: frontend/ocean-desktop

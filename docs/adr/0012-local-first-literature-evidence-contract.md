@@ -71,7 +71,7 @@ claims and hypotheses, and decide which hypothesis is active.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_literature_artifacts.py`
-- `tests/test_ocean_partner/test_portable_export.py`
-- `tests/test_ocean_partner/test_protocol_v2.py`
+- `tests/test_oceanx/test_literature_artifacts.py`
+- `tests/test_oceanx/test_portable_export.py`
+- `tests/test_oceanx/test_protocol_v2.py`
 - Protocol v2 valid/invalid paper fixtures and frontend protocol-fixture check

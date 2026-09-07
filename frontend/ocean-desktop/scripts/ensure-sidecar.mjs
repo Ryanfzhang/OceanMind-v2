@@ -23,7 +23,7 @@ function newestModification(path) {
 }
 
 const inputs = [
-  resolve(repositoryRoot, 'src', 'ocean_partner'),
+  resolve(repositoryRoot, 'src', 'oceanx'),
   resolve(repositoryRoot, 'scripts', 'ocean_desktop_sidecar_entry.py'),
   resolve(repositoryRoot, 'scripts', 'build_desktop_sidecar.py'),
   resolve(repositoryRoot, 'pyproject.toml'),

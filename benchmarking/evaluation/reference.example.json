@@ -1,0 +1,13 @@
+{
+  "status": "draft",
+  "task_id": "Q05",
+  "query_sha256": "REPLACE_WITH_FROZEN_QUERY_SHA256",
+  "data_fingerprint": "REPLACE_WITH_PACK_MANIFEST_DATA_FINGERPRINT",
+  "reference_text": "DRAFT, NOT A GOLD ANSWER. Compute area-weighted monthly means on the frozen <50 m Pearl River mask. Declare treatment of missing pixels and coverage, calendar-month climatology over 2011-2022, and percentage anomaly = 100 * (monthly_mean - corresponding_calendar_month_mean) / corresponding_calendar_month_mean. Independently validate exact January/July extrema, coverage values and units on the supplied release. Do not copy numerical values from another sensor, mask or period. Populate verified reference numbers/evidence before marking this reference validated.",
+  "figures": [],
+  "criteria": [
+    {"id": "numerical_results", "weight": 50, "description": "Agreement with independently verified numerical reference values and extrema, with declared units and tolerances; prose claims alone do not establish agreement."},
+    {"id": "method", "weight": 25, "description": "Correct frozen mask, area weighting, monthly climatology, percentage anomaly definition and missing-data/coverage treatment."},
+    {"id": "evidence_reproducibility", "weight": 25, "description": "Traceable evidence and clear reproducible code tied to supplied files. Do not infer notebook execution from code inspection. Reference calculations and independent execution checks are recorded separately."}
+  ]
+}

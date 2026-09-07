@@ -33,6 +33,6 @@ foreground request. Task mutations use optimistic `task_revision` checks.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_research_tasks.py`
-- `tests/test_ocean_partner/test_task_router.py`
-- `tests/test_ocean_partner/test_agent_router.py`
+- `tests/test_oceanx/test_research_tasks.py`
+- `tests/test_oceanx/test_task_router.py`
+- `tests/test_oceanx/test_agent_router.py`

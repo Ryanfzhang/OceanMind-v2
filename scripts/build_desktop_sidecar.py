@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ocean_partner.scientific_runtime import (
+from oceanx.scientific_runtime import (
     FROZEN_SCIENTIFIC_RUNTIME_FILENAME,
     frozen_scientific_runtime_manifest,
 )
@@ -32,8 +32,8 @@ def main() -> int:
     root = Path(__file__).resolve().parents[1]
     source = root / "src"
     entry = root / "scripts" / "ocean_desktop_sidecar_entry.py"
-    sandbox_probe_entry = source / "ocean_partner" / "sandbox_probe_entry.py"
-    scientific_view_source = source / "ocean_partner" / "scientific_view.py"
+    sandbox_probe_entry = source / "oceanx" / "sandbox_probe_entry.py"
+    scientific_view_source = source / "oceanx" / "scientific_view.py"
     output = arguments.output.resolve()
     work = arguments.work.resolve()
     dist = work / "dist"
@@ -71,7 +71,7 @@ def main() -> int:
         "--paths",
         str(source),
         "--collect-submodules",
-        "ocean_partner",
+        "oceanx",
         "--collect-submodules",
         "deepagents",
         "--collect-submodules",
@@ -99,16 +99,16 @@ def main() -> int:
         "--hidden-import",
         "gsw",
         "--collect-data",
-        "ocean_partner",
+        "oceanx",
         # The sandbox launches the selected scientific Python directly, so this
         # probe must remain a real file rather than only a frozen Python module.
         "--add-data",
-        f"{sandbox_probe_entry}:ocean_partner",
+        f"{sandbox_probe_entry}:oceanx",
         # Expert programs run under a separately selected scientific Python.
         # Keep the pure-Python builder as a real file so the backend can copy it
         # into each isolated execution root.
         "--add-data",
-        f"{scientific_view_source}:ocean_partner",
+        f"{scientific_view_source}:oceanx",
         str(entry),
     ]
     completed = subprocess.run(command, cwd=root, check=False)

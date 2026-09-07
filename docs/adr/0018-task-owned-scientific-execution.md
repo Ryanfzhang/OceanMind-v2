@@ -79,6 +79,6 @@ container part of agent orchestration.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_team_orchestrator.py`
-- `tests/test_ocean_partner/test_team_models.py`
-- `tests/test_ocean_partner/test_analysis_runs.py`
+- `tests/test_oceanx/test_team_orchestrator.py`
+- `tests/test_oceanx/test_team_models.py`
+- `tests/test_oceanx/test_analysis_runs.py`

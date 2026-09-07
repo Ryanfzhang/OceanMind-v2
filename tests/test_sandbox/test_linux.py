@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from ocean_partner.sandbox import (
+from oceanx.sandbox import (
     ResourceLimits,
     SandboxExecutionPolicy,
     SandboxExecutionStatus,
@@ -17,7 +17,7 @@ from ocean_partner.sandbox import (
     get_sandbox_execution_capabilities,
     run_sandboxed_command,
 )
-from ocean_partner.sandbox.linux import build_bubblewrap_command, seccomp_filter
+from oceanx.sandbox.linux import build_bubblewrap_command, seccomp_filter
 
 
 def policy_for(tmp_path):
@@ -46,8 +46,8 @@ def test_linux_mounts_are_explicit_readonly_and_network_unshared(tmp_path):
 
 
 def test_linux_missing_bwrap_fails_closed(monkeypatch):
-    monkeypatch.setattr("ocean_partner.sandbox.execution.get_platform", lambda: "linux")
-    monkeypatch.setattr("ocean_partner.sandbox.execution.shutil.which", lambda _: None)
+    monkeypatch.setattr("oceanx.sandbox.execution.get_platform", lambda: "linux")
+    monkeypatch.setattr("oceanx.sandbox.execution.shutil.which", lambda _: None)
     capabilities = get_sandbox_execution_capabilities()
     assert not capabilities.available
     assert "bubblewrap" in capabilities.reason
@@ -71,7 +71,7 @@ def test_networked_linux_keeps_source_mounts_readonly(tmp_path):
 
 
 def test_linux_missing_seccomp_fails_closed(monkeypatch):
-    monkeypatch.setattr("ocean_partner.sandbox.linux.ctypes.util.find_library", lambda _: None)
+    monkeypatch.setattr("oceanx.sandbox.linux.ctypes.util.find_library", lambda _: None)
     with pytest.raises(SandboxUnavailableError, match="libseccomp"), seccomp_filter(allow_child_processes=False):
         pass
 

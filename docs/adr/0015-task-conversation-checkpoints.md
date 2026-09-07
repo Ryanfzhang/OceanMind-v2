@@ -33,5 +33,5 @@ rows interrupted instead of becoming memory.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_research_tasks.py`
-- `tests/test_ocean_partner/test_agent_router.py`
+- `tests/test_oceanx/test_research_tasks.py`
+- `tests/test_oceanx/test_agent_router.py`

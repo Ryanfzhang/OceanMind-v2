@@ -164,7 +164,7 @@ local paths; review them before sharing.
 ## Verification
 
 ```sh
-pytest -q tests/test_ocean_partner/test_batch.py tests/test_sandbox/test_linux.py
+pytest -q tests/test_oceanx/test_batch.py tests/test_sandbox/test_linux.py
 ```
 
 The Linux benchmark CI workflow exercises real namespaces/seccomp and a real backend

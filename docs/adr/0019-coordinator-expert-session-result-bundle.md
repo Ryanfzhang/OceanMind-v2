@@ -37,7 +37,7 @@ OceanMind has one agent architecture and one Ocean client.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_current_team_contract.py`
-- `tests/test_ocean_partner/test_request_store.py`
-- `tests/test_ocean_partner/test_protocol_v2.py`
-- `tests/test_ocean_partner/test_stdio_host.py`
+- `tests/test_oceanx/test_current_team_contract.py`
+- `tests/test_oceanx/test_request_store.py`
+- `tests/test_oceanx/test_protocol_v2.py`
+- `tests/test_oceanx/test_stdio_host.py`

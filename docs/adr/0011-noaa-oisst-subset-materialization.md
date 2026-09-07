@@ -96,7 +96,7 @@ NCEI remains the canonical OISST Version 2.1 record and DOI authority.
 
 ## Verification
 
-- `tests/test_ocean_partner/test_remote_oisst_dataset.py`
+- `tests/test_oceanx/test_remote_oisst_dataset.py`
 - Protocol v2 valid/invalid fixtures for preview and explicit acknowledgement
 - backend-start recovery test for uncommitted remote staging
 - `scripts/run_oisst_2010_smoke.py` for a live `2010 / 105E..125E /
