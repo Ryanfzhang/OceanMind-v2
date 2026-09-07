@@ -5,6 +5,5 @@
 # Supplies launcher/sandbox dependencies, not Science's managed analysis environments.
 # Claude Science and CC Switch themselves are installed separately.
 # Cannot enable kernel user namespaces or provide a graphical desktop for CC Switch.
-curl
 bubblewrap>=0.8.0
 socat
