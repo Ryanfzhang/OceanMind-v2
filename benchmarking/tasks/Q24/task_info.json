@@ -1,7 +1,14 @@
 {
   "id": "Q24",
   "track": "autoresearch",
-  "title": "Climatological model–satellite chlorophyll consistency",
-  "query": "Using CMOMS and MODIS-Aqua chlorophyll data for 2011–2022, evaluate the model's climatological seasonal cycle and summer–winter spatial patterns over the supplied northern South China Sea shelf mask (north of 15°N, water depth ≤100 m). Compare thickness-weighted model chlorophyll over the upper 12 m, or the available water column in shallower cells, with the satellite product on common spatial and monthly coverage. Quantify agreement and assess sensitivity to observation coverage, model sampling, and spatial resolution; do not assume satellite retrievals are error-free.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
-  "data_status": "pending_subset_selection"
+  "title": "2023 East China Sea heat-budget attribution",
+  "query": "Investigate the processes contributing to the onset and persistence of the 2023 East China Sea marine heatwave using the mixed-layer heat budget. Compare atmospheric heat-flux and oceanic contributions during the early and late developing phases, quantify the resolved terms and residual, and explain the limits of the attribution.",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_groups": [
+    "P_OISST",
+    "P_ECS",
+    "P_ERA5"
+  ],
+  "analysis_period": "2023 event; 1993–2011 heat-budget baseline"
 }

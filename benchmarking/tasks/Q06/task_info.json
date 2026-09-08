@@ -1,7 +1,40 @@
 {
   "id": "Q06",
   "track": "data_analysis",
-  "title": "Bottom hypoxia exposure",
-  "query": "Using the 2011 CMOMS bottom-water oxygen data, calculate the daily area below 2 mg L−1 and the annual number of hypoxic days at each valid bottom grid cell. Verify the oxygen-unit conversion and report missing-data limitations.",
-  "data_status": "pending_subset_selection"
+  "title": "Annual bottom-water hypoxia exposure",
+  "catalog_version": "2026-09-07-basic-v1",
+  "query": "Using the 2011 CMOMS oxygen data and supplied shelf mask, make one map of the number of observed days with bottom oxygen strictly below 2 mg/L at each cell. Convert oxygen from the supplied units; the original CMOMS header uses mmol/m3. Use the fixed deepest wet level from geometry and do not replace a missing bottom observation with a shallower value. Distinguish cells with no valid observations from valid cells with zero hypoxic days. Give one short conclusion identifying the greatest observed exposure, or reporting no observed hypoxia. Use the frozen B1 manifest for masks and geometry, keep missing values distinct from zero, and retain the calculation code for checking. Only one figure and one short conclusion are requested.",
+  "analysis_period": "2011",
+  "data_groups": [
+    "B1"
+  ],
+  "required_variables": [
+    "oxygen"
+  ],
+  "input_contract": {
+    "data_group": "B1",
+    "source": "CMOMS",
+    "period": "2011-01-01/2011-12-31",
+    "sampling": "daily mean",
+    "depth": "all supplied fixed physical depth levels; do not surface-trim the shared archive",
+    "science_fields": [
+      "temp",
+      "salt",
+      "u",
+      "v",
+      "oxygen",
+      "chlorophyll"
+    ],
+    "metadata_required": [
+      "provider-confirmed units and temperature/salinity conventions",
+      "calendar, time bounds, fill values and QC",
+      "longitude/latitude, positive-down depth and wet/land masks",
+      "cell areas and bathymetry",
+      "velocity staggering/orientation and collocation/rotation specification",
+      "fixed analysis and shelf masks"
+    ],
+    "availability": "pending_authorization_and_file_validation",
+    "notes": "One shared archive, not six copies. Science fields exist in the supplied avg_info.cdl, but the header does not prove the 2011 files or geometry are available. temp is labelled potential temperature; salt convention must be confirmed. Freeze physical bottom-level indices before applying daily data validity; a missing bottom value is not permission to substitute a shallower value. Use the user's per-year/per-variable fixed-depth layout. Freeze any preprocessing and bottom mapping before evaluation, and give both systems the identical prepared grid."
+  },
+  "data_status": "pending_authorization_and_file_validation"
 }

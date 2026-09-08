@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q12",
+  "title": "Nutrient-management effects on projected hypoxia",
+  "previous_proposal_id": "CM06",
+  "query_sha256": "28bda7fde98a919ccc4eb4aa8b46850dfa2ec508b8f479fe5afb0b8d487c2a57",
+  "data_fingerprint": null,
+  "reference_mode": "Original paper period and experiment required; exact data identity not yet verified.",
+  "paper": {
+    "citation": "Yu & Gan (2025)",
+    "title": "Shellfish Aquaculture Complements Nutrient Reduction in Mitigating Climate-Exacerbated Coastal Hypoxia",
+    "doi": "10.1021/acs.est.5c06682",
+    "url": "https://doi.org/10.1021/acs.est.5c06682"
+  },
+  "reference_text": "Paper result context: late-period hypoxic volume increases approximately 6% in DecreasingN and 195% in ConstantN relative to each scenario's early period. ConstantN exceeds DecreasingN by approximately 147% in the early window and 586% in the late window. Distinguish those denominators. Only use these as numerical targets after confirming the original output and the exact aggregation; do not set arbitrary percentage tolerances from the printed figures.\n",
+  "criteria": [
+    {
+      "id": "Q12-C1",
+      "weight": 20,
+      "description": "Identify the original nested PRE model, SSP5-8.5 forcing, ConstantN/DecreasingN labels and both 2016-2045 and 2071-2100 windows. Use DO <2 mg/L, correctly converting supplied mmol O2/m^3 by a factor of 0.032 to mg/L, with valid full-depth cell volumes and a shared comparison domain.",
+      "evidence_requirements": "Scenario/data inventory, threshold/unit test and geometry audit.",
+      "source_basis": "Sections 2.4/3.1: original nested SSP5-8.5 scenario experiment; Fig. 2C hypoxia definition.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q12-C2",
+      "weight": 25,
+      "description": "At each available time calculate the volume of wet cells below the threshold, then compute June-September mean volume for each year. Distinguish the May-September simulation interval from the evaluated season. Do not threshold seasonally averaged oxygen or substitute hypoxic area for volume.",
+      "evidence_requirements": "Per-year hypoxic-volume series for both scenarios and both windows, labelled in km^3 or equivalent.",
+      "source_basis": "Fig. 2C: June–September mean volume, not May–September, not area.",
+      "reference_figures": [
+        "images/Yu2025_Fig2C_hypoxic_volume.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q12-V01",
+          "reference_figure": "images/Yu2025_Fig2C_hypoxic_volume.png",
+          "source_panel": "Fig. 2C including its inset",
+          "requirement": "scientific_information",
+          "evidence_group": "Q12-CM-Yu2025_Fig2",
+          "required_information": [
+            "June-September mean hypoxic volume per year for both scenarios and both 30-year windows, in volume units.",
+            "Thirty-year means and 25th/75th percentiles; distinguish scenario effects from period changes.",
+            "Keep the unsimulated gap missing; evaluate mitigation versus elimination from actual contrasts."
+          ],
+          "acceptable_alternatives": [
+            "Scenario time series plus interval summaries, or faceted distributions with the same annual and period-level evidence."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Only hypoxic volume is scored. Stratification, phytoplankton and oyster-removal panels are excluded.",
+          "source_basis": "10.1021/acs.est.5c06682; Fig. 2C including its inset; Fig. 2C: June–September mean volume, not May–September, not area."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Per-year hypoxic-volume series for both scenarios and both windows, labelled in km^3 or equivalent."
+      }
+    },
+    {
+      "id": "Q12-C3",
+      "weight": 25,
+      "description": "Compute each scenario's two 30-year means and 25th/75th percentiles across annual seasonal means. Quantify within-scenario period changes and within-period scenario contrasts with explicit denominators and zero-baseline handling. Treat the unsimulated interval as missing, not zero or interpolated observations.",
+      "evidence_requirements": "Four group summaries, uncertainty/spread display and absolute/relative contrast table.",
+      "source_basis": "Fig. 2C: two30-year windows and25th/75th percentiles, not confidence intervals.",
+      "reference_figures": [
+        "images/Yu2025_Fig2C_hypoxic_volume.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q12-V01",
+          "reference_figure": "images/Yu2025_Fig2C_hypoxic_volume.png",
+          "source_panel": "Fig. 2C including its inset",
+          "requirement": "scientific_information",
+          "evidence_group": "Q12-CM-Yu2025_Fig2",
+          "required_information": [
+            "June-September mean hypoxic volume per year for both scenarios and both 30-year windows, in volume units.",
+            "Thirty-year means and 25th/75th percentiles; distinguish scenario effects from period changes.",
+            "Keep the unsimulated gap missing; evaluate mitigation versus elimination from actual contrasts."
+          ],
+          "acceptable_alternatives": [
+            "Scenario time series plus interval summaries, or faceted distributions with the same annual and period-level evidence."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Only hypoxic volume is scored. Stratification, phytoplankton and oyster-removal panels are excluded.",
+          "source_basis": "10.1021/acs.est.5c06682; Fig. 2C including its inset; Fig. 2C: two30-year windows and25th/75th percentiles, not confidence intervals."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Four group summaries, uncertainty/spread display and absolute/relative contrast table."
+      }
+    },
+    {
+      "id": "Q12-C4",
+      "weight": 20,
+      "description": "Evaluate whether nutrient reduction mitigates hypoxia and whether hypoxia nevertheless persists or grows in the later period. Support both statements using the scenario contrasts, distinguish mitigation from elimination and conditional projection from observation, and do not infer oxygen-budget terms or oyster benefits from this oxygen-only analysis.",
+      "evidence_requirements": "A supported management-effect conclusion linked to the scenario calculations.",
+      "source_basis": "Section 3.1 and Fig. 2C: nutrient mitigation versus persistent hypoxia; Oyster experiment excluded.",
+      "reference_figures": [
+        "images/Yu2025_Fig2C_hypoxic_volume.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q12-V01",
+          "reference_figure": "images/Yu2025_Fig2C_hypoxic_volume.png",
+          "source_panel": "Fig. 2C including its inset",
+          "requirement": "scientific_information",
+          "evidence_group": "Q12-CM-Yu2025_Fig2",
+          "required_information": [
+            "June-September mean hypoxic volume per year for both scenarios and both 30-year windows, in volume units.",
+            "Thirty-year means and 25th/75th percentiles; distinguish scenario effects from period changes.",
+            "Keep the unsimulated gap missing; evaluate mitigation versus elimination from actual contrasts."
+          ],
+          "acceptable_alternatives": [
+            "Scenario time series plus interval summaries, or faceted distributions with the same annual and period-level evidence."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Only hypoxic volume is scored. Stratification, phytoplankton and oyster-removal panels are excluded.",
+          "source_basis": "10.1021/acs.est.5c06682; Fig. 2C including its inset; Section 3.1 and Fig. 2C: nutrient mitigation versus persistent hypoxia; Oyster experiment excluded."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "A supported management-effect conclusion linked to the scenario calculations."
+      }
+    },
+    {
+      "id": "Q12-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostic tables and reproducible notebook record.",
+      "source_basis": "Benchmark delivery requirement.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Yu2025_Fig2C_hypoxic_volume.png",
+      "source_doi": "10.1021/acs.est.5c06682",
+      "pdf_page": 5,
+      "crop_fraction_top_left": [
+        0.5016,
+        0.07,
+        0.78,
+        0.23800000000000002
+      ],
+      "source_pdf_sha256": "7c4d18517ba5ab68ac2fe4c4b60935fdfb0a0310b72b217dea20392cc77018dc",
+      "sha256": "0d5281e246fc70fe629828982ad1d1b727f3ce0c2eba1aad3155942648ea95f6",
+      "criterion_ids": [
+        "Q12-C2",
+        "Q12-C3",
+        "Q12-C4"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/YU%26Gan_Est_2025.pdf",
+      "reviewed": true,
+      "role": "June-September mean hypoxic volume per year for both scenarios and both 30-year windows, in volume units. Thirty-year means and 25th/75th percentiles; distinguish scenario effects from period changes. Keep the unsimulated gap missing; evaluate mitigation versus elimination from actual contrasts.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 80009,
+      "source_panel": "Fig. 2C including its inset",
+      "source_context": "Only hypoxic volume is scored. Stratification, phytoplankton and oyster-removal panels are excluded.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.5016,
+            0.07,
+            0.78,
+            0.23800000000000002
+          ],
+          "role": "Fig. 2C including its inset",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.27366,
+            0.23470000000000002,
+            0.4302600000000001,
+            0.2428
+          ],
+          "role": "Original ConstantN (red) / DecreasingN (blue) shared legend from Fig. 2B.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            138.5513679999999
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "visual_scope": "Original-paper visual check: Yu et al. Fig. 2, **panel C only**, for C2-C4. The retained full figure preserves the shared red/blue scenario legend. Panel A stratification, panel B phytoplankton and panel D oyster diagnostics are not required. Error bars represent 25th/75th percentiles, not confidence intervals.",
+  "release_requirements": [
+    "Obtain authorized, experiment-matched inputs and freeze their SHA-256 manifest.",
+    "Freeze geometry, masks, averaging conventions and all unresolved source definitions.",
+    "Compute independent numerical references and reviewed tolerances; never use an evaluated agent's output as its own reference.",
+    "Review weights, source-image rights and independent notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

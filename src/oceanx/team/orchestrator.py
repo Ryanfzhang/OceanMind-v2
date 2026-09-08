@@ -837,7 +837,7 @@ class OceanTeamOrchestrator:
             )
 
         # The prompt gets a compact view; full stdout/stderr and generated files
-        # remain addressable through OCEAN_INPUT_MANIFEST when code is necessary.
+        # remain directly readable without starting another code execution.
         for record in job_executions[-3:]:
             saved_names = validated_output_names(record)
             if record.result is None or (record.state != "succeeded" and not saved_names):
@@ -853,7 +853,7 @@ class OceanTeamOrchestrator:
             if len(stdout) > 1_500:
                 stdout = (
                     stdout[:718]
-                    + "\n... [middle omitted; full log is in OCEAN_INPUT_MANIFEST] ...\n"
+                    + "\n... [middle omitted; use ocean_read_file on logs.stdout] ...\n"
                     + stdout[-718:]
                 )
             executions.append(
@@ -874,6 +874,19 @@ class OceanTeamOrchestrator:
                     "result_bundle_path": record.result.get("result_bundle_path"),
                     "result_fingerprint": record.result.get("result_fingerprint"),
                     "stdout_excerpt": stdout,
+                    "logs": record.result.get("logs")
+                    or {
+                        stream: str(
+                            Path(str(record.result["work_root"]))
+                            / "executions"
+                            / record.execution_id
+                            / "logs"
+                            / f"{stream}.txt"
+                        )
+                        for stream in ("stdout", "stderr")
+                    }
+                    if record.result.get("work_root")
+                    else {},
                     "duration_seconds": record.result.get("duration_seconds"),
                 }
             )
@@ -916,8 +929,8 @@ class OceanTeamOrchestrator:
             "instruction": (
                 "This is compact durable memory for the logical Expert session. First answer from "
                 "the prior-round summary and existing execution evidence. Use the full log/output "
-                "paths or the persisted result bundle in OCEAN_INPUT_MANIFEST only when an exact "
-                "omitted detail is needed. Run "
+                "paths or result_bundle_path with ocean_read_file when an exact omitted detail "
+                "is needed; do not run Python just to search for your own logs. Run "
                 "new code only when the incremental outcome was never computed or prior evidence "
                 "must be scientifically corrected. A publication, formatting, or response-envelope "
                 "failure never justifies recomputation. shared_results are immutable outputs from "
@@ -945,7 +958,8 @@ class OceanTeamOrchestrator:
                 LITERATURE_CAPABILITY,
                 *(
                     (WEB_SEARCH_CAPABILITY, JINA_READER_CAPABILITY)
-                    if order.profile_id in {"literature_reproduction_expert", "data_reproducibility_expert"}
+                    if order.profile_id
+                    in {"literature_reproduction_expert", "data_reproducibility_expert"}
                     else ()
                 ),
             ),

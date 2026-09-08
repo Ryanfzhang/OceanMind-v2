@@ -1,7 +1,87 @@
 {
   "id": "Q26",
   "track": "idea_hypothesis",
-  "title": "A testable explanation for plume chlorophyll variability",
-  "query": "Using the supplied plume literature and CMOMS data, propose and test one hypothesis explaining chlorophyll variability within river-influenced shelf waters. Distinguish the proposed explanation from simple mixing or shared spatial gradients.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
-  "data_status": "pending_subset_selection"
+  "title": "An idea about shelf–slope physical–ecosystem coupling",
+  "catalog_version": "2026-09-07-idea-v2",
+  "query": "Read the supplied related work using the CMOMS physical-biogeochemical framework in the South China Sea. Using the supplied 2018-2022 CMOMS fields over the northern shelf and slope, identify one unresolved question about the relation between circulation and ecosystem variability. Propose a specific falsifiable hypothesis and test it using the available variables. Choose the relationship and comparison yourself, explain what goes beyond repeating a supplied result, and distinguish the evidence from alternative interpretations. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "analysis_period": "2018–2022",
+  "data_groups": [
+    "I1"
+  ],
+  "required_variables": [
+    "chlorophyll",
+    "temp",
+    "salt",
+    "u",
+    "v"
+  ],
+  "data_status": "pending_authorization_and_file_validation",
+  "data_scope": {
+    "source": "CMOMS historical archive",
+    "period": "2018–2022",
+    "region": "northern South China Sea shelf/slope and supplied coastal masks",
+    "sampling": "daily means",
+    "depth": "all available fixed physical depth levels",
+    "fields": [
+      "temp",
+      "salt",
+      "u",
+      "v",
+      "oxygen",
+      "chlorophyll"
+    ],
+    "geometry": "Coordinates, physical depth/bathymetry, cell areas, wet/land masks and velocity collocation/orientation. Same per-year/per-variable layout as B1; new years must be provided.",
+    "status": "proposed_window_pending_authorization_and_file_validation",
+    "limits": "No nutrient, sediment, respiration, PAR, turbidity or river-discharge fields are assumed. Five years permit cross-year checks where supported; do not infer causal budget closure from the six fields."
+  },
+  "related_work": [
+    {
+      "id": "lu2020",
+      "citation": "Lu et al. (2020)",
+      "title": "Nutrient transport and dynamics in the South China Sea: A modeling study",
+      "year": 2020,
+      "journal": "Progress in Oceanography",
+      "doi": "10.1016/j.pocean.2020.102308",
+      "url": "https://doi.org/10.1016/j.pocean.2020.102308",
+      "verification_source": "https://doi.org/10.1016/j.pocean.2020.102308",
+      "verification_scope": "primary_methods_or_existing_verified_benchmark_record",
+      "source_dataset": "CMOMS South China Sea coupled physical-biogeochemical experiment; climatological final model years, not dated historical files.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "lu2023",
+      "citation": "Lu et al. (2023)",
+      "title": "A Modeling Study of Nutrient Transport and Dynamics Over the Northern Slope of the South China Sea",
+      "year": 2023,
+      "journal": "Journal of Geophysical Research: Oceans",
+      "doi": "10.1029/2022JC019225",
+      "url": "https://doi.org/10.1029/2022JC019225",
+      "verification_source": "https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022JC019225",
+      "verification_scope": "primary_methods_or_existing_verified_benchmark_record",
+      "source_dataset": "CMOMS/ROMS nitrogen-phosphorus biological module; northern South China Sea slope; Methods identifies the model framework and links the Lu2020 validation.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "fang2026",
+      "citation": "Fang et al. (2026; online 2025)",
+      "title": "Typhoon-induced surface chlorophyll a decline on the shelf of the South China Sea",
+      "year": 2026,
+      "journal": "Limnology and Oceanography Letters",
+      "doi": "10.1002/lol2.70075",
+      "url": "https://doi.org/10.1002/lol2.70075",
+      "verification_source": "https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lol2.70075",
+      "verification_scope": "publisher_abstract_data_and_methods",
+      "source_dataset": "Northern SCS shelf; OC-CCI v6.0, 4 km/8-day chlorophyll and IBTrACS tracks for 2001–2023; 2016 cruise context and idealized Nida-based experiments. Same CMOMS model identity is not established.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    }
+  ],
+  "reading_pack_status": "citations_selected_full_text_pack_not_staged",
+  "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
+  "reading_data_alignment": "Two readings share the South China Sea CMOMS framework; the newer northern-shelf study uses different observations and idealized experiments. All relate to the region, but neither files nor years are identical to I1."
 }

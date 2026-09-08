@@ -255,6 +255,43 @@ class _AgentToolWaitExceeded(RuntimeError):
     """An independently budgeted tool exceeded its wait safety ceiling."""
 
 
+async def _coordinator_events(engine, text: str, request_id: str):
+    """Retry transport failures at pending checkpoints, within the caller's budgets."""
+    retries = 0
+    active_tools = 0
+    stream = engine.submit_message(text, request_id=request_id).__aiter__()
+    try:
+        while True:
+            try:
+                event = await anext(stream)
+            except StopAsyncIteration:
+                return
+            if isinstance(event, ToolExecutionStarted):
+                active_tools += 1
+            elif isinstance(event, ToolExecutionCompleted):
+                active_tools = max(0, active_tools - 1)
+            resume = getattr(engine, "resume_message", None)
+            if (
+                isinstance(event, ErrorEvent)
+                and event.retryable is True
+                and event.code == "network_failure"
+                and not active_tools
+                and retries < 2
+                and callable(resume)
+            ):
+                retries += 1
+                await stream.aclose()
+                yield StatusEvent(
+                    message=f"Model connection interrupted; resuming saved state (retry {retries}/2)"
+                )
+                await asyncio.sleep(2 ** (retries - 1))
+                stream = resume(request_id=request_id).__aiter__()
+                continue
+            yield event
+    finally:
+        await stream.aclose()
+
+
 class OceanRequestRouter:
     """Route validated envelopes while keeping authority and durability server-side."""
 
@@ -515,18 +552,28 @@ class OceanRequestRouter:
                 details={},
             )
         except ValidationError as exc:
+            artifact_validation = request.type.startswith("artifact.")
+            validation = exc.errors(
+                include_url=False, include_context=False, include_input=False,
+            )
+            fields = ", ".join(
+                ".".join(str(part) for part in error["loc"]) or "content"
+                for error in validation[:3]
+            )
             await self._fail_request(
                 client,
                 request,
-                code="invalid_artifact",
-                message="Artifact content does not satisfy its declared schema",
+                code="invalid_artifact" if artifact_validation else "store_error",
+                message=(
+                    "Artifact content does not satisfy its declared schema"
+                    if artifact_validation
+                    else f"Could not complete {request.type}: {exc.title} validation failed ({fields})"
+                ),
                 recoverable=True,
                 details={
-                    "validation": exc.errors(
-                        include_url=False,
-                        include_context=False,
-                        include_input=False,
-                    )
+                    "operation": request.type,
+                    "model": exc.title,
+                    "validation": validation,
                 },
             )
         except RequestStoreError as exc:
@@ -3240,9 +3287,8 @@ class OceanRequestRouter:
                 # contain exactly what the researcher submitted.
                 text=visible_text,
             )
-            stream = agent_session.runtime.engine.submit_message(
-                submitted_text,
-                request_id=request.request_id,
+            stream = _coordinator_events(
+                agent_session.runtime.engine, submitted_text, request.request_id,
             ).__aiter__()
             while True:
                 try:
@@ -3279,12 +3325,9 @@ class OceanRequestRouter:
                     usage_output_tokens += event.usage.output_tokens
                     if event.message.text and not event.message.tool_uses:
                         last_assistant_text = event.message.text
-                    over_budget = (
-                        usage_input_tokens > budget.max_input_tokens
-                        or usage_output_tokens > budget.max_output_tokens
-                    )
-                    if over_budget:
-                        raise _AgentBudgetExceeded("request token budget reached")
+                    # Coordinator token usage is accounting, not a termination
+                    # condition. Long research must still reach its final handoff.
+                    # Expert execution budgets remain independently enforced.
                 elif isinstance(event, ToolExecutionStarted):
                     tool_call_count += 1
                     if tool_call_count > budget.max_tool_calls:

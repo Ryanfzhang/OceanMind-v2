@@ -1,7 +1,12 @@
 {
   "id": "Q08",
   "track": "autoresearch",
-  "title": "Distinct chlorophyll hotspots",
-  "query": "Determine whether the 2011 northern South China Sea shelf contains distinct chlorophyll hotspots associated with river-influenced and upwelling-influenced waters. Quantify their differences and assess whether the available evidence supports different nutrient-supply pathways.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
-  "data_status": "pending_subset_selection"
+  "title": "Decadal circulation transition",
+  "query": "Investigate whether South China Sea layered circulation underwent a regime transition around 2009 using the 1993–2022 simulation. Compare trends during 1993–2008 and 2009–2018, account for low-frequency variability, and distinguish changes in signed vorticity from changes in circulation strength. Quantify the uncertainty and limitations of the inferred transition.",
+  "catalog_version": "2026-09-07-paper-aligned",
+  "data_status": "pending_acquisition_and_validation",
+  "data_groups": [
+    "M2"
+  ],
+  "analysis_period": "1993–2022; trends 1993–2008 versus 2009–2018"
 }

@@ -1,7 +1,40 @@
 {
   "id": "Q01",
   "track": "data_analysis",
-  "title": "Area-weighted seasonal chlorophyll",
-  "query": "Using the 2011 CMOMS data, calculate the area-weighted monthly mean surface chlorophyll concentration for the supplied northern South China Sea shelf region. Identify the months with the highest and lowest concentrations, and report valid spatial coverage.",
-  "data_status": "pending_subset_selection"
+  "title": "Monthly surface chlorophyll",
+  "catalog_version": "2026-09-07-basic-v1",
+  "query": "Using the 2011 CMOMS data and supplied shelf mask, plot the area-weighted monthly mean surface chlorophyll as one line chart. Calculate a valid-area-weighted regional mean for each day, then average valid daily means within each month. Use the fixed shallowest wet level, without replacing missing surface values with deeper values. Give one short conclusion identifying the highest and lowest months. Use the frozen B1 manifest for masks and geometry, keep missing values distinct from zero, and retain the calculation code for checking. Only one figure and one short conclusion are requested.",
+  "analysis_period": "2011",
+  "data_groups": [
+    "B1"
+  ],
+  "required_variables": [
+    "chlorophyll"
+  ],
+  "input_contract": {
+    "data_group": "B1",
+    "source": "CMOMS",
+    "period": "2011-01-01/2011-12-31",
+    "sampling": "daily mean",
+    "depth": "all supplied fixed physical depth levels; do not surface-trim the shared archive",
+    "science_fields": [
+      "temp",
+      "salt",
+      "u",
+      "v",
+      "oxygen",
+      "chlorophyll"
+    ],
+    "metadata_required": [
+      "provider-confirmed units and temperature/salinity conventions",
+      "calendar, time bounds, fill values and QC",
+      "longitude/latitude, positive-down depth and wet/land masks",
+      "cell areas and bathymetry",
+      "velocity staggering/orientation and collocation/rotation specification",
+      "fixed analysis and shelf masks"
+    ],
+    "availability": "pending_authorization_and_file_validation",
+    "notes": "One shared archive, not six copies. Science fields exist in the supplied avg_info.cdl, but the header does not prove the 2011 files or geometry are available. temp is labelled potential temperature; salt convention must be confirmed. Freeze physical bottom-level indices before applying daily data validity; a missing bottom value is not permission to substitute a shallower value. Use the user's per-year/per-variable fixed-depth layout. Freeze any preprocessing and bottom mapping before evaluation, and give both systems the identical prepared grid."
+  },
+  "data_status": "pending_authorization_and_file_validation"
 }

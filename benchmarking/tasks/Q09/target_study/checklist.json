@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q09",
+  "title": "Regional chlorophyll seasonality",
+  "previous_proposal_id": "CM03",
+  "query_sha256": "3f51b56b9eedff6ef3b61c5ee9b6849c915726503e02160674c9f3b2e36fd8fa",
+  "data_fingerprint": null,
+  "reference_mode": "Approved2018–2022 historical method transfer; not numerical reproduction of climatological years46–50.",
+  "paper": {
+    "citation": "Lu et al. (2020)",
+    "title": "Nutrient transport and dynamics in the South China Sea: A modeling study",
+    "doi": "10.1016/j.pocean.2020.102308",
+    "url": "https://doi.org/10.1016/j.pocean.2020.102308"
+  },
+  "reference_text": "Paper result context: stronger winter basin chlorophyll, shelf summer/winter peaks, and a weaker summer feature in the southern basin. Evaluate these as scientific contrasts to investigate, not mandatory outcomes on 2018-2022 data. An independently supported different seasonal cycle earns full credit.\n",
+  "criteria": [
+    {
+      "id": "Q09-C1",
+      "weight": 20,
+      "description": "Use 2018-2022 chlorophyll and the paper's four-region framework: north/south of 15 degrees N, shelf depth <=100 m and basin depth >200 m. Exclude the 100-200 m gap. Apply a documented depth-weighted near-surface mean using 12 m over the shelf, 22 m in basin winter and 29 m in other basin seasons; report units and valid coverage.",
+      "evidence_requirements": "Masks, units and depth/area/time-weighting specification.",
+      "source_basis": "Section 3.2 and Fig. 4:15 N, 100/200 m masks and12/22/29 m near-surface averages. Period changed by user approval.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q09-C2",
+      "weight": 25,
+      "description": "Produce area-weighted monthly seasonal cycles for the four regions. Quantify peak timing, minimum and peak-to-trough amplitude, and distinguish the five-year seasonal mean from year-to-year variation. Do not smooth in a way that creates a second bloom peak.",
+      "evidence_requirements": "Four seasonal curves and a per-region summary table, with annual values or spread.",
+      "source_basis": "Fig. 4b model curves; annual-spread quantification is a benchmark addition.",
+      "reference_figures": [
+        "images/Lu2020_Fig4b_regional_cycles.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q09-V02",
+          "reference_figure": "images/Lu2020_Fig4b_regional_cycles.png",
+          "source_panel": "Fig. 4b, four model regional cycles",
+          "requirement": "scientific_information",
+          "evidence_group": "Q09-C-P6_Fig04",
+          "required_information": [
+            "Model monthly chlorophyll cycle for the north basin region, with valid-month support and concentration units.",
+            "Peak/minimum timing, seasonal amplitude and interannual variability must be supported by the 2018-2022 calculations.",
+            "Model monthly chlorophyll cycle for the south basin region, with valid-month support and concentration units.",
+            "Model monthly chlorophyll cycle for the north shelf region, with valid-month support and concentration units.",
+            "Model monthly chlorophyll cycle for the south shelf region, with valid-month support and concentration units."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Only the model line is a comparison target; MODIS and SeaWiFS lines are context. Northern/southern sectors divide at 15 N; shelf <=100 m, basin >200 m. Shared concentration units: microgram/L.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 4b, four model regional cycles; Fig. 4b model curves; annual-spread quantification is a benchmark addition."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Four seasonal curves and a per-region summary table, with annual values or spread."
+      }
+    },
+    {
+      "id": "Q09-C3",
+      "weight": 25,
+      "description": "Map summer (JJA) and winter (DJF) chlorophyll and quantify regional contrasts consistent with the maps. Use a stated, consistent DJF convention within the approved data window and show wet-domain coverage. Do not extrapolate across land or missing depth support.",
+      "evidence_requirements": "Summer/winter maps with consistent units/scales and regional contrasts.",
+      "source_basis": "Fig. 4a model summer/winter maps; same2018–2022 adaptation.",
+      "reference_figures": [
+        "images/Lu2020_Fig4a_model_seasons.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q09-V01",
+          "reference_figure": "images/Lu2020_Fig4a_model_seasons.png",
+          "source_panel": "Fig. 4a, model summer/winter pair",
+          "requirement": "scientific_information",
+          "evidence_group": "Q09-C-P6_Fig04",
+          "required_information": [
+            "JJA chlorophyll distribution on the supported wet domain, correct concentration units and stated near-surface averaging.",
+            "Spatial contrasts and regional statistics must agree; use comparable scales between the two seasons.",
+            "DJF chlorophyll distribution on the supported wet domain, correct concentration units and stated near-surface averaging.",
+            "Spatial contrasts and regional statistics must agree; use comparable scales between the two seasons."
+          ],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Model row only, summer left and winter right; shared colorbar concentration units are microgram/L. Satellite maps are excluded.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 4a, model summer/winter pair; Fig. 4a model summer/winter maps; same2018–2022 adaptation."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Summer/winter maps with consistent units/scales and regional contrasts."
+      }
+    },
+    {
+      "id": "Q09-C4",
+      "weight": 20,
+      "description": "Explain which shelf/basin and north/south contrasts are supported in 2018-2022. Distinguish observed/modelled concentration patterns from untested mechanisms; discuss interannual variability and the change from climatological forcing. Do not require the paper's peak phase or concentration to recur.",
+      "evidence_requirements": "Evidence-linked synthesis and explicit comparability limits.",
+      "source_basis": "Paper contrasts are context, not mandatory outcomes on a historical run.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q09-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostic tables and reproducible notebook record.",
+      "source_basis": "Benchmark delivery requirement.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Lu2020_Fig4a_model_seasons.png",
+      "sha256": "63160864fb233774a74ba921b1b9257139f1c0da94b0c99e4230a0cda0bd32e4",
+      "bytes": 486728,
+      "paper_id": "C-P6",
+      "authors": "Lu et al. (2020)",
+      "title": "Nutrient transport and dynamics in the South China Sea: A modeling study",
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/SCSnutrinet_2020.pdf",
+      "source_pdf_sha256": "93c52b5a63ca3b323582b8dc8f9e29b4bb59c93fb29420b851881d49330418b9",
+      "figure": 4,
+      "pdf_page": 6,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q09-C3"
+      ],
+      "source_doi": "10.1016/j.pocean.2020.102308",
+      "role": "JJA chlorophyll distribution on the supported wet domain, correct concentration units and stated near-surface averaging. Spatial contrasts and regional statistics must agree; use comparable scales between the two seasons. DJF chlorophyll distribution on the supported wet domain, correct concentration units and stated near-surface averaging. Spatial contrasts and regional statistics must agree; use comparable scales between the two seasons.",
+      "crop_fraction_top_left": [
+        0.17,
+        0.28823,
+        0.77635,
+        0.49704
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 4a, model summer/winter pair",
+      "source_context": "Model row only, summer left and winter right; shared colorbar concentration units are microgram/L. Satellite maps are excluded.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.17,
+            0.28823,
+            0.77635,
+            0.49704
+          ],
+          "role": "Fig. 4a, model summer/winter pair",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            20.82249269500005
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.17,
+            0.07,
+            0.77635,
+            0.091195
+          ],
+          "role": "Original Summer/Winter column headings.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Retain the two seasons together because they share latitude labels and the concentration scale."
+    },
+    {
+      "path": "images/Lu2020_Fig4b_regional_cycles.png",
+      "sha256": "b76b179f9ec3ffee96ed102be00a873f17549b85826ae3a004f587f9d53e488f",
+      "bytes": 433174,
+      "paper_id": "C-P6",
+      "authors": "Lu et al. (2020)",
+      "title": "Nutrient transport and dynamics in the South China Sea: A modeling study",
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/SCSnutrinet_2020.pdf",
+      "source_pdf_sha256": "93c52b5a63ca3b323582b8dc8f9e29b4bb59c93fb29420b851881d49330418b9",
+      "figure": 4,
+      "pdf_page": 6,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q09-C2"
+      ],
+      "source_doi": "10.1016/j.pocean.2020.102308",
+      "role": "Model monthly chlorophyll cycle for the north basin region, with valid-month support and concentration units. Peak/minimum timing, seasonal amplitude and interannual variability must be supported by the 2018-2022 calculations. Model monthly chlorophyll cycle for the south basin region, with valid-month support and concentration units. Model monthly chlorophyll cycle for the north shelf region, with valid-month support and concentration units. Model monthly chlorophyll cycle for the south shelf region, with valid-month support and concentration units.",
+      "crop_fraction_top_left": [
+        0.17,
+        0.504105,
+        0.84,
+        0.855
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 4b, four model regional cycles",
+      "source_context": "Only the model line is a comparison target; MODIS and SeaWiFS lines are context. Northern/southern sectors divide at 15 N; shelf <=100 m, basin >200 m. Shared concentration units: microgram/L.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.17,
+            0.504105,
+            0.84,
+            0.855
+          ],
+          "role": "Fig. 4b, four model regional cycles",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the 2x2 regional cycles together because month labels, concentration axes and row/column region labels are shared."
+    }
+  ],
+  "visual_scope": "Original-paper visual check: Lu Fig. 4, model curves in panel b for C2 and model maps in panel a for C3. Satellite panels are context only and are not candidate numerical targets.",
+  "release_requirements": [
+    "Obtain authorized, experiment-matched inputs and freeze their SHA-256 manifest.",
+    "Freeze geometry, masks, averaging conventions and all unresolved source definitions.",
+    "Compute independent numerical references and reviewed tolerances; never use an evaluated agent's output as its own reference.",
+    "Review weights, source-image rights and independent notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

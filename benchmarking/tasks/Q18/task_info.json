@@ -1,7 +1,13 @@
 {
   "id": "Q18",
   "track": "autoresearch",
-  "title": "Seasonal upper-ocean stratification",
-  "query": "Investigate the seasonal evolution of mixed-layer depth and upper-ocean stratification in the supplied Gulf of Mexico period. Determine whether Loop Current-influenced waters and surrounding Gulf waters exhibit different seasonal responses.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
-  "data_status": "pending_subset_selection"
+  "title": "Tracking a Loop Current-region eddy in reanalysis",
+  "query": "Using daily GLORYS sea-surface height in the Gulf of Mexico from July 2015 to November 2016, identify one resolved anticyclonic feature that separates from the Loop Current region. Track its centre, enclosed area and westward displacement over its reliably connected trajectory and show representative maps. State sensitivity to the sea-level criterion and gaps/ambiguous matches; do not require the feature or dates to coincide with the observed Poseidon chronology. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_groups": [
+    "P_GULF"
+  ],
+  "analysis_period": "July 2015–November 2016",
+  "adaptation": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive."
 }

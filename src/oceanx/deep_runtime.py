@@ -239,6 +239,7 @@ class DeepAgentEngine:
         self._seed_messages: list[BaseMessage] = []
         self._model_call_state_hook: Callable[[bool], None] | None = None
         self._turn_context = ""
+        self._stream_turn_index = 0
 
     @property
     def messages(self) -> list[ConversationMessage]:
@@ -337,16 +338,24 @@ class DeepAgentEngine:
         ]
 
     async def submit_message(
-        self, text: str, *, request_id: str | None = None
+        self, text: str, *, request_id: str | None = None, _resume: bool = False
     ) -> AsyncIterator[StreamEvent]:
         config = self._config(request_id)
-        inputs = {"messages": await self._input_messages(config, text)}
+        if _resume:
+            snapshot = await self.graph.aget_state(config)
+            if not snapshot.next:
+                yield ErrorEvent(message="No pending model checkpoint to resume", code="model_error", retryable=False)
+                return
+            inputs = None
+        else:
+            inputs = {"messages": await self._input_messages(config, text)}
+            self._stream_turn_index = 0
         pending_calls: deque[dict[str, Any]] = deque()
         tool_started: dict[str, tuple[float, str, str | None]] = {}
         opaque_tool_runs: set[str] = set()
         model_turns: dict[str, str] = {}
         completed_model_runs: set[str] = set()
-        turn_index = 0
+        turn_index = self._stream_turn_index
         try:
             async for event in self.graph.astream_events(inputs, config=config, version="v2"):
                 name = str(event.get("event") or "")
@@ -367,6 +376,7 @@ class DeepAgentEngine:
                 data = event.get("data") or {}
                 if name == "on_chat_model_start":
                     turn_index += 1
+                    self._stream_turn_index = turn_index
                     turn_id = f"{request_id or self.thread_id}:turn:{turn_index}"
                     model_turns[run_id] = turn_id
                     if self._model_call_state_hook is not None:
@@ -470,6 +480,10 @@ class DeepAgentEngine:
             )
             code = "network_failure" if retryable else "model_error"
             yield ErrorEvent(message=message, code=code, retryable=retryable)
+
+    def resume_message(self, *, request_id: str | None = None) -> AsyncIterator[StreamEvent]:
+        """Resume the pending graph node without appending another user message."""
+        return self.submit_message("", request_id=request_id, _resume=True)
 
 
 async def build_deep_agent_engine(

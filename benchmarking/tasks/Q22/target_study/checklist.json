@@ -1,0 +1,588 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "status": "draft",
+  "task_id": "Q22",
+  "title": "Vietnam-region chlorophyll and monsoon winds",
+  "query_sha256": "8480c2643e1e20f33d14917cba77b78c139780909c2c2622a81c8e8c590cd6ef",
+  "data_fingerprint": null,
+  "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "paper": {
+    "citation": "Lu et al. (2018)",
+    "title": "Physical modulation to the biological productivity in the summer Vietnam upwelling system",
+    "doi": "10.5194/os-14-1303-2018",
+    "url": "https://os.copernicus.org/articles/14/1303/2018/"
+  },
+  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing monthly MODIS-Aqua chlorophyll and NOAA blended winds for May–September 2004–2012 in the Vietnam-region box 109–112 E, 10–16 N, examine whether summer chlorophyll anomalies covary with meridional wind and scalar wind speed. Show regional series and raw versus calendar-month-anomaly relationships, and test sensitivity to dropping one summer at a time. This reduced analysis concerns chlorophyll concentration and wind association, not primary productivity, wind stress, an upwelling transport index or a circulation budget. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "criteria": [
+    {
+      "id": "Q22-C1",
+      "weight": 20,
+      "description": "Extract the fixed benchmark box, MJJAS months and matched valid ocean support. Preserve wind units/direction and distinguish chlorophyll concentration from NPP.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Sections 2.1–2.2 and Eqs.1–2: satellite diagnostics and averaging region. Eq. 2's printed ADT expression requires a dimensional check; use geostrophic balance for height in metres. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q22-C2",
+      "weight": 25,
+      "description": "Produce regional chlorophyll, meridional-wind and scalar-speed series and their calendar-month anomalies with explicit averaging and matched sample counts.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Eq. 3, Section 3.1 and Fig. 3: separate and multiple regression on2004–2012 MJJAS records. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Lu2018_Fig3_upwelling.png",
+        "images/Lu2018_Fig3_ke.png",
+        "images/Lu2018_Fig3_npp.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q22-V01",
+          "reference_figure": "images/Lu2018_Fig3_upwelling.png",
+          "source_panel": "Fig. 3a",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig03",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 3a; Eq. 3, Section 3.1 and Fig. 3: separate and multiple regression on2004–2012 MJJAS records."
+        },
+        {
+          "id": "Q22-V02",
+          "reference_figure": "images/Lu2018_Fig3_ke.png",
+          "source_panel": "Fig. 3b",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig03",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 3b; Eq. 3, Section 3.1 and Fig. 3: separate and multiple regression on2004–2012 MJJAS records."
+        },
+        {
+          "id": "Q22-V03",
+          "reference_figure": "images/Lu2018_Fig3_npp.png",
+          "source_panel": "Fig. 3c",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig03",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 3c; Eq. 3, Section 3.1 and Fig. 3: separate and multiple regression on2004–2012 MJJAS records."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q22-C3",
+      "weight": 25,
+      "description": "Quantify raw/anomaly associations and leave-one-summer-out sensitivity; show equivalent time-series/scatter or effect plots with temporally defensible uncertainty.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.1 and Fig. 4: deseasonalized NPP quartiles and circulation composites. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Lu2018_Fig4_low.png",
+        "images/Lu2018_Fig4_high.png",
+        "images/Lu2018_Fig4_normal.png",
+        "images/Lu2018_Fig4_difference.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q22-V04",
+          "reference_figure": "images/Lu2018_Fig4_low.png",
+          "source_panel": "Fig. 4a",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4a; Section 3.1 and Fig. 4: deseasonalized NPP quartiles and circulation composites."
+        },
+        {
+          "id": "Q22-V05",
+          "reference_figure": "images/Lu2018_Fig4_high.png",
+          "source_panel": "Fig. 4b",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4b; Section 3.1 and Fig. 4: deseasonalized NPP quartiles and circulation composites."
+        },
+        {
+          "id": "Q22-V06",
+          "reference_figure": "images/Lu2018_Fig4_normal.png",
+          "source_panel": "Fig. 4c",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4c; Section 3.1 and Fig. 4: deseasonalized NPP quartiles and circulation composites."
+        },
+        {
+          "id": "Q22-V07",
+          "reference_figure": "images/Lu2018_Fig4_difference.png",
+          "source_panel": "Fig. 4d",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4d; Section 3.1 and Fig. 4: deseasonalized NPP quartiles and circulation composites."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q22-C4",
+      "weight": 20,
+      "description": "Do not label chlorophyll as VGPM productivity, monthly wind as nonlinear wind stress, or association as a demonstrated upwelling/circulation mechanism. No CCMP, ADT or author model experiment is required.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.1 reports regression and pattern significance; controlled model experiments are separate Sections 2.4/3.3. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Lu2018_Fig4_low.png",
+        "images/Lu2018_Fig4_high.png",
+        "images/Lu2018_Fig4_normal.png",
+        "images/Lu2018_Fig4_difference.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q22-V04",
+          "reference_figure": "images/Lu2018_Fig4_low.png",
+          "source_panel": "Fig. 4a",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4a; Section 3.1 reports regression and pattern significance; controlled model experiments are separate Sections 2.4/3.3."
+        },
+        {
+          "id": "Q22-V05",
+          "reference_figure": "images/Lu2018_Fig4_high.png",
+          "source_panel": "Fig. 4b",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4b; Section 3.1 reports regression and pattern significance; controlled model experiments are separate Sections 2.4/3.3."
+        },
+        {
+          "id": "Q22-V06",
+          "reference_figure": "images/Lu2018_Fig4_normal.png",
+          "source_panel": "Fig. 4c",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4c; Section 3.1 reports regression and pattern significance; controlled model experiments are separate Sections 2.4/3.3."
+        },
+        {
+          "id": "Q22-V07",
+          "reference_figure": "images/Lu2018_Fig4_difference.png",
+          "source_panel": "Fig. 4d",
+          "requirement": "context_only",
+          "evidence_group": "Q22-Lu2018_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/os-14-1303-2018; Fig. 4d; Section 3.1 reports regression and pattern significance; controlled model experiments are separate Sections 2.4/3.3."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q22-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Lu2018_Fig3_upwelling.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 5,
+      "crop_fraction_top_left": [
+        0.56,
+        0.093,
+        0.864,
+        0.17035
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "66ad79445968a5473907463dd40ed328cc0f7818700b1bf3031e09fd053bc88a",
+      "criterion_ids": [
+        "Q22-C2"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "Matched May-September 2004-2012 upwelling index with correct units, monthly and summer-mean support. The regression check also needs UI-only, KE-only and joint fitted relationships and explained variance; matching this time series alone is not enough.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 62470,
+      "source_panel": "Fig. 3a",
+      "source_context": "UI units m2/s; KE m2/s2; NPP mg C/m2/day. Non-summer months are not fabricated zero observations.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.56,
+            0.093,
+            0.864,
+            0.17035
+          ],
+          "role": "Fig. 3a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2018_Fig3_ke.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 5,
+      "crop_fraction_top_left": [
+        0.56,
+        0.17058800000000002,
+        0.864,
+        0.24413
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "f1e854f134d8ec6d1282b8d561e7c5331f44a25a4734fed7d06ac21f0e3f2947",
+      "criterion_ids": [
+        "Q22-C2"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "Matched May-September 2004-2012 KE with correct units, monthly and summer-mean support. The regression check also needs UI-only, KE-only and joint fitted relationships and explained variance; matching this time series alone is not enough.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 66943,
+      "source_panel": "Fig. 3b",
+      "source_context": "UI units m2/s; KE m2/s2; NPP mg C/m2/day. Non-summer months are not fabricated zero observations.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.56,
+            0.17058800000000002,
+            0.864,
+            0.24413
+          ],
+          "role": "Fig. 3b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2018_Fig3_npp.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 5,
+      "crop_fraction_top_left": [
+        0.56,
+        0.244844,
+        0.864,
+        0.331
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "14056d15c7c187481ddde9c07bfd5a06c24dec898668df3c86597e8ab435da20",
+      "criterion_ids": [
+        "Q22-C2"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "Matched May-September 2004-2012 NPP with correct units, monthly and summer-mean support. The regression check also needs UI-only, KE-only and joint fitted relationships and explained variance; matching this time series alone is not enough.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 61611,
+      "source_panel": "Fig. 3c",
+      "source_context": "UI units m2/s; KE m2/s2; NPP mg C/m2/day. Non-summer months are not fabricated zero observations.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.56,
+            0.244844,
+            0.864,
+            0.331
+          ],
+          "role": "Fig. 3c",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2018_Fig4_low.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 6,
+      "crop_fraction_top_left": [
+        0.24,
+        0.091,
+        0.49806,
+        0.24850000000000003
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "0de24062f306e20a9bd64ded6f7ffc8fd2ac27f7be8750c7c019b350c72bcd65",
+      "criterion_ids": [
+        "Q22-C3",
+        "Q22-C4"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "low NPP-anomaly circulation composite on the paper's geography, with velocity/ADT units and anomaly-group definitions. High/low masks must follow seasonally adjusted NPP quartiles. Spatial patterns and the difference must be supported by matched samples, with stated support.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 174180,
+      "source_panel": "Fig. 4a",
+      "source_context": "Do not infer the separate NO_ADV causal experiment from observational composites. The difference uses ADT shading and velocity arrows; constituent composites use speed shading.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.24,
+            0.091,
+            0.49806,
+            0.24850000000000003
+          ],
+          "role": "Fig. 4a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2018_Fig4_high.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 6,
+      "crop_fraction_top_left": [
+        0.493,
+        0.091,
+        0.746,
+        0.24850000000000003
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "076feb77b9edb8bcde7b13c0fcead9fb63ca301dfbf243e04d5b317214ee1e4d",
+      "criterion_ids": [
+        "Q22-C3",
+        "Q22-C4"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "high NPP-anomaly circulation composite on the paper's geography, with velocity/ADT units and anomaly-group definitions. High/low masks must follow seasonally adjusted NPP quartiles. Spatial patterns and the difference must be supported by matched samples, with stated support.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 182144,
+      "source_panel": "Fig. 4b",
+      "source_context": "Do not infer the separate NO_ADV causal experiment from observational composites. The difference uses ADT shading and velocity arrows; constituent composites use speed shading.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.493,
+            0.091,
+            0.746,
+            0.24850000000000003
+          ],
+          "role": "Fig. 4b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2018_Fig4_normal.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 6,
+      "crop_fraction_top_left": [
+        0.24,
+        0.24692500000000003,
+        0.49806,
+        0.406
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "8f83478d65a3cab5126d1f37a84e115c73a247cd271be60c0d66e5fd81067c17",
+      "criterion_ids": [
+        "Q22-C3",
+        "Q22-C4"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "normal NPP-anomaly circulation composite on the paper's geography, with velocity/ADT units and anomaly-group definitions. High/low masks must follow seasonally adjusted NPP quartiles. Spatial patterns and the difference must be supported by matched samples, with stated support.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 180038,
+      "source_panel": "Fig. 4c",
+      "source_context": "Normal composite is contextual, not an additional mandatory analysis if high, low and their difference are fully demonstrated.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.24,
+            0.24692500000000003,
+            0.49806,
+            0.406
+          ],
+          "role": "Fig. 4c",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2018_Fig4_difference.png",
+      "source_doi": "10.5194/os-14-1303-2018",
+      "pdf_page": 6,
+      "crop_fraction_top_left": [
+        0.493,
+        0.24692500000000003,
+        0.746,
+        0.406
+      ],
+      "source_pdf_sha256": "b707a90c554b285643b9eaebb77312d5641007bb7571dd5de6f3a94df9e43722",
+      "sha256": "c2fb2a0b3cfd9214b88980910abfef660feb0700304fe71dee3bf30557850c24",
+      "criterion_ids": [
+        "Q22-C3",
+        "Q22-C4"
+      ],
+      "source_url": "https://os.copernicus.org/articles/14/1303/2018/",
+      "role": "High-minus-low NPP-anomaly circulation composite on the paper's geography, with velocity/ADT units and anomaly-group definitions. High/low masks must follow seasonally adjusted NPP quartiles. Spatial patterns and the difference must be supported by matched samples, with stated support.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 112026,
+      "source_panel": "Fig. 4d",
+      "source_context": "Do not infer the separate NO_ADV causal experiment from observational composites. The difference uses ADT shading and velocity arrows; constituent composites use speed shading.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.493,
+            0.24692500000000003,
+            0.746,
+            0.406
+          ],
+          "role": "Fig. 4d",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "release_requirements": [
+    "Download and verify the canonical public input groups and freeze file hashes.",
+    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
+    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

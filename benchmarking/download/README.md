@@ -1,134 +1,117 @@
-# 在 Linux 服务器下载 benchmark 数据
+# 两条命令下载全部非 CMOMS benchmark 数值数据
 
-独立脚本：**不导入 OceanMind、不调用 LLM、不启动桌面端，也不改变多智能体交互**。把本目录复制到服务器即可运行；数据写到你指定的目录，不复制 CMOMS。
+这是 **2026-09-08-accessible-v1** 版本的统一入口。已同步简化 Q13–Q22、Q28–Q30，去掉无法直接获取的原始航次/作者数据依赖；Q23/Q24 保留可公开获取的产品。CMOMS 不下载、不转换、不复制。
 
-## 已接通与尚未接通
+## 首次安装与账号准备（只做一次）
 
-默认可下载三种产品，均通过公开 NOAA ERDDAP 下载，不需要账号：
-
-| 配置 ID | 产品 / 版本 | 默认时段 | 默认空间范围 |
-| --- | --- | --- | --- |
-| `modis_monthly` | MODIS-Aqua 月平均叶绿素，约 4 km，R2022 产品系列 | 2003-01—2022-12 | **必须指定** `--modis-bbox W E S N` 或配置 `bbox` |
-| `seawifs_monthly` | SeaWiFS 月平均叶绿素，约 9 km，R2018.0 | 1997-09—2010-04 | 104–120°E、1–25°N |
-| `blended_wind_monthly` | NOAA Blended Sea Winds v2，月平均、0.25°，风速 / u / v / mask | 1997-09—2010-04 | 104–120°E、1–25°N |
-
-这是**当前自动下载部分，不是所有非 CMOMS 数据已经齐备**。Argo/APEX、GMOG、Gulf 高度计/再分析、作者 NEMO、ETOPO5、细时间采样信息和模拟实际强迫仍在配置的 `pending` 中，附缺少的选择或获取条件。脚本不会替你选择 GLORYS、生成未经确认的论文浮标样本或用新水深产品替换 ETOPO5。`--products gulf_reanalysis` 等待定项会报错，不会假装完成。
-
-MODIS R2018 的 OceanWatch 镜像元数据实际截止 **2022-04**，所以本脚本明确选用了可覆盖后续时段的 R2022 入口，**不是混用两个版本拼接**。ERDDAP 的产品系列可能继续更新，计划和下载文件会记录当前提供方元数据 / `processing_version`，每份文件另外有 SHA-256。它们不能自动视为原论文处理版本；所有参考数值应基于实际下载文件重算。月份完整性以时间轴检查为准，不只看目录标题或起止年份。
-
-## 1. 安装
-
-服务器需要 Python **3.10+** 和 `curl`。在复制过来的 `download/` 目录中运行：
+在服务器的 Python 3.11 环境、仓库根目录中：
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python download_data.py --list
+python -m pip install -r benchmarking/download/requirements.txt
 ```
 
-不需要安装整个 OceanMind。配置文件不存账号密码；当前三个公开入口无需 Earthdata / Copernicus 凭据。
+服务器需已有 `curl`，不需要 sudo。CMEMS/ERA5 是公开可申请的数据服务，但需你自己的账号：
 
-## 2. 先预览，不下载数据场
+- 运行 `copernicusmarine login`，本地保存 Copernicus Marine 凭据。
+- 按 [CDS 官方说明](https://cds.climate.copernicus.eu/how-to-api)配置 `.cdsapirc`，并在网页接受 ERA5 数据集许可。
+- 不把凭据放进数据目录、仓库或聊天。无需 Earthdata 账号，也不需要作者给原始 glider 文件。
 
-下面 **104–121°E、1–25°N 只是 MODIS 下载外包矩形示例**，不是冻结的分析 mask。根据最终所需区域修改四个数。脚本保留框内全部原分辨率像元，不抽样、不平均、不插值；坐标中心落在框内的像元才会保留。
+账号未配置、网络不通或提供方服务异常不能靠脚本绕过；会报错并保留已验证的文件，重跑即可继续。
+
+## 实际下载：这两条命令
+
+选择一个新的空数据根目录，避免与旧版不同区域/版本的档案混放。以下都从仓库根目录运行：
 
 ```bash
-.venv/bin/python download_data.py \
-  --output /data/oceanmind-benchmark \
-  --modis-bbox 104 121 1 25
+python -u benchmarking/download/download_all.py public --output /srv/ocean-benchmark-data --execute
+python -u benchmarking/download/download_all.py services --output /srv/ocean-benchmark-data --execute
 ```
 
-预览会联网读取产品定义和真实坐标轴，写入 `_runs/<run-id>/` 下的计划与报告，但不下载叶绿素/风数据场。它检查：
+将 `/srv/ocean-benchmark-data` 换成你有写权限的目录，例如 `/home/mafzhang/ocean-benchmark-data`。
 
-- 变量和维度是否存在，纬度是否倒序、经度是 0–360 还是 −180–180，风的额外高度轴是否为指定值。
-- 所请求的每个月是否真的在时间轴中；不会把缺失月份匹配到相邻月份。
-- 每个文件的实际时间戳、网格范围、变量、来源 URL 和输出路径。月平均的时间戳不一定是月初。
+**不需要再填写产品 ID、变量、年份、经纬度或逐个 query 下载。** [public_manifest.json](public_manifest.json) 已固定这些要求并合并重复需求：
 
-**发现缺月时退出码为 2**，具体月份写在 `missing_periods`。这不是 Python 崩溃，也不代表要填零。确认允许先下载其余月份后，使用下一步的 `--allow-missing`。
+| 阶段 | 下载内容 | 主要服务的 query |
+| --- | --- | --- |
+| public | MODIS 2003–2017、NOAA 月风 2003–2012、OISST 1982–2023 | Q19–Q24、Q28 |
+| services | 墨西哥湾 GLORYS 2011–2017；东海 GLORYS + ERA5 的 1993–2011 基线和 2023 事件期 | Q13–Q18、Q24、Q29–Q30 |
 
-## 3. 下载 / 中断后继续
+两阶段均成功后覆盖 **15/15 个非 CMOMS query 的数值数据需求**。这是当前简化版的数据覆盖，不是旧版原始航次复现，也不代表评分答案已生成。
 
-```bash
-.venv/bin/python download_data.py \
-  --output /data/oceanmind-benchmark \
-  --modis-bbox 104 121 1 25 \
-  --execute --allow-missing
-```
+下载规模较大，特别是 OISST 原始日文件和 GLORYS 多年三维场。OISST 每天获取一次原始全球文件，裁出研究区并分别保存 SST/海冰，随后清除本次临时原文件；不会长期保存一份额外全球副本。下载保持原始 packed 数据、时间分辨率和缺测标记，不做平均或插值。网络传输量会大于最终区域子集。
 
-去掉 `--allow-missing` 时，任一所选产品的时间轴有缺月，就在数据传输前停止；有其他预检查错误时，即使加了该参数也不开始传输。允许缺月只允许下载存在的文件，**不会自动补齐、填零或把不完整档案标成完成**；退出码仍为 2。
-
-按月份切成独立 NetCDF 文件，串行下载以减少服务器压力。每次请求有连接 / 总时限和最多 3 次重试。完成后校验 NetCDF 能否完整读取、变量、维度、坐标端点和实际时间，记录有效值数量及 SHA-256。全缺测月份会保留并记录有效数为 0，不伪造观测。
-
-这里的断点续传是**按已完成月份续下**：已通过哈希检查的文件跳过；`.nc.part` 是尚未完成的单月文件，重跑时仅重下这个月。动态 ERDDAP 响应不保证支持 HTTP Range，所以不承诺从半个文件的字节位置续传。已有文件若损坏、缺少回执或与请求不符，脚本会报错，**不会覆盖你的文件**；人工检查并移走冲突文件后再重跑。同一输出目录有进程锁，防止两个下载进程互相覆盖。
-
-后台执行示例（日志先保存在当前目录）：
-
-```bash
-nohup .venv/bin/python -u download_data.py \
-  --output /data/oceanmind-benchmark \
-  --modis-bbox 104 121 1 25 \
-  --execute --allow-missing > download.log 2>&1 &
-tail -f download.log
-```
-
-## 4. 单产品 / 小范围测试 / 修改时段
-
-只下载已有固定范围的 Q23 风数据：
-
-```bash
-.venv/bin/python download_data.py \
-  --output /data/oceanmind-benchmark \
-  --products blended_wind_monthly --execute
-```
-
-首次运行建议先测试一个月、一度见方（**测试数据不能冒充完整 benchmark 数据**）：
-
-```bash
-.venv/bin/python download_data.py \
-  --output /data/oceanmind-smoke \
-  --products modis_monthly --bbox 116 117 18 19 \
-  --start 2022-12 --end 2022-12 --execute
-```
-
-`--bbox` 只允许用于一个显式选定的产品。`--start` 和 `--end` 必须一起提供，并覆盖本次所选产品的配置日期；不要给多个传感器设置它们不共有的年代。`--limit 1` 可仅下载每个产品第一个可用时间片，报告会明确 `limited: true` 和 `complete: false`。
-
-如果 Q22 确定需要 2002 年 MODIS 数据，可在单选 MODIS 的命令中加 `--start 2002-07 --end 2022-12`，或者修改配置。不要写 2002-01 然后假定不存在的早期月份有数据。Q05/Q24 直接使用共同档案中的 2011–2022 子集，不另复制一份。
-
-## 输出与复现记录
+## 目录和完成判定
 
 ```text
-/data/oceanmind-benchmark/
-├── modis_monthly/
-│   ├── 2011-01_<request-hash>.nc
-│   └── 2011-01_<request-hash>.receipt.json
-├── seawifs_monthly/
-├── blended_wind_monthly/
-└── _runs/<run-id>/
-    ├── modis_monthly.plan.json
-    ├── seawifs_monthly.plan.json
-    ├── blended_wind_monthly.plan.json
-    └── report.json
+ocean-benchmark-data/
+  MODIS_Aqua/chlorophyll/2003/*.nc
+  NOAA_Blended_Wind/windspeed/2003/*.nc
+  NOAA_Blended_Wind/u_wind/2003/*.nc
+  NOAA_Blended_Wind/v_wind/2003/*.nc
+  NOAA_Blended_Wind/mask/2003/*.nc
+  OISST/sst/1982/*.nc
+  OISST/ice/1982/*.nc
+  CMEMS_Gulf/thetao/2011/*.nc
+  CMEMS_Gulf/so/2011/*.nc
+  CMEMS_Gulf/zos/2011/*.nc
+  CMEMS_ECS/thetao/1993/*.nc
+  CMEMS_ECS/uo/1993/*.nc
+  CMEMS_ECS/vo/1993/*.nc
+  ERA5/ssr/1993/*.nc
+  ERA5/str/1993/*.nc
+  ERA5/sshf/1993/*.nc
+  ERA5/slhf/1993/*.nc
+  _download_all/coverage.json
+  _download_all/data_bindings.json
+  _download_all/masks.json
 ```
 
-哈希后缀区分数据集、版本、坐标范围和变量选择，避免改变参数后覆盖不同子集。计划包含提供方完整元数据及坐标快照；回执包含来源、字节数、SHA-256、有效值计数。每次运行保留报告，数据文件不为审计额外复制。退出码：`0` 为所选操作成功（可能仅预览或测试），`1` 为错误，`2` 为时间覆盖缺失，`130` 为用户中断。是否得到全部请求数据应查看 `mode`、`limited`、各产品及总 `complete`，不能只看退出码。
+Gulf/ECS 分开命名，避免同一个 CMEMS 变量目录混入不同空间网格。年目录下保留原生时间分辨率：月海色每月一份，OISST 每日一份，GLORYS/ERA5 每月一份且文件内仍逐日/逐小时。坐标和深度随变量保留。
 
-下载矩形不是最终研究区：海陆、陆架、断面、近岸 / 深盆 mask 仍需按准备表冻结。月平均文件的缺测标记只支持月尺度有效覆盖统计，不提供月内采样日期。该脚本不进行重网格、科学 QC 筛选、浮标样本选择、缺测填补、论文检索或标准答案生成。
+查看 `_download_all/coverage.json`：
+- `all_numerical_inputs_complete: true`：两阶段的所有数值文件已经通过下载时校验。
+- 每题的 `missing_groups`：哪组未完成；不会把失败或缺月记成成功。
+- 任一组失败，命令返回非零。重复相同命令按哈希跳过已完成文件；损坏或与请求冲突的文件不覆盖。
 
-## 测试与来源
-
-2026-09-06 实测：三个入口各下载了一份一度见方、单月 NetCDF，变量 / 坐标 / 时间及完整读取校验均通过；重跑 MODIS 样本确认跳过已验证文件。未下载完整科学数据集。完整计划的时间轴检查结果：MODIS 2003–2022 为 **240/240 月**，Blended Winds 为 **152/152 月**；SeaWiFS 为 **148/152 月**，该镜像缺 **2008-02、2008-03、2008-06、2009-05**。这是提供方目录缺月，不是脚本会自动修复的问题；可先下其余月份，之后另行确认是否需追查同版本原始文件。脚本每次都会重新检查，不把本次清单硬编码成永久事实。
-
-离线测试：
+需要下载前查看固定计划，去掉 `--execute`，无需联网。需要下载后重新检查所有文件的请求/哈希：
 
 ```bash
-.venv/bin/python -m unittest discover -s . -v
+python benchmarking/download/download_all.py verify --output /srv/ocean-benchmark-data
 ```
 
-覆盖缺月、真实月时间戳、倒序纬度、0–360 经度、额外高度维度、输入错误、不同子集文件隔离、部分文件重试、哈希校验及 HTML / 错误 NetCDF 拒收。
+`verify` 不联网、不补下丢失文件；丢失/损坏返回失败。正常下载过程已执行 NetCDF、时间/变量校验；报告不等于科学参考答案验证。
 
-已核对的提供方文档（入口状态仍会在每次运行时重新检查）：
+## 运行 benchmark 时只指定数据位置
 
-- [ERDDAP griddap 请求语法](https://coastwatch.noaa.gov/erddap/griddap/documentation.html)
-- [MODIS R2022 月产品定义](https://coastwatch.pfeg.noaa.gov/erddap/info/erdMH1chlamday_R2022SQ/index.html)
-- [SeaWiFS R2018 月产品定义](https://oceanwatch.pifsc.noaa.gov/erddap/info/sw_chla_monthly_2018_0/index.html)
-- [NOAA Blended Sea Winds 月产品](https://coastwatch.noaa.gov/erddap/griddap/noaacwBlendedWindsMonthly.html)
+统一下载器同时生成全部 15 题的目录映射。以下命令保持英文 query 原文，只引用目录，不复制数据：
+
+```bash
+python benchmarking/server/prepare_queries.py \
+  --data-root /srv/ocean-benchmark-data \
+  --bindings /srv/ocean-benchmark-data/_download_all/data_bindings.json \
+  --tasks Q13 Q14 Q15 Q16 Q17 Q18 Q19 Q20 Q21 Q22 Q23 Q24 Q28 Q29 Q30 \
+  --output /srv/ocean-runs/non-cmoms.jsonl
+```
+
+然后使用现有 `ocean batch --queries ... --output ...`。Q28–Q30 的论文阅读包是另外的文献输入：在 bindings 的对应对象加入 `papers` 路径，并给两个被测 agent 相同授权全文。数值下载脚本不假装已经提供论文全文或 evaluator 标准答案。评分规则/原文参考图不能放进 agent 的输入目录。
+
+## 代码与范围
+
+- `download_all.py`：唯一推荐的 benchmark 批量入口，两阶段、固定清单、去重、逐题完成报告。
+- `public_manifest.json`：所有产品、变量、时间、区域、题目映射，无待人工选择的数据产品占位符。
+- `download_data.py` / `download_services.py`：底层适配器，也保留手动下载能力；不要把它们旧的默认选项当作当前 benchmark 全量入口。
+- `ncei_oisst.py`：直接获取 NOAA 原始文件，不依赖缺日的 OISST ERDDAP 镜像。
+- [数据与原论文对照表](../preparation/DATA_PREPARATION.md)：列明简化点和原论文差异。
+- 同目录 `_collection.json` / 回执 / 计划仅保存元数据，不复制科学数据。脚本不改 OceanX 的 UI、Coordinator 或 Expert 运行链路。
+
+GLORYS 固定 `202311` 版本，依据[官方服务状态表](https://marine.copernicus.eu/media/pdf/6713/open)。版本退役会失败，不静默换成另一产品。官方 SDK 的排队和重试不保证墙钟完成时间。
+
+## 测试
+
+```bash
+python -m pytest benchmarking/tests
+```
+
+离线测试验证目录、清单闭合、任务/评分哈希、原始数据裁剪保真、重跑和失败状态，不代表已在服务器完整下载。CMEMS/ERA5 需本地账号实测；公共入口也受网络和提供方服务状态影响。
+
+本轮在线检查：NOAA 原始 OISST 文件返回 HTTP 200 / NetCDF；2023-08-01 的一度范围 SST/海冰裁剪及重复运行跳过均通过。该低纬度样本的海冰变量为缺测，原样保留，不把缺测伪造为零或用它误删有效 SST。此小样本不代表全部年份已下载。

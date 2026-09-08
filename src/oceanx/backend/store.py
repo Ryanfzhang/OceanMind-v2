@@ -560,6 +560,30 @@ class RequestStore:
         self._lock = threading.RLock()
         self._migrate()
         self._migrate_learning()
+        self._migrate_exploration()
+
+    def _migrate_exploration(self) -> None:
+        with self._lock:
+            if self._connection.execute(
+                "SELECT 1 FROM schema_migrations WHERE version = 47"
+            ).fetchone() is None:
+                if not self._new_database:
+                    self._backup_before_migration(47)
+                self._connection.executescript(
+                    """
+                    BEGIN IMMEDIATE;
+                    CREATE TABLE research_exploration_trees (
+                        task_id TEXT PRIMARY KEY REFERENCES research_tasks(task_id) ON DELETE CASCADE,
+                        workspace_id TEXT NOT NULL,
+                        revision INTEGER NOT NULL,
+                        tree_json TEXT NOT NULL
+                    );
+                    INSERT INTO schema_migrations (version, applied_at)
+                    VALUES (47, strftime('%Y-%m-%dT%H:%M:%f+00:00', 'now'));
+                    COMMIT;
+                    """
+                )
+            self._enforce_sqlite_private_files()
 
     def _migrate_learning(self) -> None:
         with self._lock:
@@ -6284,7 +6308,9 @@ class RequestStore:
             if existing is not None:
                 if (
                     existing["workspace_id"] != workspace_id
-                    or existing["work_order_json"] != payload
+                    or _canonical_json(
+                        self._readable_work_order_payload(json.loads(existing["work_order_json"]))
+                    ) != payload
                 ):
                     raise RequestStoreError(
                         f"work_order_id already has different content: {work_order.work_order_id}"
@@ -8727,9 +8753,14 @@ class RequestStore:
 
     @staticmethod
     def _readable_work_order_payload(payload: dict[str, Any]) -> dict[str, Any]:
-        """Validate a current hierarchy record without legacy projection."""
+        """Read retired manual assignments without restoring their runtime behavior."""
 
-        return dict(payload)
+        readable = dict(payload)
+        # Older backends persisted profile-injected manual names. Manuals no
+        # longer participate in delegation; keep the original journal intact
+        # while excluding this retired metadata from the current WorkOrder.
+        readable.pop("assigned_manuals", None)
+        return readable
 
     @staticmethod
     def _readable_expert_result_payload(payload: dict[str, Any]) -> dict[str, Any]:

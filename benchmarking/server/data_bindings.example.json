@@ -1,0 +1,277 @@
+{
+  "Q01": {
+    "datasets": [
+      "CMOMS/temperature/2011",
+      "CMOMS/salinity/2011",
+      "CMOMS/u/2011",
+      "CMOMS/v/2011",
+      "CMOMS/oxygen/2011",
+      "CMOMS/chlorophyll/2011",
+      "CMOMS/geometry"
+    ]
+  },
+  "Q02": {
+    "datasets": [
+      "CMOMS/temperature/2011",
+      "CMOMS/salinity/2011",
+      "CMOMS/u/2011",
+      "CMOMS/v/2011",
+      "CMOMS/oxygen/2011",
+      "CMOMS/chlorophyll/2011",
+      "CMOMS/geometry"
+    ]
+  },
+  "Q03": {
+    "datasets": [
+      "CMOMS/temperature/2011",
+      "CMOMS/salinity/2011",
+      "CMOMS/u/2011",
+      "CMOMS/v/2011",
+      "CMOMS/oxygen/2011",
+      "CMOMS/chlorophyll/2011",
+      "CMOMS/geometry"
+    ]
+  },
+  "Q04": {
+    "datasets": [
+      "CMOMS/temperature/2011",
+      "CMOMS/salinity/2011",
+      "CMOMS/u/2011",
+      "CMOMS/v/2011",
+      "CMOMS/oxygen/2011",
+      "CMOMS/chlorophyll/2011",
+      "CMOMS/geometry"
+    ]
+  },
+  "Q05": {
+    "datasets": [
+      "CMOMS/temperature/2011",
+      "CMOMS/salinity/2011",
+      "CMOMS/u/2011",
+      "CMOMS/v/2011",
+      "CMOMS/oxygen/2011",
+      "CMOMS/chlorophyll/2011",
+      "CMOMS/geometry"
+    ]
+  },
+  "Q06": {
+    "datasets": [
+      "CMOMS/temperature/2011",
+      "CMOMS/salinity/2011",
+      "CMOMS/u/2011",
+      "CMOMS/v/2011",
+      "CMOMS/oxygen/2011",
+      "CMOMS/chlorophyll/2011",
+      "CMOMS/geometry"
+    ]
+  },
+  "Q25": {
+    "datasets": [
+      "CMOMS/temperature/2018",
+      "CMOMS/temperature/2019",
+      "CMOMS/temperature/2020",
+      "CMOMS/temperature/2021",
+      "CMOMS/temperature/2022",
+      "CMOMS/salinity/2018",
+      "CMOMS/salinity/2019",
+      "CMOMS/salinity/2020",
+      "CMOMS/salinity/2021",
+      "CMOMS/salinity/2022",
+      "CMOMS/u/2018",
+      "CMOMS/u/2019",
+      "CMOMS/u/2020",
+      "CMOMS/u/2021",
+      "CMOMS/u/2022",
+      "CMOMS/v/2018",
+      "CMOMS/v/2019",
+      "CMOMS/v/2020",
+      "CMOMS/v/2021",
+      "CMOMS/v/2022",
+      "CMOMS/chlorophyll/2018",
+      "CMOMS/chlorophyll/2019",
+      "CMOMS/chlorophyll/2020",
+      "CMOMS/chlorophyll/2021",
+      "CMOMS/chlorophyll/2022",
+      "CMOMS/geometry"
+    ],
+    "papers": []
+  },
+  "Q26": {
+    "datasets": [
+      "CMOMS/temperature/2018",
+      "CMOMS/temperature/2019",
+      "CMOMS/temperature/2020",
+      "CMOMS/temperature/2021",
+      "CMOMS/temperature/2022",
+      "CMOMS/salinity/2018",
+      "CMOMS/salinity/2019",
+      "CMOMS/salinity/2020",
+      "CMOMS/salinity/2021",
+      "CMOMS/salinity/2022",
+      "CMOMS/u/2018",
+      "CMOMS/u/2019",
+      "CMOMS/u/2020",
+      "CMOMS/u/2021",
+      "CMOMS/u/2022",
+      "CMOMS/v/2018",
+      "CMOMS/v/2019",
+      "CMOMS/v/2020",
+      "CMOMS/v/2021",
+      "CMOMS/v/2022",
+      "CMOMS/chlorophyll/2018",
+      "CMOMS/chlorophyll/2019",
+      "CMOMS/chlorophyll/2020",
+      "CMOMS/chlorophyll/2021",
+      "CMOMS/chlorophyll/2022",
+      "CMOMS/geometry"
+    ],
+    "papers": []
+  },
+  "Q27": {
+    "datasets": [
+      "CMOMS/temperature/2018",
+      "CMOMS/temperature/2019",
+      "CMOMS/temperature/2020",
+      "CMOMS/temperature/2021",
+      "CMOMS/temperature/2022",
+      "CMOMS/salinity/2018",
+      "CMOMS/salinity/2019",
+      "CMOMS/salinity/2020",
+      "CMOMS/salinity/2021",
+      "CMOMS/salinity/2022",
+      "CMOMS/u/2018",
+      "CMOMS/u/2019",
+      "CMOMS/u/2020",
+      "CMOMS/u/2021",
+      "CMOMS/u/2022",
+      "CMOMS/v/2018",
+      "CMOMS/v/2019",
+      "CMOMS/v/2020",
+      "CMOMS/v/2021",
+      "CMOMS/v/2022",
+      "CMOMS/oxygen/2018",
+      "CMOMS/oxygen/2019",
+      "CMOMS/oxygen/2020",
+      "CMOMS/oxygen/2021",
+      "CMOMS/oxygen/2022",
+      "CMOMS/chlorophyll/2018",
+      "CMOMS/chlorophyll/2019",
+      "CMOMS/chlorophyll/2020",
+      "CMOMS/chlorophyll/2021",
+      "CMOMS/chlorophyll/2022",
+      "CMOMS/geometry"
+    ],
+    "papers": []
+  },
+  "Q21": {
+    "datasets": [
+      "MODIS_Aqua/chlorophyll"
+    ]
+  },
+  "Q23": {
+    "datasets": [
+      "OISST/sst",
+      "OISST/ice"
+    ]
+  },
+  "Q13": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ]
+  },
+  "Q14": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ]
+  },
+  "Q15": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ]
+  },
+  "Q16": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ]
+  },
+  "Q17": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ]
+  },
+  "Q18": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ]
+  },
+  "Q19": {
+    "datasets": [
+      "MODIS_Aqua/chlorophyll"
+    ]
+  },
+  "Q20": {
+    "datasets": [
+      "MODIS_Aqua/chlorophyll",
+      "NOAA_Blended_Wind/windspeed",
+      "NOAA_Blended_Wind/u_wind",
+      "NOAA_Blended_Wind/v_wind",
+      "NOAA_Blended_Wind/mask"
+    ]
+  },
+  "Q22": {
+    "datasets": [
+      "MODIS_Aqua/chlorophyll",
+      "NOAA_Blended_Wind/windspeed",
+      "NOAA_Blended_Wind/u_wind",
+      "NOAA_Blended_Wind/v_wind",
+      "NOAA_Blended_Wind/mask"
+    ]
+  },
+  "Q24": {
+    "datasets": [
+      "OISST/sst",
+      "OISST/ice",
+      "CMEMS_ECS/thetao",
+      "CMEMS_ECS/uo",
+      "CMEMS_ECS/vo",
+      "ERA5/ssr",
+      "ERA5/str",
+      "ERA5/sshf",
+      "ERA5/slhf"
+    ]
+  },
+  "Q28": {
+    "datasets": [
+      "MODIS_Aqua/chlorophyll"
+    ],
+    "papers": []
+  },
+  "Q29": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ],
+    "papers": []
+  },
+  "Q30": {
+    "datasets": [
+      "CMEMS_Gulf/thetao",
+      "CMEMS_Gulf/so",
+      "CMEMS_Gulf/zos"
+    ],
+    "papers": []
+  }
+}

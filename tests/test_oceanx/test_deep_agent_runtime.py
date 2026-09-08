@@ -59,6 +59,16 @@ class _IncrementInput(BaseModel):
     value: int
 
 
+class _DisconnectAfterToolModel(_BoundFakeModel):
+    disconnected: bool = False
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        if any(isinstance(m, ToolMessage) for m in messages) and not self.disconnected:
+            self.disconnected = True
+            raise RuntimeError("peer closed connection without sending complete message body")
+        return super()._generate(messages, stop=stop, run_manager=run_manager, **kwargs)
+
+
 class _IncrementTool(BaseTool):
     name = "ocean_increment"
     description = "Increment one test value."
@@ -298,10 +308,11 @@ async def test_nested_agent_events_inside_a_tool_do_not_leak_into_parent_stream(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("disconnect", [False, True])
 async def test_deep_agent_exposes_only_ocean_tools_and_returns_one_final_answer(
-    tmp_path: Path,
+    tmp_path: Path, disconnect: bool,
 ) -> None:
-    model = _BoundFakeModel(
+    model = (_DisconnectAfterToolModel if disconnect else _BoundFakeModel)(
         responses=[
             AIMessage(
                 content="",
@@ -318,7 +329,7 @@ async def test_deep_agent_exposes_only_ocean_tools_and_returns_one_final_answer(
         ]
     )
     # Fake model provider identity is its llm type.
-    _disable_generic_deep_agent_tools("_boundfakemodel")
+    _disable_generic_deep_agent_tools(type(model).__name__.lower())
     backend = StateBackend()
     registry = ToolRegistry()
     increment = _IncrementTool()
@@ -345,12 +356,19 @@ async def test_deep_agent_exposes_only_ocean_tools_and_returns_one_final_answer(
         operation_id_factory=operation,
     )
 
-    events = [event async for event in engine.submit_message("run", request_id="req-1")]
+    from oceanx.backend.router import _coordinator_events
+    events = [event async for event in _coordinator_events(engine, "run", "req-1")]
+    assert len(increment.contexts) == 1
+    snapshot = await graph.aget_state(engine._config("req-1"))
+    assert sum(isinstance(m, HumanMessage) for m in snapshot.values["messages"]) == 1
 
     assert any(isinstance(event, ToolExecutionStarted) for event in events)
     assert any(isinstance(event, ToolExecutionCompleted) for event in events)
     final = [event for event in events if isinstance(event, AssistantTurnComplete)][-1]
     assert final.message.text == "The bounded result is 2."
+    if disconnect:
+        assert model.disconnected
+        assert final.turn_id == "req-1:turn:3"
     assert increment.contexts[0].tool_call_id == "call-1"
     assert increment.contexts[0].operation_id == "req-1:langgraph:call-1"
     assert model.bound_tool_names

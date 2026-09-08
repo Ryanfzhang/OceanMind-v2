@@ -177,6 +177,112 @@ def _todo(order: WorkOrder) -> CoordinatorTodo:
     )
 
 
+def test_retired_manual_metadata_does_not_block_restore_or_new_delegation(tmp_path):
+    store = RequestStore(tmp_path / "legacy.sqlite3")
+    try:
+        with store._transaction() as db:
+            db.execute(
+                "INSERT INTO workspace_records (workspace_id, path, revision, updated_at) VALUES (?, ?, ?, ?)",
+                ("ws_legacy", str(tmp_path), 3, datetime.now().astimezone().isoformat()),
+            )
+        task = store.create_research_task(workspace_id="ws_legacy", title="Legacy task")
+        old = _order("work_legacy").model_copy(
+            update={"task_id": task.task_id, "job_key": "job_legacy"}
+        )
+        store.create_team_work_order(workspace_id="ws_legacy", work_order=old)
+        legacy = old.model_dump(mode="json")
+        legacy["assigned_manuals"] = ["paper-navigator", "reproducibility-audit"]
+        raw = json.dumps(legacy)
+        with store._transaction() as db:
+            db.execute(
+                "UPDATE team_work_records SET work_order_json = ? WHERE work_order_id = ?",
+                (raw, old.work_order_id),
+            )
+        store.close()
+        store = RequestStore(tmp_path / "legacy.sqlite3")
+        assert store.get_team_work(old.work_order_id).work_order == old
+        assert (
+            store.create_team_work_order(workspace_id="ws_legacy", work_order=old).work_order == old
+        )
+        assert store.task_snapshot(task_id=task.task_id).task.task_id == task.task_id
+        new = old.model_copy(update={"work_order_id": "work_next", "session_round": 2})
+        assert (
+            store.create_team_work_order(workspace_id="ws_legacy", work_order=new).work_order == new
+        )
+        assert (
+            store._connection.execute(
+                "SELECT work_order_json FROM team_work_records WHERE work_order_id = ?",
+                (old.work_order_id,),
+            ).fetchone()[0]
+            == raw
+        )
+        legacy["unknown_field"] = "still invalid"
+        with pytest.raises(ValidationError, match="unknown_field"):
+            WorkOrder.model_validate(store._readable_work_order_payload(legacy))
+    finally:
+        store.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("operation", ["task.open", "artifact.create"])
+async def test_task_validation_error_identifies_operation_model_and_field(
+    tmp_path, monkeypatch, operation
+):
+    store = RequestStore(tmp_path / "errors.sqlite3")
+    events = []
+
+    async def send(event):
+        events.append(event)
+
+    client = BackendClient(
+        transport="stdio",
+        expected_client_kind="desktop",
+        sender=send,
+        client_id="client_validation",
+        session_id="session_validation",
+        principal=principal_for_client_kind("desktop"),
+    )
+    router = OceanRequestRouter(store=store, event_bus=EventBus())
+
+    async def invalid_dispatch(_client, _request):
+        WorkOrder.model_validate({**_order("work_invalid").model_dump(), "unexpected": True})
+
+    monkeypatch.setattr(router, "_dispatch", invalid_dispatch)
+    try:
+        await router.handle_payload(
+            client,
+            {
+                "protocol_version": 2,
+                "request_id": "req_validation",
+                "type": operation,
+                "payload": (
+                    {"task_id": "task_validation"}
+                    if operation == "task.open"
+                    else {"artifact_type": "claim", "title": "Invalid artifact", "content": {}}
+                ),
+                "expected_workspace_revision": 0,
+                "context": {
+                    "client_id": client.client_id,
+                    "session_id": client.session_id,
+                    "workspace_id": "ws_validation",
+                },
+            },
+        )
+        error = [e for e in events if e.type == "request.failed"][-1].payload.error
+        if operation == "artifact.create":
+            assert error.code == "invalid_artifact"
+            assert "Artifact" in error.message
+            return
+        assert error.code == "store_error"
+        assert "task.open" in error.message
+        assert "WorkOrder" in error.message
+        assert "unexpected" in error.message
+        assert "Artifact" not in error.message
+        assert tuple(error.details["validation"][0]["loc"]) == ("unexpected",)
+        assert "input" not in error.details["validation"][0]
+    finally:
+        store.close()
+
 @pytest.mark.parametrize("retired_phase", ["output_ready", "submitted", "accepted"])
 def test_retired_workstream_phases_are_not_runtime_inputs(retired_phase: str) -> None:
     with pytest.raises(ValidationError):
@@ -3568,8 +3674,9 @@ def test_run_code_preserves_failed_execution_candidate_without_publishing(
     assert payload["publication_state"] == "awaiting_coordinator_review"
 
 
+@pytest.mark.parametrize("request_id", ["request_candidate_publication", "request_followup"])
 def test_coordinator_can_publish_valid_candidate_from_failed_envelope(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, request_id
 ) -> None:
     from oceanx import tools as ocean_tools_module
 
@@ -3657,6 +3764,7 @@ def test_coordinator_can_publish_valid_candidate_from_failed_envelope(
             return None
 
     async def materialize(_services, item, *, execution_id):
+        assert _services.expert_result_origin_request_id == request_id
         assert item.title == "Reviewed profile"
         assert execution_id == "codeexec_candidate_publication"
         return ocean_tools_module._MaterializedResult(
@@ -3679,13 +3787,20 @@ def test_coordinator_can_publish_valid_candidate_from_failed_envelope(
     publish_tool = next(
         tool for tool in lead_registry.list_tools() if tool.name == "ocean_publish_outputs"
     )
+    # This store double tests publication scope; durable receipts are tested separately.
+    monkeypatch.setattr(publish_tool, "_model_operation", lambda _context: None)
+    resource_tool = lead_registry.get("ocean_resources")
+    inventory = resource_tool._task_outputs()
+    assert inventory[0]["state"] == "candidate"
+    assert inventory[0]["citation"] is None
+    assert inventory[0]["origin_request_id"] == "request_candidate_publication"
     response = asyncio.run(
         publish_tool.execute(
             publish_tool.input_model(
                 accepted_paths=(f"outputs/{output_name}",),
                 review_summary="The claim is bound to the inspected profile and execution evidence.",
             ),
-            ToolExecutionContext(cwd=tmp_path),
+            ToolExecutionContext(cwd=tmp_path, request_id=request_id),
         )
     )
 
@@ -3693,6 +3808,12 @@ def test_coordinator_can_publish_valid_candidate_from_failed_envelope(
     assert len(publications) == 1
     assert publications[0]["refs"] == (published_ref,)
     assert publications[0]["result_metadata"]["coordinator_review"].startswith("The claim is bound")
+    work_record.result = result.model_copy(update={
+        "outputs": (candidate.model_copy(update={"result_ref": published_ref}),),
+    })
+    inventory = resource_tool._task_outputs()
+    assert inventory[0]["state"] == "published"
+    assert "[[result:task_candidate_publication/result_candidate_publication@v1|" in inventory[0]["citation"]
     expert_registry = create_ocean_expert_tool_registry(services)
     assert "ocean_publish_outputs" not in {tool.name for tool in expert_registry.list_tools()}
 
@@ -4279,6 +4400,20 @@ def test_followup_work_order_reuses_same_expert_session_evidence(tmp_path) -> No
                 execution.execution_id
             ]
             assert "temperature_unit=degrees_C" in checkpoint["executions"][0]["stdout_excerpt"]
+            before = host.store.list_agent_job_code_executions(
+                workspace_id="ws_agent_job_memory", task_id=task.task_id,
+                parent_request_id=second.parent_request_id, job_key=second.job_key,
+            )
+            saved = host.expert_code_execution.read_expert_file(
+                workspace_id="ws_agent_job_memory", task_id=task.task_id,
+                work_order_id=second.work_order_id,
+                path=checkpoint["executions"][0]["logs"]["stdout"],
+            )
+            assert "temperature_unit=degrees_C" in saved["content"]
+            assert host.store.list_agent_job_code_executions(
+                workspace_id="ws_agent_job_memory", task_id=task.task_id,
+                parent_request_id=second.parent_request_id, job_key=second.job_key,
+            ) == before
 
             reused = await host.expert_code_execution.run_python(
                 workspace_id="ws_agent_job_memory",
@@ -5116,6 +5251,7 @@ def test_tool_surfaces_match_each_responsibility(tmp_path) -> None:
             "ocean_list_skills",
             "ocean_load_skill",
             "ocean_expert_run_code",
+            "ocean_read_file",
         }
         assert {tool.name for tool in discussion.list_tools()} == {
             "ocean_list_skills",

@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q07",
+  "title": "Layered circulation and spatial concentration",
+  "previous_proposal_id": "CM01",
+  "query_sha256": "033586ea48e7d5afc33b0a0fb9fd2f0daceb9554cc6383e206dc110e0567660b",
+  "data_fingerprint": null,
+  "reference_mode": "Original paper period and experiment required; exact data identity not yet verified.",
+  "paper": {
+    "citation": "Gan et al. (2022)",
+    "title": "Hotspots of the stokes rotating circulation in a large marginal sea",
+    "doi": "10.1038/s41467-022-29610-z",
+    "url": "https://doi.org/10.1038/s41467-022-29610-z"
+  },
+  "reference_text": "Paper result context: cyclonic/anticyclonic/cyclonic organization and disproportionate hotspot contributions. The reported combined IR values are approximately 0.58, 0.55 and 0.49. These are not automatic tolerances. The text's area fractions and Fig. 3a AR values are not mutually reproduced by simple division; resolve masks/definitions with original arrays before treating either as an exact answer.\n",
+  "criteria": [
+    {
+      "id": "Q07-C1",
+      "weight": 20,
+      "description": "Use the 1992-2011 run and seven-day averaging. Calculate vertical relative vorticity on fixed-depth surfaces using valid grid metrics, orientation, staggering and wet masks. Keep the distinction between a fixed-depth area integral and a layer-averaged quantity explicit, with correct units.",
+      "evidence_requirements": "Input/geometry audit, vorticity calculation and basin/layer definitions.",
+      "source_basis": "Methods, Eq. 1: dated hindcast, fixed-depth vorticity and seven-day means; geometry checks are benchmark requirements.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q07-C2",
+      "weight": 25,
+      "description": "Calculate basin-integrated vorticity versus depth and time; quantify the direction, vertical structure and persistence of circulation across 0-750 m, 750-1500 m and deeper than 1500 m. Judge the inferred structure against the calculated series, not only a schematic.",
+      "evidence_requirements": "Time-depth plot with signed scale, depth and dates; supporting layer/profile summaries.",
+      "source_basis": "Fig. 1b and stated 750/1500 m layers; exclude Fig. 1c's different period.",
+      "reference_figures": [
+        "images/Gan2022_Fig1b_depth_time.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q07-V01",
+          "reference_figure": "images/Gan2022_Fig1b_depth_time.png",
+          "source_panel": "Fig. 1b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q07-CM-Gan2022_Fig1b",
+          "required_information": [
+            "Basin-integrated vorticity versus year and depth, its sign, units and vertical boundaries.",
+            "Persistence and direction of circulation in the upper, middle and deep layers."
+          ],
+          "acceptable_alternatives": [
+            "A time-depth plot or aligned layer/depth diagnostics that preserve the vertical transitions and temporal persistence."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "",
+          "source_basis": "10.1038/s41467-022-29610-z; Fig. 1b; Fig. 1b and stated 750/1500 m layers; exclude Fig. 1c's different period."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Time-depth plot with signed scale, depth and dates; supporting layer/profile summaries."
+      }
+    },
+    {
+      "id": "Q07-C3",
+      "weight": 25,
+      "description": "Identify favorable-vorticity hotspots using a reproducible, paper-grounded threshold/mask procedure on the long-term layer fields. Map slope, Luzon, Mindoro and southwestern-basin contributions where supported. Distinguish sign-favorable vorticity from the absolute value of all vorticity; document areas and mask overlap.",
+      "evidence_requirements": "Layer maps, threshold definitions, hotspot masks and wet-area table.",
+      "source_basis": "Results and Fig. 2b: favorable vorticity and slope/strait/basin hotspots.",
+      "reference_figures": [
+        "images/Gan2022_Fig2b_hotspots.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q07-V02",
+          "reference_figure": "images/Gan2022_Fig2b_hotspots.png",
+          "source_panel": "Fig. 2b (three vertically stacked layers)",
+          "requirement": "scientific_information",
+          "evidence_group": "Q07-CM-Gan2022_Fig2",
+          "required_information": [
+            "Sign-favorable hotspot locations in each layer, layer bounds, masks/areas and their quantitative contributions.",
+            "Geographic correspondence must be demonstrable; arrows and extra dynamics in the original are not mandatory."
+          ],
+          "acceptable_alternatives": [
+            "Contours, a raster map or geographically resolved symbols on a labelled domain with equivalent spatial and quantitative information."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The original left-column transport and vorticity maps are excluded. Read geographic coordinates across the stacked perspective maps.",
+          "source_basis": "10.1038/s41467-022-29610-z; Fig. 2b (three vertically stacked layers); Results and Fig. 2b: favorable vorticity and slope/strait/basin hotspots."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Layer maps, threshold definitions, hotspot masks and wet-area table."
+      }
+    },
+    {
+      "id": "Q07-C4",
+      "weight": 20,
+      "description": "Compute each hotspot's relative contribution IR and area-normalized contribution AR following Eqs. 2-3; compare contribution with area fraction and explain where a small region contributes disproportionately. Reconcile the aggregated contribution with the same union of masks. Do not infer a full dynamical budget from these fields alone.",
+      "evidence_requirements": "IR, AR and area-fraction table/plot with formulas, aggregation check and supported interpretation.",
+      "source_basis": "Eqs.2–3 and Fig. 3a: IR and AR; published text/figure normalization discrepancy remains unresolved.",
+      "reference_figures": [
+        "images/Gan2022_Fig3a_contributions.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q07-V03",
+          "reference_figure": "images/Gan2022_Fig3a_contributions.png",
+          "source_panel": "Fig. 3a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q07-CM-Gan2022_Fig3a",
+          "required_information": [
+            "IR and area-normalized AR for the three layers, definitions and underlying area fractions.",
+            "Distinguish disproportionate contribution from large area; quantify the comparison, not just bar ordering."
+          ],
+          "acceptable_alternatives": [
+            "Grouped bars, a labelled contribution plot, or a quantitative table accompanied by a visual comparison."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Rs bars remain source context, not an additional required diagnostic. Source printed values are not independently validated tolerances.",
+          "source_basis": "10.1038/s41467-022-29610-z; Fig. 3a; Eqs.2–3 and Fig. 3a: IR and AR; published text/figure normalization discrepancy remains unresolved."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "IR, AR and area-fraction table/plot with formulas, aggregation check and supported interpretation."
+      }
+    },
+    {
+      "id": "Q07-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostic tables and reproducible notebook record.",
+      "source_basis": "Benchmark delivery requirement; not a paper-defined scoring rule.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Gan2022_Fig1b_depth_time.png",
+      "source_doi": "10.1038/s41467-022-29610-z",
+      "pdf_page": 2,
+      "crop_fraction_top_left": [
+        0.535,
+        0.351,
+        0.89,
+        0.514
+      ],
+      "source_pdf_sha256": "2a0a89a1c0ce1a18aa8d38be46a2e365ce97fb1b508e3e51f0c3fc43dcc919cd",
+      "sha256": "f7e68384993bdffceebad4d701cfecf3d62f6d5f3f7313336204f44e1f90ba00",
+      "criterion_ids": [
+        "Q07-C2"
+      ],
+      "source_url": "https://www.nature.com/articles/s41467-022-29610-z",
+      "reviewed": true,
+      "role": "Basin-integrated vorticity versus year and depth, its sign, units and vertical boundaries. Persistence and direction of circulation in the upper, middle and deep layers.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 253394,
+      "source_panel": "Fig. 1b",
+      "source_context": "",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.535,
+            0.351,
+            0.89,
+            0.514
+          ],
+          "role": "Fig. 1b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Gan2022_Fig2b_hotspots.png",
+      "source_doi": "10.1038/s41467-022-29610-z",
+      "pdf_page": 3,
+      "crop_fraction_top_left": [
+        0.49679999999999996,
+        0.05,
+        0.8399999999999999,
+        0.421
+      ],
+      "source_pdf_sha256": "2a0a89a1c0ce1a18aa8d38be46a2e365ce97fb1b508e3e51f0c3fc43dcc919cd",
+      "sha256": "973d0613ae32d61822796820cdc9e313fdf4503286f031799c3b92a8d1f36b21",
+      "criterion_ids": [
+        "Q07-C3"
+      ],
+      "source_url": "https://www.nature.com/articles/s41467-022-29610-z",
+      "reviewed": true,
+      "role": "Sign-favorable hotspot locations in each layer, layer bounds, masks/areas and their quantitative contributions. Geographic correspondence must be demonstrable; arrows and extra dynamics in the original are not mandatory.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 364199,
+      "source_panel": "Fig. 2b (three vertically stacked layers)",
+      "source_context": "The original left-column transport and vorticity maps are excluded. Read geographic coordinates across the stacked perspective maps.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.49679999999999996,
+            0.05,
+            0.8399999999999999,
+            0.421
+          ],
+          "role": "Fig. 2b (three vertically stacked layers)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the three-layer perspective group because it shares the geographic frame and demonstrates vertical correspondence."
+    },
+    {
+      "path": "images/Gan2022_Fig3a_contributions.png",
+      "source_doi": "10.1038/s41467-022-29610-z",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.077,
+        0.059,
+        0.458,
+        0.223
+      ],
+      "source_pdf_sha256": "2a0a89a1c0ce1a18aa8d38be46a2e365ce97fb1b508e3e51f0c3fc43dcc919cd",
+      "sha256": "6177a6463981a6707dbdc307160bb179c0b8ae56278ffcb1ea50e181ecada877",
+      "criterion_ids": [
+        "Q07-C4"
+      ],
+      "source_url": "https://www.nature.com/articles/s41467-022-29610-z",
+      "reviewed": true,
+      "role": "IR and area-normalized AR for the three layers, definitions and underlying area fractions. Distinguish disproportionate contribution from large area; quantify the comparison, not just bar ordering.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 62281,
+      "source_panel": "Fig. 3a",
+      "source_context": "Rs bars remain source context, not an additional required diagnostic. Source printed values are not independently validated tolerances.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.077,
+            0.059,
+            0.458,
+            0.223
+          ],
+          "role": "Fig. 3a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "visual_scope": "Original-paper visual checks: Fig. 1b for C2; Fig. 2, panel b only for C3; Fig. 3a, IR/AR only for C4. Check signs, units, layers and hotspot support, not pixel similarity. Fig. 1c has a different stated period and is excluded. Isopycnal, energy-budget and shear-vorticity decomposition panels are not required.",
+  "release_requirements": [
+    "Obtain authorized, experiment-matched inputs and freeze their SHA-256 manifest.",
+    "Freeze geometry, masks, averaging conventions and all unresolved source definitions.",
+    "Compute independent numerical references and reviewed tolerances; never use an evaluated agent's output as its own reference.",
+    "Review weights, source-image rights and independent notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

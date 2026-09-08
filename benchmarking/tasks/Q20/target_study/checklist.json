@@ -1,0 +1,732 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "status": "draft",
+  "task_id": "Q20",
+  "title": "Seasonal and anomaly chlorophyll–wind association",
+  "query_sha256": "3b7353e8285f980e5e0d12a272023c7f45f5b8216c2b8bcbe42e0c7f55121671",
+  "data_fingerprint": null,
+  "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "paper": {
+    "citation": "Palacz et al. (2011)",
+    "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+    "doi": "10.1029/2011JC007064",
+    "url": "https://doi.org/10.1029/2011JC007064"
+  },
+  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing monthly MODIS-Aqua chlorophyll and NOAA blended scalar wind speed over 104–122 E, 1–25 N for 2003–2012, construct matched area-weighted South China Sea time series. Compare the association in the raw records with that after removal of calendar-month climatologies, and check sensitivity to omitting the first and last year. Show the series and association estimates; a full EEMD decomposition is not required. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "criteria": [
+    {
+      "id": "Q20-C1",
+      "weight": 20,
+      "description": "Use scalar monthly wind speed, not the magnitude of monthly mean vectors; align months and reproducible ocean/valid-area support with MODIS and state any remapping.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 2: monthly satellite/wind inputs; scalar speed is not the magnitude of mean vectors. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q20-C2",
+      "weight": 25,
+      "description": "Compute raw and deseasonalized monthly records with explicit area weighting, climatology and missingness handling; show both temporal diagnostics.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Palacz2011_Fig1_input.png",
+        "images/Palacz2011_Fig1_C1.png",
+        "images/Palacz2011_Fig1_C2.png",
+        "images/Palacz2011_Fig1_C3.png",
+        "images/Palacz2011_Fig1_C4.png",
+        "images/Palacz2011_Fig1_C5.png",
+        "images/Palacz2011_Fig1_C6.png",
+        "images/Palacz2011_Fig1_trend.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q20-V01",
+          "reference_figure": "images/Palacz2011_Fig1_input.png",
+          "source_panel": "Fig. 1, input (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, input (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V02",
+          "reference_figure": "images/Palacz2011_Fig1_C1.png",
+          "source_panel": "Fig. 1, C1 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C1 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V03",
+          "reference_figure": "images/Palacz2011_Fig1_C2.png",
+          "source_panel": "Fig. 1, C2 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C2 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V04",
+          "reference_figure": "images/Palacz2011_Fig1_C3.png",
+          "source_panel": "Fig. 1, C3 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C3 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V05",
+          "reference_figure": "images/Palacz2011_Fig1_C4.png",
+          "source_panel": "Fig. 1, C4 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C4 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V06",
+          "reference_figure": "images/Palacz2011_Fig1_C5.png",
+          "source_panel": "Fig. 1, C5 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C5 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V07",
+          "reference_figure": "images/Palacz2011_Fig1_C6.png",
+          "source_panel": "Fig. 1, C6 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C6 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        },
+        {
+          "id": "Q20-V08",
+          "reference_figure": "images/Palacz2011_Fig1_trend.png",
+          "source_panel": "Fig. 1, trend (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, trend (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q20-C3",
+      "weight": 25,
+      "description": "Report matched correlations or regressions and support for raw/anomaly relationships with uncertainty that accounts for temporal dependence.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Palacz2011_Fig1_input.png",
+        "images/Palacz2011_Fig1_C1.png",
+        "images/Palacz2011_Fig1_C2.png",
+        "images/Palacz2011_Fig1_C3.png",
+        "images/Palacz2011_Fig1_C4.png",
+        "images/Palacz2011_Fig1_C5.png",
+        "images/Palacz2011_Fig1_C6.png",
+        "images/Palacz2011_Fig1_trend.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q20-V01",
+          "reference_figure": "images/Palacz2011_Fig1_input.png",
+          "source_panel": "Fig. 1, input (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, input (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V02",
+          "reference_figure": "images/Palacz2011_Fig1_C1.png",
+          "source_panel": "Fig. 1, C1 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C1 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V03",
+          "reference_figure": "images/Palacz2011_Fig1_C2.png",
+          "source_panel": "Fig. 1, C2 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C2 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V04",
+          "reference_figure": "images/Palacz2011_Fig1_C3.png",
+          "source_panel": "Fig. 1, C3 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C3 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V05",
+          "reference_figure": "images/Palacz2011_Fig1_C4.png",
+          "source_panel": "Fig. 1, C4 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C4 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V06",
+          "reference_figure": "images/Palacz2011_Fig1_C5.png",
+          "source_panel": "Fig. 1, C5 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C5 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V07",
+          "reference_figure": "images/Palacz2011_Fig1_C6.png",
+          "source_panel": "Fig. 1, C6 (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, C6 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        },
+        {
+          "id": "Q20-V08",
+          "reference_figure": "images/Palacz2011_Fig1_trend.png",
+          "source_panel": "Fig. 1, trend (chlorophyll left, wind right)",
+          "requirement": "context_only",
+          "evidence_group": "Q20-scale-resolved-decomposition",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 1, trend (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q20-C4",
+      "weight": 20,
+      "description": "Repeat on the interior 2004–2011 window, discuss seasonal confounding, spatial support and finite-record sensitivity; neither association nor a robust sign establishes wind causation.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.1 finite-record/end-point check; seed documentation is an execution requirement. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q20-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Palacz2011_Fig1_input.png",
+      "sha256": "873ad38d2eca624a12b42119d0c9735254cfcd23b2e6dec0ee60656e7906de78",
+      "bytes": 234279,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Matched chlorophyll and scalar-wind input series, units and identical dates. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.079,
+        0.895,
+        0.152899
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, input (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.079,
+            0.895,
+            0.152899
+          ],
+          "role": "Fig. 1, input (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_C1.png",
+      "sha256": "9a988c980d055e56a78d12ee27219551b540276fa9be59a4caaf1126cee2e051",
+      "bytes": 204625,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired C1 components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.152899,
+        0.895,
+        0.228661
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, C1 (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.152899,
+            0.895,
+            0.228661
+          ],
+          "role": "Fig. 1, C1 (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_C2.png",
+      "sha256": "0d67bbabbaf3afe925726a13ddd3fb5438f63b464e501f19b9ed977d9b6b8bc5",
+      "bytes": 209121,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired C2 components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.228661,
+        0.895,
+        0.304423
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, C2 (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.228661,
+            0.895,
+            0.304423
+          ],
+          "role": "Fig. 1, C2 (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_C3.png",
+      "sha256": "dc3334f1f9475c4ba0c0de4486ddf4b8f434df21b81aa6a12e0b5a8a41d84db2",
+      "bytes": 204836,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired C3 components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.304423,
+        0.895,
+        0.380185
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, C3 (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.304423,
+            0.895,
+            0.380185
+          ],
+          "role": "Fig. 1, C3 (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_C4.png",
+      "sha256": "aa9fc8b564ae771caf9e1f530d6b1ec5bdf5b94c2eeb7900a3875ba5c5987422",
+      "bytes": 201333,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired C4 components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.380185,
+        0.895,
+        0.454084
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, C4 (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.380185,
+            0.895,
+            0.454084
+          ],
+          "role": "Fig. 1, C4 (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_C5.png",
+      "sha256": "ee0d1a282592b97a625f529c3f2087aa4c1e025cb28dd6122c56f3fb0d4d6c44",
+      "bytes": 174703,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired C5 components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.454084,
+        0.895,
+        0.53233
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, C5 (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.454084,
+            0.895,
+            0.53233
+          ],
+          "role": "Fig. 1, C5 (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_C6.png",
+      "sha256": "d05aafab5774780a1e3eef645aec5e72a35b36a614619024d020473eb77d906e",
+      "bytes": 171287,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired C6 components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.53233,
+        0.895,
+        0.608092
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, C6 (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.53233,
+            0.895,
+            0.608092
+          ],
+          "role": "Fig. 1, C6 (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    },
+    {
+      "path": "images/Palacz2011_Fig1_trend.png",
+      "sha256": "5523353f5c52eed40f67a6104fdaf9c4224f76a9f4756252d93b8829e1885470",
+      "bytes": 133904,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 1,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q20-C2",
+        "Q20-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "Paired trend components with amplitude units, temporal support and characteristic timescale. For components, verify reconstruction and compare like timescales; EEMD runs need not assign the same physical scale to the same IMF number. Quantitative coupling and endpoint sensitivity need calculations; visual co-variation alone is insufficient.",
+      "crop_fraction_top_left": [
+        0.11,
+        0.608092,
+        0.895,
+        0.7
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 1, trend (chlorophyll left, wind right)",
+      "source_context": "Chlorophyll units: mg/m3; wind units: m/s. Original solid/dashed alternatives show endpoint sensitivity. These are facets of one decomposition, not eight separately weighted scores.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11,
+            0.608092,
+            0.895,
+            0.7
+          ],
+          "role": "Fig. 1, trend (chlorophyll left, wind right)",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the chlorophyll/wind pair to compare the same component or scale on a common time axis."
+    }
+  ],
+  "release_requirements": [
+    "Download and verify the canonical public input groups and freeze file hashes.",
+    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
+    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

@@ -1,7 +1,41 @@
 {
   "id": "Q03",
   "track": "data_analysis",
-  "title": "Mixed-layer depth from temperature and salinity",
-  "query": "Calculate density-based mixed-layer depth from the supplied Gulf of Mexico profiles using a density increase of 0.03 kg m−3 relative to 10 m. Report profiles for which the criterion cannot be resolved and compare summer and winter distributions.",
-  "data_status": "pending_subset_selection"
+  "title": "Summer versus winter mixed-layer depth",
+  "catalog_version": "2026-09-07-basic-v1",
+  "query": "Using the 2011 CMOMS temperature and salinity data and supplied analysis mask, make one plot comparing the area-day-weighted distributions of daily mixed-layer depth in summer (June-August) and winter (January-February plus December of 2011). Define MLD as the first downward increase in TEOS-10 sigma0 of 0.03 kg/m3 relative to 10 m; linearly interpolate the reference and crossing between adjacent valid levels, without extrapolation or bridging missing levels. Use the supplied temperature/salinity conventions. Briefly state which seasonal sample has the deeper weighted median, or whether no clear difference is resolved. Use the frozen B1 manifest for masks and geometry, keep missing values distinct from zero, and retain the calculation code for checking. Only one figure and one short conclusion are requested.",
+  "analysis_period": "2011",
+  "data_groups": [
+    "B1"
+  ],
+  "required_variables": [
+    "temp",
+    "salt"
+  ],
+  "input_contract": {
+    "data_group": "B1",
+    "source": "CMOMS",
+    "period": "2011-01-01/2011-12-31",
+    "sampling": "daily mean",
+    "depth": "all supplied fixed physical depth levels; do not surface-trim the shared archive",
+    "science_fields": [
+      "temp",
+      "salt",
+      "u",
+      "v",
+      "oxygen",
+      "chlorophyll"
+    ],
+    "metadata_required": [
+      "provider-confirmed units and temperature/salinity conventions",
+      "calendar, time bounds, fill values and QC",
+      "longitude/latitude, positive-down depth and wet/land masks",
+      "cell areas and bathymetry",
+      "velocity staggering/orientation and collocation/rotation specification",
+      "fixed analysis and shelf masks"
+    ],
+    "availability": "pending_authorization_and_file_validation",
+    "notes": "One shared archive, not six copies. Science fields exist in the supplied avg_info.cdl, but the header does not prove the 2011 files or geometry are available. temp is labelled potential temperature; salt convention must be confirmed. Freeze physical bottom-level indices before applying daily data validity; a missing bottom value is not permission to substitute a shallower value. Use the user's per-year/per-variable fixed-depth layout. Freeze any preprocessing and bottom mapping before evaluation, and give both systems the identical prepared grid."
+  },
+  "data_status": "pending_authorization_and_file_validation"
 }

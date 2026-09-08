@@ -1,0 +1,551 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q10",
+  "title": "Inorganic nitrogen exchange through straits",
+  "previous_proposal_id": "CM04",
+  "query_sha256": "c18c554cb6f74e27011b384c796b736d4c5f345e0671f03614e5c3fa73a00d84",
+  "data_fingerprint": null,
+  "reference_mode": "Approved2018–2022 historical method transfer; not numerical reproduction of climatological years46–50.",
+  "paper": {
+    "citation": "Lu et al. (2020)",
+    "title": "Nutrient transport and dynamics in the South China Sea: A modeling study",
+    "doi": "10.1016/j.pocean.2020.102308",
+    "url": "https://doi.org/10.1016/j.pocean.2020.102308"
+  },
+  "reference_text": "Paper result context: Luzon is a strong annually averaged DIN source with seasonal reversals; Mindoro-Balabac is an export pathway, while Karimata and Taiwan DIN transports are much smaller. These are comparisons, not prescribed signs or amplitudes for the 2018-2022 hindcast.\n",
+  "criteria": [
+    {
+      "id": "Q10-C1",
+      "weight": 20,
+      "description": "Use 2018-2022 and construct DIN = NO3 + NH4 in consistent molar-N units. Define wet, full-depth sections for Luzon, Mindoro plus Balabac, Karimata and Taiwan; verify normal velocity, face area and an inward-positive convention. Do not replace DIN by nitrate alone or total nitrogen.",
+      "evidence_requirements": "Constituent/unit mapping and section coordinates, normals and geometry.",
+      "source_basis": "Fig. 9 and associated gateway analysis: DIN=NO3+NH4; user-approved2018–2022 adaptation.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q10-C2",
+      "weight": 25,
+      "description": "Compute section-integrated DIN flux from concentration times normal velocity times wet face area at each available time, before monthly/annual averaging. Preserve seasonal transport reversals and compare all four gateways in mmol N/s or an explicitly converted unit.",
+      "evidence_requirements": "Four monthly flux curves, annual means and intermediate transport diagnostics.",
+      "source_basis": "Fig. 9 blue DIN curves; product-before-average is the transport computation requirement.",
+      "reference_figures": [
+        "images/Lu2020_Fig9_luzon.png",
+        "images/Lu2020_Fig9_mindoro_balabac.png",
+        "images/Lu2020_Fig9_karimata.png",
+        "images/Lu2020_Fig9_taiwan.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q10-V01",
+          "reference_figure": "images/Lu2020_Fig9_luzon.png",
+          "source_panel": "Fig. 9a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through luzon, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9a; Fig. 9 blue DIN curves; product-before-average is the transport computation requirement."
+        },
+        {
+          "id": "Q10-V02",
+          "reference_figure": "images/Lu2020_Fig9_mindoro_balabac.png",
+          "source_panel": "Fig. 9b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through mindoro plus balabac, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9b; Fig. 9 blue DIN curves; product-before-average is the transport computation requirement."
+        },
+        {
+          "id": "Q10-V03",
+          "reference_figure": "images/Lu2020_Fig9_karimata.png",
+          "source_panel": "Fig. 9c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through karimata, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9c; Fig. 9 blue DIN curves; product-before-average is the transport computation requirement."
+        },
+        {
+          "id": "Q10-V04",
+          "reference_figure": "images/Lu2020_Fig9_taiwan.png",
+          "source_panel": "Fig. 9d",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through taiwan, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9d; Fig. 9 blue DIN curves; product-before-average is the transport computation requirement."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Four monthly flux curves, annual means and intermediate transport diagnostics."
+      }
+    },
+    {
+      "id": "Q10-C3",
+      "weight": 25,
+      "description": "Quantify each gateway's source/sink role, relative magnitude, seasonal extrema and any sign reversals using the computed fluxes. Combine Mindoro and Balabac consistently. Label mean flux versus time-integrated amount correctly and compare annual results across the five years.",
+      "evidence_requirements": "Gateway summary table, seasonal/annual comparison and plot-linked interpretation.",
+      "source_basis": "Fig. 9 gateway signs/magnitudes and seasonal change; exclude red total-N curves.",
+      "reference_figures": [
+        "images/Lu2020_Fig9_luzon.png",
+        "images/Lu2020_Fig9_mindoro_balabac.png",
+        "images/Lu2020_Fig9_karimata.png",
+        "images/Lu2020_Fig9_taiwan.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q10-V01",
+          "reference_figure": "images/Lu2020_Fig9_luzon.png",
+          "source_panel": "Fig. 9a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through luzon, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9a; Fig. 9 gateway signs/magnitudes and seasonal change; exclude red total-N curves."
+        },
+        {
+          "id": "Q10-V02",
+          "reference_figure": "images/Lu2020_Fig9_mindoro_balabac.png",
+          "source_panel": "Fig. 9b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through mindoro plus balabac, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9b; Fig. 9 gateway signs/magnitudes and seasonal change; exclude red total-N curves."
+        },
+        {
+          "id": "Q10-V03",
+          "reference_figure": "images/Lu2020_Fig9_karimata.png",
+          "source_panel": "Fig. 9c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through karimata, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9c; Fig. 9 gateway signs/magnitudes and seasonal change; exclude red total-N curves."
+        },
+        {
+          "id": "Q10-V04",
+          "reference_figure": "images/Lu2020_Fig9_taiwan.png",
+          "source_panel": "Fig. 9d",
+          "requirement": "scientific_information",
+          "evidence_group": "Q10-CM-Lu2020_Fig9",
+          "required_information": [
+            "Monthly DIN exchange through taiwan, with normal orientation, sign convention and mmol N/s or converted units.",
+            "Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+          "source_basis": "10.1016/j.pocean.2020.102308; Fig. 9d; Fig. 9 gateway signs/magnitudes and seasonal change; exclude red total-N curves."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Gateway summary table, seasonal/annual comparison and plot-linked interpretation."
+      }
+    },
+    {
+      "id": "Q10-C4",
+      "weight": 20,
+      "description": "Check numerical and interpretive limits: section coverage, temporal sampling and unresolved concentration-velocity covariance from daily means. A gateway DIN exchange is not a closed basin N budget; distinguish organic-N transport and internal sources/sinks that were not supplied.",
+      "evidence_requirements": "Transport consistency checks and a bounded scientific conclusion.",
+      "source_basis": "Benchmark numerical/covariance checks and scope limits; no claim of a closed N budget.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q10-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostic tables and reproducible notebook record.",
+      "source_basis": "Benchmark delivery requirement.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Lu2020_Fig9_luzon.png",
+      "source_doi": "10.1016/j.pocean.2020.102308",
+      "pdf_page": 10,
+      "crop_fraction_top_left": [
+        0.11209,
+        0.522,
+        0.5117200000000001,
+        0.7030620000000001
+      ],
+      "source_pdf_sha256": "93c52b5a63ca3b323582b8dc8f9e29b4bb59c93fb29420b851881d49330418b9",
+      "sha256": "c2a722ae230e189a4d13af67ee2e15e458211e2f1851bb662a4d4b9f31e4a3ed",
+      "criterion_ids": [
+        "Q10-C2",
+        "Q10-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/SCSnutrinet_2020.pdf",
+      "reviewed": true,
+      "role": "Monthly DIN exchange through luzon, with normal orientation, sign convention and mmol N/s or converted units. Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 43502,
+      "source_panel": "Fig. 9a",
+      "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11209,
+            0.522,
+            0.5117200000000001,
+            0.7030620000000001
+          ],
+          "role": "Fig. 9a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            16.35792975999999,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.0896,
+            0.629352,
+            0.11036,
+            0.721206
+          ],
+          "role": "Original shared DIN/TN flux-axis units.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.49441999999999997,
+            0.87732,
+            0.60341,
+            0.8947080000000001
+          ],
+          "role": "Original shared Time (month) label.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            94.68447320000001,
+            147.70909046200003
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2020_Fig9_mindoro_balabac.png",
+      "source_doi": "10.1016/j.pocean.2020.102308",
+      "pdf_page": 10,
+      "crop_fraction_top_left": [
+        0.5134500000000001,
+        0.522,
+        0.92,
+        0.7030620000000001
+      ],
+      "source_pdf_sha256": "93c52b5a63ca3b323582b8dc8f9e29b4bb59c93fb29420b851881d49330418b9",
+      "sha256": "6d7fdf714afa9b6f4aa670c176df385660ddc232fc1622a7c4bc8ac5f530324a",
+      "criterion_ids": [
+        "Q10-C2",
+        "Q10-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/SCSnutrinet_2020.pdf",
+      "reviewed": true,
+      "role": "Monthly DIN exchange through mindoro plus balabac, with normal orientation, sign convention and mmol N/s or converted units. Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 42295,
+      "source_panel": "Fig. 9b",
+      "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.5134500000000001,
+            0.522,
+            0.92,
+            0.7030620000000001
+          ],
+          "role": "Fig. 9b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            16.35792975999999,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.0896,
+            0.629352,
+            0.11036,
+            0.721206
+          ],
+          "role": "Original shared DIN/TN flux-axis units.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.49441999999999997,
+            0.87732,
+            0.60341,
+            0.8947080000000001
+          ],
+          "role": "Original shared Time (month) label.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            96.74412815999997,
+            147.70909046200003
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2020_Fig9_karimata.png",
+      "source_doi": "10.1016/j.pocean.2020.102308",
+      "pdf_page": 10,
+      "crop_fraction_top_left": [
+        0.11209,
+        0.703818,
+        0.5117200000000001,
+        0.876564
+      ],
+      "source_pdf_sha256": "93c52b5a63ca3b323582b8dc8f9e29b4bb59c93fb29420b851881d49330418b9",
+      "sha256": "532ff1a863f335fddd6311ca59acd83547409fd2c707969c27d1f2084fa3a795",
+      "criterion_ids": [
+        "Q10-C2",
+        "Q10-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/SCSnutrinet_2020.pdf",
+      "reviewed": true,
+      "role": "Monthly DIN exchange through karimata, with normal orientation, sign convention and mmol N/s or converted units. Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 42571,
+      "source_panel": "Fig. 9c",
+      "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.11209,
+            0.703818,
+            0.5117200000000001,
+            0.876564
+          ],
+          "role": "Fig. 9c",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            16.35792975999999,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.0896,
+            0.629352,
+            0.11036,
+            0.721206
+          ],
+          "role": "Original shared DIN/TN flux-axis units.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.49441999999999997,
+            0.87732,
+            0.60341,
+            0.8947080000000001
+          ],
+          "role": "Original shared Time (month) label.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            94.68447320000001,
+            141.10867294599996
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Lu2020_Fig9_taiwan.png",
+      "source_doi": "10.1016/j.pocean.2020.102308",
+      "pdf_page": 10,
+      "crop_fraction_top_left": [
+        0.5134500000000001,
+        0.703818,
+        0.92,
+        0.876564
+      ],
+      "source_pdf_sha256": "93c52b5a63ca3b323582b8dc8f9e29b4bb59c93fb29420b851881d49330418b9",
+      "sha256": "ec658f0cf66a4e7ae8ddadf17c86464b277cfa5f93463aced19578fcbdcb8be7",
+      "criterion_ids": [
+        "Q10-C2",
+        "Q10-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/SCSnutrinet_2020.pdf",
+      "reviewed": true,
+      "role": "Monthly DIN exchange through taiwan, with normal orientation, sign convention and mmol N/s or converted units. Flux magnitude, seasonal extrema, source/sink role and reversals must follow the computed section integral.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 39977,
+      "source_panel": "Fig. 9d",
+      "source_context": "The blue DIN curve is the comparison target. Red TN is context only. The paper labels the combined Mindoro/Balabac gateway 'Mindoro Strait'; month ticks are 0-12.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.5134500000000001,
+            0.703818,
+            0.92,
+            0.876564
+          ],
+          "role": "Fig. 9d",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            16.35792975999999,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.0896,
+            0.629352,
+            0.11036,
+            0.721206
+          ],
+          "role": "Original shared DIN/TN flux-axis units.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.49441999999999997,
+            0.87732,
+            0.60341,
+            0.8947080000000001
+          ],
+          "role": "Original shared Time (month) label.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            96.74412815999997,
+            141.10867294599996
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "visual_scope": "Original-paper visual check: Lu Fig. 9, **blue DIN curves only**, for C2-C3. Check four gateways, inward-positive sign, common calendar and correctly labelled orders of magnitude. Red TN curves are not required; they cannot be reconstructed from NO3/NH4 alone.",
+  "release_requirements": [
+    "Obtain authorized, experiment-matched inputs and freeze their SHA-256 manifest.",
+    "Freeze geometry, masks, averaging conventions and all unresolved source definitions.",
+    "Compute independent numerical references and reviewed tolerances; never use an evaluated agent's output as its own reference.",
+    "Review weights, source-image rights and independent notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

@@ -1,7 +1,12 @@
 {
   "id": "Q07",
   "track": "autoresearch",
-  "title": "Spatial organization of subsurface chlorophyll",
-  "query": "Investigate how the depth and intensity of the subsurface chlorophyll maximum vary from the Pearl River plume to the outer shelf in summer 2011. Assess which aspects of the pattern are consistent with stratification and nutrient availability.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
-  "data_status": "pending_subset_selection"
+  "title": "Layered circulation and spatial concentration",
+  "query": "Determine the vertical organization of South China Sea circulation during 1992–2011. Quantify basin-integrated relative vorticity and identify the regions that contribute disproportionately to circulation in the upper, middle and deep layers. Assess whether their circulation contributions are proportional to their area.",
+  "catalog_version": "2026-09-07-paper-aligned",
+  "data_status": "pending_acquisition_and_validation",
+  "data_groups": [
+    "M1"
+  ],
+  "analysis_period": "1992–2011"
 }

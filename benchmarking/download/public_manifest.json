@@ -1,0 +1,24 @@
+{
+  "version": "2026-09-08-accessible-v1",
+  "groups": {
+    "P_MODIS": {"phase": "public", "adapter": "erddap", "product": "modis_monthly", "data_type": "MODIS_Aqua", "variables": ["chlor_a"], "folders": ["chlorophyll"], "start": "2003-01", "end": "2017-12", "bbox": [104, 122, 1, 25]},
+    "P_WIND": {"phase": "public", "adapter": "erddap", "product": "blended_wind_monthly", "data_type": "NOAA_Blended_Wind", "variables": ["windspeed", "u_wind", "v_wind", "mask"], "folders": ["windspeed", "u_wind", "v_wind", "mask"], "start": "2003-01", "end": "2012-12", "bbox": [104, 122, 1, 25]},
+    "P_OISST": {"phase": "public", "adapter": "ncei", "data_type": "OISST", "variables": ["sst", "ice"], "folders": ["sst", "ice"], "start": "1982-01-01", "end": "2023-12-31", "bbox": [120, 128, 25, 34]},
+    "P_GULF": {"phase": "services", "adapter": "cmems", "data_type": "CMEMS_Gulf", "dataset": "cmems_mod_glo_phy_my_0.083deg_P1D-m", "dataset_version": "202311", "variables": ["thetao", "so", "zos"], "folders": ["thetao", "so", "zos"], "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017], "months": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "bbox": [-98, -80, 18, 31], "depth": [0, 2000]},
+    "P_ECS": {"phase": "services", "adapter": "cmems", "data_type": "CMEMS_ECS", "dataset": "cmems_mod_glo_phy_my_0.083deg_P1D-m", "dataset_version": "202311", "variables": ["thetao", "uo", "vo"], "folders": ["thetao", "uo", "vo"], "years": [1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2023], "months": [5, 6, 7, 8, 9, 10, 11], "bbox": [119, 129, 24, 35]},
+    "P_ERA5": {"phase": "services", "adapter": "era5", "data_type": "ERA5", "variables": ["ssr", "str", "sshf", "slhf"], "folders": ["ssr", "str", "sshf", "slhf"], "years": [1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2023], "months": [5, 6, 7, 8, 9, 10, 11], "bbox": [119, 129, 24, 35]}
+  },
+  "tasks": {
+    "Q13": ["P_GULF"], "Q14": ["P_GULF"], "Q15": ["P_GULF"], "Q16": ["P_GULF"], "Q17": ["P_GULF"], "Q18": ["P_GULF"],
+    "Q19": ["P_MODIS"], "Q20": ["P_MODIS", "P_WIND"], "Q21": ["P_MODIS"], "Q22": ["P_MODIS", "P_WIND"],
+    "Q23": ["P_OISST"], "Q24": ["P_OISST", "P_ECS", "P_ERA5"], "Q28": ["P_MODIS"], "Q29": ["P_GULF"], "Q30": ["P_GULF"]
+  },
+  "masks": {
+    "gulf_analysis": [-98, -82, 18, 30], "gulf_east_west_split_longitude": -90,
+    "scs_coastal_box": [112, 115, 21, 23], "scs_offshore_box": [115, 118, 17, 20],
+    "seats_box": [115.5, 116.5, 17.5, 18.5], "vietnam_box": [109, 112, 10, 16], "ecs_analysis": [120, 128, 25, 34]
+  },
+  "mask_policy": "Coordinate boxes are benchmark-defined approximations, not original paper polygons or bathymetric shelf masks. Use native valid/ocean masks and coordinate-derived cell areas; no external bathymetry required.",
+  "version_source": "https://marine.copernicus.eu/media/pdf/6713/open",
+  "scope": "All numerical inputs for the 15 non-CMOMS tasks in this catalogue revision. CMOMS is manual. Literature full texts and independent evaluator reference arrays are separate from numerical-data acquisition."
+}

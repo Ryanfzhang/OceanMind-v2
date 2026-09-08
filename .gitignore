@@ -72,6 +72,11 @@ native/windows-sandbox-broker/target/
 .oceanmind/
 react_tui_smoke.txt
 
+# Local OceanX/benchmark runs (reports, workspaces, execution logs and state).
+# Root-scoped so source fixtures and benchmark reference artifacts stay visible.
+/output/
+/outputs/
+
 # OS
 .DS_Store
 Thumbs.db

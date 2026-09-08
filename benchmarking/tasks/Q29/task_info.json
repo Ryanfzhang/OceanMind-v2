@@ -1,7 +1,84 @@
 {
   "id": "Q29",
   "track": "idea_hypothesis",
-  "title": "What controls changes in a salinity core?",
-  "query": "Using the supplied Gulf of Mexico literature and reanalysis, propose and test a hypothesis explaining changes in an eddy’s subsurface salinity maximum. Design the analysis to distinguish temporal evolution within the eddy from changes in the water masses being sampled.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
-  "data_status": "pending_subset_selection"
+  "title": "An idea about the evolving structure of a Loop Current eddy",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "query": "Read the supplied Loop Current eddy related work. Using only public GLORYS temperature, salinity and sea-surface height for 6 August 2016-25 July 2017 in the Gulf of Mexico (98-82 W, 18-30 N), propose and test one falsifiable idea about the vertical structure or evolution of a resolved anticyclonic feature. Choose a feasible feature/contrast from the fields instead of assuming GLORYS contains the observed Poseidon trajectory. Original glider missions and bio-optical data are not supplied or required. Separate model-internal evidence from independent observational validation. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "analysis_period": "6 August 2016–25 July 2017",
+  "data_groups": [
+    "P_GULF"
+  ],
+  "required_variables": [
+    "thetao",
+    "so",
+    "zos",
+    "coordinates/depth"
+  ],
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_scope": {
+    "source": "GLORYS12 daily public reanalysis",
+    "period": "6 August 2016–25 July 2017",
+    "region": "98–82 W, 18–30 N",
+    "sampling": "Daily",
+    "depth": "Native levels from surface to 2000 m",
+    "fields": [
+      "thetao",
+      "so",
+      "zos",
+      "coordinates/depth"
+    ],
+    "access": "https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description",
+    "status": "scripted_acquisition_pending_execution",
+    "limits": "Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample."
+  },
+  "related_work": [
+    {
+      "id": "meunier2018",
+      "citation": "Meunier et al. (2018)",
+      "title": "The Vertical Structure of a Loop Current Eddy",
+      "year": 2018,
+      "journal": "Journal of Geophysical Research: Oceans",
+      "doi": "10.1029/2018JC013801",
+      "url": "https://doi.org/10.1029/2018JC013801",
+      "verification_source": "https://doi.org/10.1029/2018JC013801",
+      "verification_scope": "primary_methods_or_existing_verified_benchmark_record",
+      "source_dataset": "GMOG Poseidon2016 glider mission0003, 5 August–15 November2016, plus contextual observations.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "sosa2020",
+      "citation": "Sosa-Gutierrez et al. (2020)",
+      "title": "Erosion of the Subsurface Salinity Maximum of the Loop Current Eddies From Glider Observations and a Numerical Model",
+      "year": 2020,
+      "journal": "Journal of Geophysical Research: Oceans",
+      "doi": "10.1029/2019JC015397",
+      "url": "https://doi.org/10.1029/2019JC015397",
+      "verification_source": "https://doi.org/10.1029/2019JC015397",
+      "verification_scope": "existing_benchmark_paper_record",
+      "source_dataset": "GMOG Poseidon2016–2017 glider observations (6 August2016–25 July2017 analysis) plus a separate numerical model.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "marquez2024",
+      "citation": "Marquez-Artavia et al. (2024)",
+      "title": "On the Seasonal Cycle of Phytoplankton Bio-Optical Properties Inside a Warm Core Ring in the Gulf of Mexico",
+      "year": 2024,
+      "journal": "Journal of Geophysical Research: Oceans",
+      "doi": "10.1029/2023JC020837",
+      "url": "https://doi.org/10.1029/2023JC020837",
+      "verification_source": "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2023JC020837",
+      "verification_scope": "primary_methods_or_existing_verified_benchmark_record",
+      "source_dataset": "GMOG Poseidon missions0003–0006, August2016–August2017; physical and bio-optical sensors; study windows differ across papers.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    }
+  ],
+  "reading_pack_status": "citations_selected_full_text_pack_not_staged",
+  "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
+  "reading_data_alignment": "Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample."
 }

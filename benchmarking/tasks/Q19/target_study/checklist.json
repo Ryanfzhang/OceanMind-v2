@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "status": "draft",
+  "task_id": "Q19",
+  "title": "Regional MODIS chlorophyll seasonality",
+  "query_sha256": "0518b08d4f5647e2a6e367da017d2a98daed2de40902dff3b8822d166f5a4c7a",
+  "data_fingerprint": null,
+  "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "paper": {
+    "citation": "Palacz et al. (2011)",
+    "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+    "doi": "10.1029/2011JC007064",
+    "url": "https://doi.org/10.1029/2011JC007064"
+  },
+  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing monthly MODIS-Aqua chlorophyll for 2003–2012, compare seasonal variability in two benchmark-defined South China Sea boxes: coastal 112–115 E, 21–23 N and offshore 115–118 E, 17–20 N. Compute area-weighted monthly time series and calendar-month climatologies, report valid-pixel coverage, and quantify seasonal timing and amplitude. These are coordinate boxes, not the paper's 500 m bathymetric shelf/basin partition. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "criteria": [
+    {
+      "id": "Q19-C1",
+      "weight": 20,
+      "description": "Extract both stated coordinate boxes from the MODIS record using native missing-value masks and coordinate-based cell areas; report processing release and valid-area support.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 2: SeaWiFS window, ETOPO5 and500 m partition. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q19-C2",
+      "weight": 25,
+      "description": "Compute time series and 12-month climatologies without zero filling; show curves with valid support and reproducible seasonal aggregation.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.2 and Fig. 4: regional seasonal and nonseasonal chlorophyll components. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Palacz2011_Fig4_shelf.png",
+        "images/Palacz2011_Fig4_basin.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q19-V01",
+          "reference_figure": "images/Palacz2011_Fig4_shelf.png",
+          "source_panel": "Fig. 4A",
+          "requirement": "context_only",
+          "evidence_group": "Q19-S-P1_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 4A; Section 3.2 and Fig. 4: regional seasonal and nonseasonal chlorophyll components."
+        },
+        {
+          "id": "Q19-V02",
+          "reference_figure": "images/Palacz2011_Fig4_basin.png",
+          "source_panel": "Fig. 4B",
+          "requirement": "context_only",
+          "evidence_group": "Q19-S-P1_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 4B; Section 3.2 and Fig. 4: regional seasonal and nonseasonal chlorophyll components."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q19-C3",
+      "weight": 25,
+      "description": "Quantify peak/trough timing, amplitude and coastal/offshore contrast with year-to-year variability; show supporting numerical summaries and labelled plots.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.2/Fig. 4: contrasting regional seasonality. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Palacz2011_Fig4_shelf.png",
+        "images/Palacz2011_Fig4_basin.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q19-V01",
+          "reference_figure": "images/Palacz2011_Fig4_shelf.png",
+          "source_panel": "Fig. 4A",
+          "requirement": "context_only",
+          "evidence_group": "Q19-S-P1_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 4A; Section 3.2/Fig. 4: contrasting regional seasonality."
+        },
+        {
+          "id": "Q19-V02",
+          "reference_figure": "images/Palacz2011_Fig4_basin.png",
+          "source_panel": "Fig. 4B",
+          "requirement": "context_only",
+          "evidence_group": "Q19-S-P1_Fig04",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2011JC007064; Fig. 4B; Section 3.2/Fig. 4: contrasting regional seasonality."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q19-C4",
+      "weight": 20,
+      "description": "Explain retrieval/coverage sensitivity and the restricted period/sensor comparison. Do not demand the paper's SeaWiFS concentrations, ETOPO5 masks or exact EEMD seasonal components.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Original missing-data treatment and interpretation; release differences are a benchmark comparability issue. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q19-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Palacz2011_Fig4_shelf.png",
+      "sha256": "0d48faddbe5d8b24cb3ccfdae6554c456836b83bdc7066a9daa71d06f071cd20",
+      "bytes": 153055,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 4,
+      "pdf_page": 8,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q19-C2",
+        "Q19-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "shelf chlorophyll record and seasonal/low-frequency components on matched months, with concentration units and domain definition. Quantify seasonal timing and amplitude versus the other region; do not interpret reconstructed components as unprocessed observations.",
+      "crop_fraction_top_left": [
+        0.1,
+        0.075,
+        0.49750000000000005,
+        0.337
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 4A",
+      "source_context": "Shelf/basin boundary is 500 m. Source chlorophyll concentration units are mg/m3; smooth components are interpreted using the paper's decomposition, not a fit chosen only for visual agreement.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.1,
+            0.075,
+            0.49750000000000005,
+            0.337
+          ],
+          "role": "Fig. 4A",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Palacz2011_Fig4_basin.png",
+      "sha256": "559cd7d26ee520e6c88c116880e52053a2dcb20d2f22e2f56d5ca20b61dfd16e",
+      "bytes": 135546,
+      "paper_id": "S-P1",
+      "authors": "Palacz et al. (2011)",
+      "title": "Seasonal and inter-annual changes in the surface chlorophyll of the South China Sea",
+      "source_url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/56406457/Palacz.pdf",
+      "source_pdf_sha256": "4e455fb0b41ba40b98c3be492750f7951027894b50e3a16eeb0aa08174752da5",
+      "figure": 4,
+      "pdf_page": 8,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q19-C2",
+        "Q19-C3"
+      ],
+      "source_doi": "10.1029/2011JC007064",
+      "role": "basin chlorophyll record and seasonal/low-frequency components on matched months, with concentration units and domain definition. Quantify seasonal timing and amplitude versus the other region; do not interpret reconstructed components as unprocessed observations.",
+      "crop_fraction_top_left": [
+        0.49750000000000005,
+        0.075,
+        0.895,
+        0.337
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 4B",
+      "source_context": "Shelf/basin boundary is 500 m. Source chlorophyll concentration units are mg/m3; smooth components are interpreted using the paper's decomposition, not a fit chosen only for visual agreement.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.49750000000000005,
+            0.075,
+            0.895,
+            0.337
+          ],
+          "role": "Fig. 4B",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "release_requirements": [
+    "Download and verify the canonical public input groups and freeze file hashes.",
+    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
+    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

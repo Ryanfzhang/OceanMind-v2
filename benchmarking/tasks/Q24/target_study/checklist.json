@@ -1,0 +1,464 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q24",
+  "title": "2023 East China Sea heat-budget attribution",
+  "query_sha256": "53918af6ee135cfb0e604c79ec36563123addbb9917283b633ca0242cdb35027",
+  "data_fingerprint": null,
+  "reference_mode": "Original heat-budget component; no CMIP6 projection or unsupplied IORS validation required.",
+  "paper": {
+    "citation": "Oh et al. (2024)",
+    "title": "Late-arriving 2023 summer marine heatwave in the East China Sea and implications for global warming",
+    "doi": "10.1038/s41612-024-00846-4",
+    "url": "https://doi.org/10.1038/s41612-024-00846-4"
+  },
+  "reference_text": "Score actual executed evidence, not agreement by quotation. Published figures support diagnostic comparison; frozen-data numerical tolerances require independent computation. Do not require unperformed extensions or unavailable model experiments.\n\nPublished result context (not a validated numerical answer): Oh Results/Fig. 3 contrasts early shortwave/ocean contributions with later surface-flux influence, including latent heat flux, and notes residual cooling later in the event. Only the selected aggregate-budget terms are required; unseen mean/eddy processes must not be claimed verified.",
+  "criteria": [
+    {
+      "id": "Q24-C1",
+      "weight": 20,
+      "description": "Derive the 0.5 C temperature-threshold mixed layer and apply a consistent1993–2011 heat-budget baseline over 25–34 N, 120–128 E. Convert accumulated ERA5 energy to flux and align sampling/grids.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Methods/Data and Fig. 3 caption: GLORYS/ERA5, 0.5 C MLD and1993–2011 baseline.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q24-C2",
+      "weight": 25,
+      "description": "Compute mixed-layer temperature tendency, horizontal advection and surface heat input with shortwave penetration correction. Parameterize entrainment/detrainment and vertical diffusion following Methods rather than naming an unexplained residual as observed mixing.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Methods heat-budget equation, penetration formula and vertical parameterization (Kv=1e-4 m2/s); vertical velocity neglected in entrainment as in the paper.",
+      "reference_figures": [
+        "images/Oh2024_Fig3_budget_series.png",
+        "images/Oh2024_Fig3_surface_fluxes.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q24-V01",
+          "reference_figure": "images/Oh2024_Fig3_budget_series.png",
+          "source_panel": "Fig. 3a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units.",
+            "Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3a; Methods heat-budget equation, penetration formula and vertical parameterization (Kv=1e-4 m2/s); vertical velocity neglected in entrainment as in the paper."
+        },
+        {
+          "id": "Q24-V02",
+          "reference_figure": "images/Oh2024_Fig3_surface_fluxes.png",
+          "source_panel": "Fig. 3b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Shortwave, longwave, sensible and latent contributions with correct signs, units and mixed-layer conversion.",
+            "Resolve which components support net surface heating and cooling; accumulated energy must first be converted correctly."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3b; Methods heat-budget equation, penetration formula and vertical parameterization (Kv=1e-4 m2/s); vertical velocity neglected in entrainment as in the paper."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q24-C3",
+      "weight": 25,
+      "description": "Plot budget/flux components over July 30–October 19, 2023 and compare developing phases August 12–28 and September 6–28, as labelled in Fig. 3. Separate shortwave, longwave, sensible and latent terms.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy.",
+      "reference_figures": [
+        "images/Oh2024_Fig3_budget_series.png",
+        "images/Oh2024_Fig3_surface_fluxes.png",
+        "images/Oh2024_Fig3_early_phase.png",
+        "images/Oh2024_Fig3_late_phase.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q24-V01",
+          "reference_figure": "images/Oh2024_Fig3_budget_series.png",
+          "source_panel": "Fig. 3a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units.",
+            "Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3a; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
+        },
+        {
+          "id": "Q24-V02",
+          "reference_figure": "images/Oh2024_Fig3_surface_fluxes.png",
+          "source_panel": "Fig. 3b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Shortwave, longwave, sensible and latent contributions with correct signs, units and mixed-layer conversion.",
+            "Resolve which components support net surface heating and cooling; accumulated energy must first be converted correctly."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3b; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
+        },
+        {
+          "id": "Q24-V03",
+          "reference_figure": "images/Oh2024_Fig3_early_phase.png",
+          "source_panel": "Fig. 3c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Phase-mean heat-budget and surface-flux contributions for August 12-28, 2023.",
+            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
+          ],
+          "acceptable_alternatives": [
+            "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3c; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
+        },
+        {
+          "id": "Q24-V04",
+          "reference_figure": "images/Oh2024_Fig3_late_phase.png",
+          "source_panel": "Fig. 3d",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Phase-mean heat-budget and surface-flux contributions for September 6-28, 2023.",
+            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
+          ],
+          "acceptable_alternatives": [
+            "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3d; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q24-C4",
+      "weight": 20,
+      "description": "Quantify closure and distinguish resolved advection, parameterized vertical processes and residual. Interpret the difference between phases without requiring the paper's magnitudes on a different reprocessing release.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task.",
+      "reference_figures": [
+        "images/Oh2024_Fig3_budget_series.png",
+        "images/Oh2024_Fig3_early_phase.png",
+        "images/Oh2024_Fig3_late_phase.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q24-V01",
+          "reference_figure": "images/Oh2024_Fig3_budget_series.png",
+          "source_panel": "Fig. 3a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units.",
+            "Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3a; Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task."
+        },
+        {
+          "id": "Q24-V03",
+          "reference_figure": "images/Oh2024_Fig3_early_phase.png",
+          "source_panel": "Fig. 3c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Phase-mean heat-budget and surface-flux contributions for August 12-28, 2023.",
+            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
+          ],
+          "acceptable_alternatives": [
+            "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3c; Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task."
+        },
+        {
+          "id": "Q24-V04",
+          "reference_figure": "images/Oh2024_Fig3_late_phase.png",
+          "source_panel": "Fig. 3d",
+          "requirement": "scientific_information",
+          "evidence_group": "Q24-Oh2024_Fig03",
+          "required_information": [
+            "Phase-mean heat-budget and surface-flux contributions for September 6-28, 2023.",
+            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
+          ],
+          "acceptable_alternatives": [
+            "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 3d; Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q24-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Oh2024_Fig3_budget_series.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.22,
+        0.057,
+        0.785,
+        0.20524799999999999
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "f6d7a737700a8657f3d68dbc2411bc0c5ff8f605902370af06ebf6d3e79fa8ff",
+      "criterion_ids": [
+        "Q24-C2",
+        "Q24-C3",
+        "Q24-C4"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units. Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 222124,
+      "source_panel": "Fig. 3a",
+      "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.22,
+            0.057,
+            0.785,
+            0.20524799999999999
+          ],
+          "role": "Fig. 3a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Oh2024_Fig3_surface_fluxes.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.22,
+        0.20567399999999997,
+        0.785,
+        0.35136599999999996
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "fcc5bbd1d988418266054f55866aeaffca65d8c64e4fd7612e13eaef7cf268a4",
+      "criterion_ids": [
+        "Q24-C2",
+        "Q24-C3"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "Shortwave, longwave, sensible and latent contributions with correct signs, units and mixed-layer conversion. Resolve which components support net surface heating and cooling; accumulated energy must first be converted correctly.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 210395,
+      "source_panel": "Fig. 3b",
+      "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.22,
+            0.20567399999999997,
+            0.785,
+            0.35136599999999996
+          ],
+          "role": "Fig. 3b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Oh2024_Fig3_early_phase.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.268025,
+        0.35264399999999996,
+        0.5160600000000001,
+        0.483
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "e337e20506091f1f4ce66e5779cc78befcb0619632519f18a4e8a9a962136a1f",
+      "criterion_ids": [
+        "Q24-C3",
+        "Q24-C4"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "Phase-mean heat-budget and surface-flux contributions for August 12-28, 2023. Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 61894,
+      "source_panel": "Fig. 3c",
+      "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.268025,
+            0.35264399999999996,
+            0.5160600000000001,
+            0.483
+          ],
+          "role": "Fig. 3c",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Oh2024_Fig3_late_phase.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.51719,
+        0.35264399999999996,
+        0.785,
+        0.483
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "27b057204ad0dbfa61f27b531ddb43c831e6cc3de3741f5818a84d72f3db55cf",
+      "criterion_ids": [
+        "Q24-C3",
+        "Q24-C4"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "Phase-mean heat-budget and surface-flux contributions for September 6-28, 2023. Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 62898,
+      "source_panel": "Fig. 3d",
+      "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.51719,
+            0.35264399999999996,
+            0.785,
+            0.483
+          ],
+          "role": "Fig. 3d",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "release_requirements": [
+    "Obtain authorized original-period inputs, record product versions/QC and freeze the input fingerprint.",
+    "Freeze spatial masks, interpolation, temporal processing and any unresolved original-method parameters.",
+    "Independently compute numerical targets and review tolerances on those inputs.",
+    "Review source-image permissions and notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

@@ -1,7 +1,41 @@
 {
   "id": "Q05",
   "track": "data_analysis",
-  "title": "Interannual chlorophyll anomalies near the Pearl River",
-  "query": "Using monthly MODIS-Aqua chlorophyll data for 2011–2022 and the supplied Pearl River nearshore mask (water depth <50 m), calculate the area-weighted regional monthly means and calendar-month climatology. Calculate January and July percentage anomalies relative to their respective climatological means, identify the strongest positive and negative anomalies, and report valid spatial coverage without treating missing observations as zero.",
-  "data_status": "pending_subset_selection"
+  "title": "Monthly surface current speed",
+  "catalog_version": "2026-09-07-basic-v1",
+  "query": "Using the 2011 CMOMS u and v data and supplied analysis mask, draw one line chart of area-weighted monthly mean surface current speed. Follow the supplied collocation/rotation specification, use joint-valid components at the fixed surface level and calculate daily speed as sqrt(u*u+v*v) before spatial or temporal averaging. First area-average each day, then average valid daily means within each month. Give one short conclusion identifying the strongest and weakest months. Use the frozen B1 manifest for masks and geometry, keep missing values distinct from zero, and retain the calculation code for checking. Only one figure and one short conclusion are requested.",
+  "analysis_period": "2011",
+  "data_groups": [
+    "B1"
+  ],
+  "required_variables": [
+    "u",
+    "v"
+  ],
+  "input_contract": {
+    "data_group": "B1",
+    "source": "CMOMS",
+    "period": "2011-01-01/2011-12-31",
+    "sampling": "daily mean",
+    "depth": "all supplied fixed physical depth levels; do not surface-trim the shared archive",
+    "science_fields": [
+      "temp",
+      "salt",
+      "u",
+      "v",
+      "oxygen",
+      "chlorophyll"
+    ],
+    "metadata_required": [
+      "provider-confirmed units and temperature/salinity conventions",
+      "calendar, time bounds, fill values and QC",
+      "longitude/latitude, positive-down depth and wet/land masks",
+      "cell areas and bathymetry",
+      "velocity staggering/orientation and collocation/rotation specification",
+      "fixed analysis and shelf masks"
+    ],
+    "availability": "pending_authorization_and_file_validation",
+    "notes": "One shared archive, not six copies. Science fields exist in the supplied avg_info.cdl, but the header does not prove the 2011 files or geometry are available. temp is labelled potential temperature; salt convention must be confirmed. Freeze physical bottom-level indices before applying daily data validity; a missing bottom value is not permission to substitute a shallower value. Use the user's per-year/per-variable fixed-depth layout. Freeze any preprocessing and bottom mapping before evaluation, and give both systems the identical prepared grid."
+  },
+  "data_status": "pending_authorization_and_file_validation"
 }

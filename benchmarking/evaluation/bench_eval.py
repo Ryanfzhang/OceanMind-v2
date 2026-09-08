@@ -16,10 +16,13 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 from zipfile import ZIP_DEFLATED, ZipFile
 
-PUBLIC_TASKS = {"Q05", *(f"Q{i:02}" for i in range(15, 24)), "Q28", "Q29", "Q30"}
+PUBLIC_TASKS = {*(f"Q{i:02}" for i in range(13, 25)), "Q28", "Q29", "Q30"}
 CATALOG = Path(__file__).resolve().parents[1] / "tasks"
 MAX_FILE = 20 * 1024 * 1024
 MAX_BUNDLE = 64 * 1024 * 1024
+# Split reference panels count toward the same explicit image budget as submissions.
+MAX_REVIEW_IMAGES = 16
+MAX_REVIEW_IMAGE_BYTES = MAX_BUNDLE
 TEXT_EXTENSIONS = {".md", ".txt", ".csv", ".json", ".py", ".ipynb"}
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 STATUSES = {"completed", "failed", "timed_out", "needs_interaction", "cancelled"}
@@ -176,6 +179,7 @@ def judge_payload(bundle, reference, *, images=False, max_chars=80_000):
             "Non-completed attempts belong in the outcome denominator, not the quality-only judge"
         )
     evidence, image_parts, unseen = [], [], []
+    image_bytes = 0
     for name, body in files.items():
         suffix = PurePosixPath(name).suffix.lower()
         if suffix in TEXT_EXTENSIONS:
@@ -205,8 +209,11 @@ def judge_payload(bundle, reference, *, images=False, max_chars=80_000):
                 )
             evidence.append({"id": name, "text": text})
         elif suffix in IMAGE_EXTENSIONS and images:
-            if len(image_parts) // 2 >= 8:
-                raise ValueError("Select at most 8 figures for this review")
+            if len(image_parts) // 2 >= MAX_REVIEW_IMAGES:
+                raise ValueError(f"Select at most {MAX_REVIEW_IMAGES} total candidate/reference figures")
+            image_bytes += len(body)
+            if image_bytes > MAX_REVIEW_IMAGE_BYTES:
+                raise ValueError("Review images exceed 64 MiB; explicitly select smaller evidence")
             mime = "image/png" if suffix == ".png" else "image/jpeg"
             image_parts.extend(
                 [
@@ -229,8 +236,11 @@ def judge_payload(bundle, reference, *, images=False, max_chars=80_000):
         if not images:
             unseen.append("reference figure: " + figure["path"] + " not inspected")
             continue
-        if len(image_parts) // 2 >= 8:
-            raise ValueError("Select at most 8 total candidate/reference figures")
+        if len(image_parts) // 2 >= MAX_REVIEW_IMAGES:
+            raise ValueError(f"Select at most {MAX_REVIEW_IMAGES} total candidate/reference figures")
+        image_bytes += len(body)
+        if image_bytes > MAX_REVIEW_IMAGE_BYTES:
+            raise ValueError("Review images exceed 64 MiB; explicitly select smaller evidence")
         mime = "image/png" if path.suffix.lower() == ".png" else "image/jpeg"
         image_parts.extend(
             [
@@ -245,6 +255,16 @@ def judge_payload(bundle, reference, *, images=False, max_chars=80_000):
     payload = {
         "query": manifest["query"],
         "reference": ref.get("reference_text", ""),
+        "reference_mode": ref.get("reference_mode", ""),
+        "visual_scoring_policy": ref.get("visual_scoring_policy", {}),
+        "reference_figure_context": [
+            {
+                key: figure[key]
+                for key in ("path", "source_panel", "source_context", "grouping_reason")
+                if key in figure
+            }
+            for figure in ref.get("figures", [])
+        ],
         "criteria": criteria,
         "evidence": evidence,
         "not_inspected": unseen,
@@ -275,6 +295,14 @@ def judge_payload(bundle, reference, *, images=False, max_chars=80_000):
         "Do not reward verbosity, agent identity, or a hypothesis merely being supported. A valid rejection "
         "can be successful science. Do not claim you verified references externally, ran notebooks, or "
         "inspected omitted figures. Missing evidence and missing reference requirements must be explicit. "
+        "Assess scientific information, not pixel similarity: alternative plot types, colors, layouts "
+        "and panel counts can receive full credit when they preserve the required quantities, units, "
+        "domain, time support and quantitative relationships. A matching conclusion alone is insufficient. "
+        "Map submitted evidence to the visual checks collectively; one plot can satisfy several checks "
+        "and several plots can satisfy one check. Context-only or alternative reference panels are not "
+        "extra requirements. Do not add scores per image or double-count the same scientific finding. "
+        "Follow the declared comparison mode; a justified different result on approved adapted data "
+        "can receive full credit. Never invent numerical tolerances by eyeballing reference images. "
         "Cite provided evidence IDs for each score; state uncertainty. This review is not independent numerical verification."
     )
     content = [{"type": "text", "text": body}, *image_parts] if image_parts else body

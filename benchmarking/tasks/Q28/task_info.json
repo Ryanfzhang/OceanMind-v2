@@ -1,7 +1,67 @@
 {
   "id": "Q28",
   "track": "idea_hypothesis",
-  "title": "Robustness of a satellite-derived ecological conclusion",
-  "query": "Using the supplied satellite literature and MODIS data, propose and test a hypothesis about how observation coverage changes an inferred ecological relationship or seasonal pattern. Determine whether the conclusion survives a defensible coverage-sensitivity analysis.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
-  "data_status": "pending_subset_selection"
+  "title": "An idea about inference from incomplete ocean-colour records",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "query": "Read the supplied South China Sea ocean-colour related work. Using only the public monthly MODIS-Aqua chlorophyll fields and their native valid-pixel masks for 2013-2017 (104-122 E, 1-25 N), propose and test one falsifiable idea about regional seasonal variability or the sensitivity of inference to incomplete spatial coverage. No author reconstruction or daily predictor dataset is supplied or required. If testing reconstruction, mask only originally valid observations, keep held-out values out of fitting and state that artificial missingness is not independent validation of real cloud gaps. Do not infer submonthly events from monthly means. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "analysis_period": "2013–2017",
+  "data_groups": [
+    "P_MODIS"
+  ],
+  "required_variables": [
+    "chlor_a",
+    "native valid-pixel masks",
+    "coordinates"
+  ],
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_scope": {
+    "source": "MODIS-Aqua monthly R2022 public product",
+    "period": "2013–2017",
+    "region": "104–122 E, 1–25 N",
+    "sampling": "Monthly",
+    "depth": "Surface",
+    "fields": [
+      "chlor_a",
+      "native valid-pixel masks",
+      "coordinates"
+    ],
+    "access": "https://coastwatch.pfeg.noaa.gov/erddap/info/erdMH1chlamday_R2022SQ/index.html",
+    "status": "scripted_acquisition_pending_execution",
+    "limits": "The readings discuss daily reconstruction; this reduced task uses independent monthly MODIS inputs for a methodological/seasonal hypothesis, not the shared author target or an exact replication."
+  },
+  "related_work": [
+    {
+      "id": "ye2024",
+      "citation": "Ye et al. (2024)",
+      "title": "A daily reconstructed chlorophyll-a dataset in the South China Sea from MODIS using OI-SwinUnet",
+      "year": 2024,
+      "journal": "Earth System Science Data",
+      "doi": "10.5194/essd-16-3125-2024",
+      "url": "https://doi.org/10.5194/essd-16-3125-2024",
+      "verification_source": "https://essd.copernicus.org/articles/16/3125/2024/",
+      "verification_scope": "publisher_abstract_and_analysis",
+      "source_dataset": "Daily South China Sea MODIS-derived reconstructed chlorophyll2013–2017; author product DOI10.5281/zenodo.10478524.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "fang2025",
+      "citation": "Fang et al. (2025)",
+      "title": "Leveraging ResUnet, oceanic and atmospheric data for accurate chlorophyll-a estimations in the South China Sea",
+      "year": 2025,
+      "journal": "Frontiers in Marine Science",
+      "doi": "10.3389/fmars.2025.1528921",
+      "url": "https://doi.org/10.3389/fmars.2025.1528921",
+      "verification_source": "https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2025.1528921/full",
+      "verification_scope": "primary_methods_or_existing_verified_benchmark_record",
+      "source_dataset": "Ye2024 daily reconstructed South China Sea chlorophyll, 1 January2013–31 December2017; the paper additionally uses HYCOM and ERA5.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    }
+  ],
+  "reading_pack_status": "citations_selected_full_text_pack_not_staged",
+  "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
+  "reading_data_alignment": "The readings discuss daily reconstruction; this reduced task uses independent monthly MODIS inputs for a methodological/seasonal hypothesis, not the shared author target or an exact replication."
 }

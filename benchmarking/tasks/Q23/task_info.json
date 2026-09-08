@@ -1,7 +1,12 @@
 {
   "id": "Q23",
   "track": "autoresearch",
-  "title": "Wind–chlorophyll variability across time scales",
-  "query": "Using monthly SeaWiFS chlorophyll and blended satellite wind observations for September 1997–April 2010, investigate wind–chlorophyll coupling across the South China Sea shelf and deep basin. Use ensemble empirical mode decomposition to distinguish seasonal, interannual, and longer-term variability, and assess which associations are supported by the record. Document missing-month treatment, product versions, and the limitations of inferring long-term change or causality from this record.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
-  "data_status": "pending_subset_selection"
+  "title": "2023 East China Sea marine heatwave",
+  "query": "Characterize the onset, duration, intensity and seasonal timing of East China Sea marine heatwaves during 2023 using daily SST over 25–34 degrees N, 120–128 degrees E. Place the June–October events in the 1982–2023 historical context using a fixed 1982–2011 seasonal baseline.",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_groups": [
+    "P_OISST"
+  ],
+  "analysis_period": "1982–2023; event 2023, baseline 1982–2011"
 }

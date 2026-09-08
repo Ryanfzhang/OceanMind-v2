@@ -1,6 +1,7 @@
+# Historical Claude Science Conda spec, NOT part of the current OceanX benchmark setup.
 # Conda MatchSpec file, NOT a pip requirements file.
 # Linux x86_64, glibc-based host; install from conda-forge without sudo:
-# conda create -n claude-science-tools --override-channels -c conda-forge --file benchmarking/server/claude-science-requirements.txt
+# conda create -n claude-science-tools --override-channels -c conda-forge --file docs/evals/legacy-claude-science-conda.txt
 # Activate this environment before installing or starting Claude Science.
 # Supplies launcher/sandbox dependencies, not Science's managed analysis environments.
 # Claude Science and CC Switch themselves are installed separately.

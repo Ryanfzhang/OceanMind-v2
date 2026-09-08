@@ -1,0 +1,375 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q08",
+  "title": "Decadal circulation transition",
+  "previous_proposal_id": "CM02",
+  "query_sha256": "d5efa540466b133ba6762344358d6ec66b966ff010641b4b12fb46a88a3f2729",
+  "data_fingerprint": null,
+  "reference_mode": "Original paper period and experiment required; exact data identity not yet verified.",
+  "paper": {
+    "citation": "Zheng et al. (2026)",
+    "title": "Decadal climate control of circulation regime transitions in a large marginal sea",
+    "doi": "10.1016/j.scib.2025.12.033",
+    "url": "https://doi.org/10.1016/j.scib.2025.12.033"
+  },
+  "reference_text": "Paper result context: upper-layer strengthening then weakening; middle-layer weakening then strengthening; deep-layer strengthening becomes prominent after 2009. The text reports approximately +6%/-2% per decade for upper circulation, middle weakening ~3% then strengthening ~13%, and deep strengthening ~15% after 2009. Match normalization and sampling before using magnitudes as numerical checks; a discrepancy requires investigation, not unsupported agreement.\n",
+  "criteria": [
+    {
+      "id": "Q08-C1",
+      "weight": 20,
+      "description": "Use 1993-2022 daily data and the paper's 750/1500 m layer boundaries. Implement its layer-integrated circulation diagnostic on the native grid or a verified equivalent, excluding invalid coastal derivative cells. Document any area normalization; do not mistake Fig. 2's normalized layer-integrated index for a simple mean of local vorticity.",
+      "evidence_requirements": "Diagnostic formula, units, masks and three layer time series.",
+      "source_basis": "Sections 2.1–2.2 and Eq. 1: daily1993–2022, native layer-integrated circulation.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q08-C2",
+      "weight": 25,
+      "description": "Retain original and seven-year-smoothed circulation series and fit the specified 1993-2008 and 2009-2018 windows. Show temporal alignment, smoothing edge handling and trend estimates in unambiguous absolute units; document the denominator if also reporting percentage per decade.",
+      "evidence_requirements": "Three-panel time series, fit windows and slope table.",
+      "source_basis": "Section 3.1 and Fig. 2: seven-year smoothing and the two trend windows; endpoint handling must be frozen.",
+      "reference_figures": [
+        "images/Zheng2026_Fig2_upper.png",
+        "images/Zheng2026_Fig2_middle.png",
+        "images/Zheng2026_Fig2_deep.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q08-V01",
+          "reference_figure": "images/Zheng2026_Fig2_upper.png",
+          "source_panel": "Fig. 2a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q08-CM-Zheng2026_Fig2",
+          "required_information": [
+            "Original and seven-year-smoothed upper-layer circulation series with an explicit year axis and absolute units.",
+            "Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+          "source_basis": "10.1016/j.scib.2025.12.033; Fig. 2a; Section 3.1 and Fig. 2: seven-year smoothing and the two trend windows; endpoint handling must be frozen."
+        },
+        {
+          "id": "Q08-V02",
+          "reference_figure": "images/Zheng2026_Fig2_middle.png",
+          "source_panel": "Fig. 2b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q08-CM-Zheng2026_Fig2",
+          "required_information": [
+            "Original and seven-year-smoothed middle-layer circulation series with an explicit year axis and absolute units.",
+            "Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+          "source_basis": "10.1016/j.scib.2025.12.033; Fig. 2b; Section 3.1 and Fig. 2: seven-year smoothing and the two trend windows; endpoint handling must be frozen."
+        },
+        {
+          "id": "Q08-V03",
+          "reference_figure": "images/Zheng2026_Fig2_deep.png",
+          "source_panel": "Fig. 2c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q08-CM-Zheng2026_Fig2",
+          "required_information": [
+            "Original and seven-year-smoothed deep-layer circulation series with an explicit year axis and absolute units.",
+            "Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+          "source_basis": "10.1016/j.scib.2025.12.033; Fig. 2c; Section 3.1 and Fig. 2: seven-year smoothing and the two trend windows; endpoint handling must be frozen."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Three-panel time series, fit windows and slope table."
+      }
+    },
+    {
+      "id": "Q08-C3",
+      "weight": 25,
+      "description": "Compare pre/post-2009 trends in all three layers. Correctly translate signed-index trends into strengthening or weakening, particularly for the negative middle-layer index. State whether a transition is supported by the estimates rather than assuming one from the query.",
+      "evidence_requirements": "Layer-by-period comparison and plot-linked findings.",
+      "source_basis": "Section 3.1: interpret negative middle-layer index carefully; strengthening is not always a positive slope.",
+      "reference_figures": [
+        "images/Zheng2026_Fig2_upper.png",
+        "images/Zheng2026_Fig2_middle.png",
+        "images/Zheng2026_Fig2_deep.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q08-V01",
+          "reference_figure": "images/Zheng2026_Fig2_upper.png",
+          "source_panel": "Fig. 2a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q08-CM-Zheng2026_Fig2",
+          "required_information": [
+            "Original and seven-year-smoothed upper-layer circulation series with an explicit year axis and absolute units.",
+            "Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+          "source_basis": "10.1016/j.scib.2025.12.033; Fig. 2a; Section 3.1: interpret negative middle-layer index carefully; strengthening is not always a positive slope."
+        },
+        {
+          "id": "Q08-V02",
+          "reference_figure": "images/Zheng2026_Fig2_middle.png",
+          "source_panel": "Fig. 2b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q08-CM-Zheng2026_Fig2",
+          "required_information": [
+            "Original and seven-year-smoothed middle-layer circulation series with an explicit year axis and absolute units.",
+            "Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+          "source_basis": "10.1016/j.scib.2025.12.033; Fig. 2b; Section 3.1: interpret negative middle-layer index carefully; strengthening is not always a positive slope."
+        },
+        {
+          "id": "Q08-V03",
+          "reference_figure": "images/Zheng2026_Fig2_deep.png",
+          "source_panel": "Fig. 2c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q08-CM-Zheng2026_Fig2",
+          "required_information": [
+            "Original and seven-year-smoothed deep-layer circulation series with an explicit year axis and absolute units.",
+            "Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+          "source_basis": "10.1016/j.scib.2025.12.033; Fig. 2c; Section 3.1: interpret negative middle-layer index carefully; strengthening is not always a positive slope."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Layer-by-period comparison and plot-linked findings."
+      }
+    },
+    {
+      "id": "Q08-C4",
+      "weight": 20,
+      "description": "Quantify trend uncertainty with temporal dependence accounted for, and assess sensitivity to smoothing or fitting choices without replacing the primary windows after inspecting results. Distinguish basin-integrated changes from local surface circulation; do not claim PDO, wind or pressure causality without those inputs.",
+      "evidence_requirements": "Intervals/dependence treatment, a robustness check and limitations.",
+      "source_basis": "Paper discusses limits; dependence-aware uncertainty and sensitivity are added benchmark quality checks.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q08-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostic tables and reproducible notebook record.",
+      "source_basis": "Benchmark delivery requirement.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Zheng2026_Fig2_upper.png",
+      "source_doi": "10.1016/j.scib.2025.12.033",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.2,
+        0.08,
+        0.81,
+        0.19934
+      ],
+      "source_pdf_sha256": "6e8d0fef1cd6d2ae2c66a52cea62f8b88cca97ccf16839d4f8a5a4009fcfc98b",
+      "sha256": "8fafbb61ab544186e2ed828fc7df6e8c2e215e193f82f2455d65f82b8aaa5b96",
+      "criterion_ids": [
+        "Q08-C2",
+        "Q08-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/Cai%26Gan_SB_2026.pdf",
+      "reviewed": true,
+      "role": "Original and seven-year-smoothed upper-layer circulation series with an explicit year axis and absolute units. Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 239334,
+      "source_panel": "Fig. 2a",
+      "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.2,
+            0.08,
+            0.81,
+            0.19934
+          ],
+          "role": "Fig. 2a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Zheng2026_Fig2_middle.png",
+      "source_doi": "10.1016/j.scib.2025.12.033",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.2,
+        0.2007,
+        0.6819000000000002,
+        0.3044
+      ],
+      "source_pdf_sha256": "6e8d0fef1cd6d2ae2c66a52cea62f8b88cca97ccf16839d4f8a5a4009fcfc98b",
+      "sha256": "142a4d57dfa03e94a30e9f9dbd900e3fc98ba587a0ede7f3b758c82da55075be",
+      "criterion_ids": [
+        "Q08-C2",
+        "Q08-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/Cai%26Gan_SB_2026.pdf",
+      "reviewed": true,
+      "role": "Original and seven-year-smoothed middle-layer circulation series with an explicit year axis and absolute units. Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 152781,
+      "source_panel": "Fig. 2b",
+      "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.2,
+            0.2007,
+            0.6819000000000002,
+            0.3044
+          ],
+          "role": "Fig. 2b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.2,
+            0.40741999999999995,
+            0.6819000000000002,
+            0.42
+          ],
+          "role": "Shared year-axis labels from Fig. 2c; aligned to the same time coordinate.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            86.30679369999996
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Zheng2026_Fig2_deep.png",
+      "source_doi": "10.1016/j.scib.2025.12.033",
+      "pdf_page": 4,
+      "crop_fraction_top_left": [
+        0.2,
+        0.3078,
+        0.81,
+        0.42
+      ],
+      "source_pdf_sha256": "6e8d0fef1cd6d2ae2c66a52cea62f8b88cca97ccf16839d4f8a5a4009fcfc98b",
+      "sha256": "1fe37b1fb26b924959318cee562ebb8563eeb2228ea605330d05b7a79aec7f16",
+      "criterion_ids": [
+        "Q08-C2",
+        "Q08-C3"
+      ],
+      "source_url": "https://www.math.hkust.edu.hk/~magan/papers/Cai%26Gan_SB_2026.pdf",
+      "reviewed": true,
+      "role": "Original and seven-year-smoothed deep-layer circulation series with an explicit year axis and absolute units. Separate fits for 1993-2008 and 2009-2018; signed slopes and strengthening/weakening must agree with computed values.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "bytes": 231431,
+      "source_panel": "Fig. 2c",
+      "source_context": "PDO, wind, pressure and density overlays are source context only. Do not require unsupplied attribution inputs.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.2,
+            0.3078,
+            0.81,
+            0.42
+          ],
+          "role": "Fig. 2c",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "visual_scope": "Original-paper visual check: Fig. 2a-c, CMOMS curves/trends only, for C2-C3. PDO, WSC, planetary-flux, EN4 and pressure overlays are not scored. Detrended interlayer correlations are optional until the exact Supplementary Fig. S4 processing is verified.",
+  "release_requirements": [
+    "Obtain authorized, experiment-matched inputs and freeze their SHA-256 manifest.",
+    "Freeze geometry, masks, averaging conventions and all unresolved source definitions.",
+    "Compute independent numerical references and reviewed tolerances; never use an evaluated agent's output as its own reference.",
+    "Review weights, source-image rights and independent notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

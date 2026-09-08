@@ -36,6 +36,7 @@ from oceanx.expert_execution import (
     ExpertCodeExecutionError,
     ExpertCodeExecutionService,
 )
+from oceanx.exploration import ExplorationInput, exploration_action
 from oceanx.jina_reader import JinaReaderTool
 from oceanx.protocol.v2.models import EventEnvelope
 from oceanx.research_learning import (
@@ -214,9 +215,35 @@ class OceanResourcesTool(_OceanTool):
     name = "ocean_resources"
     description = (
         "List current workspace resources or inspect one immutable resource. The Coordinator sees "
-        "only routing identity; scientific content must be assigned to an Expert."
+        "routing identity and task_outputs from all request rounds, with candidate/published state "
+        "and exact published citation tokens. Use this when continuing an interrupted task. "
+        "Scientific content must be assigned to an Expert."
     )
     input_model = OceanResourcesInput
+
+    def _task_outputs(self) -> list[dict[str, Any]]:
+        if self.services.task_id is None:
+            return []
+        records = self.services.store.list_task_team_work(
+            workspace_id=self.services.workspace_id, task_id=self.services.task_id
+        )
+        outputs: dict[str, dict[str, Any]] = {}
+        for record in records:
+            if record.result is None:
+                continue
+            for output in record.result.outputs:
+                ref = output.result_ref
+                outputs[output.path] = {
+                    "path": output.path,
+                    "title": output.title,
+                    "state": "published" if ref else "candidate",
+                    "origin_request_id": record.work_order.parent_request_id,
+                    "result_ref": ref.model_dump(mode="json") if ref else None,
+                    "citation": f"[[result:{ref.task_id}/{ref.result_id}@v{ref.version}|{output.title}]]"
+                    if ref
+                    else None,
+                }
+        return list(outputs.values())
 
     def is_read_only(self, arguments: OceanResourcesInput) -> bool:
         del arguments
@@ -252,6 +279,7 @@ class OceanResourcesTool(_OceanTool):
                         ).revision,
                         "access_scope": "routing",
                         "task_sources": task_sources,
+                        "task_outputs": self._task_outputs(),
                     }
                 )
             summaries = self.services.store.list_artifact_summaries(self.services.workspace_id)
@@ -432,9 +460,7 @@ class OceanLoadSkillTool(_OceanTool):
             else:
                 content = evolved.content
                 skill_name = evolved.skill_name
-                skill_version = (
-                    f"workspace:v{evolved.version}:sha256:{evolved.content_sha256[:12]}"
-                )
+                skill_version = f"workspace:v{evolved.version}:sha256:{evolved.content_sha256[:12]}"
             usage_id = record_ocean_resource_use(
                 self.services.store,
                 workspace_id=self.services.workspace_id,
@@ -491,6 +517,63 @@ class OceanSaveExperienceInput(OceanToolInput):
     )
 
 
+class OceanExplorationTool(_OceanTool):
+    name = "ocean_exploration"
+    description = (
+        "Maintain your research tree whenever investigating an open question or competing explanations. "
+        "Do not wait for the user to request a tree. Standalone factual answers, reading, downloads "
+        "and specified plots need no tree; supporting work inside research belongs to its root. "
+        "start uses mode=ideas for ideation without execution, iterative for investigations; "
+        "default budget is 12 ideas. read returns compact branch context, a recommendation and recent "
+        "task observation IDs and saved tree_text for the final answer. propose adds up to four "
+        "distinct ideas with feasible tests under node_id. "
+        "record links returned evidence to an idea; information_gain is your justified 0..1 assessment "
+        "of knowledge gained, not confidence, novelty or an automatic Bayesian reward. Contradictions "
+        "can be valuable; tool failures are deferred with zero gain. Recommendations never authorize "
+        "experiments. Act on expand by proposing children or record why the branch is exhausted/blocked, "
+        "then choose another. supported does not mean solved: branch_status stays open until the "
+        "Coordinator determines that a main hypothesis answers the root question with key checks "
+        "passed. Mark that main branch solved, or exhaust all branches, before reporting research "
+        "completion. Budget/user stops are interruptions. Execute only user-authorized work through "
+        "existing Experts. pause at the requested "
+        "stopping point; resume or enlarge budgets only within renewed user scope. Mutations require "
+        "expected_revision (0 for start). No background exploration or model calls occur in this tool."
+    )
+    input_model = ExplorationInput
+
+    def is_read_only(self, arguments: ExplorationInput) -> bool:
+        return arguments.action == "read"
+
+    def effect_for(self, arguments: ExplorationInput) -> ToolEffect:
+        return ToolEffect.READ_ONLY if self.is_read_only(arguments) else ToolEffect.MUTATION
+
+    def concurrency_key(self, arguments: ExplorationInput) -> str:
+        return f"exploration:{self.services.workspace_id}:{self.services.task_id}"
+
+    async def execute(
+        self, arguments: ExplorationInput, context: ToolExecutionContext
+    ) -> ToolResult:
+        if self.services.task_id is None or self.services.skill_role != "coordinator":
+            return self._error("Only the task Coordinator can manage research exploration")
+
+        async def action() -> ToolResult:
+            return self._json(
+                exploration_action(
+                    self.services.store,
+                    self.services.workspace_id,
+                    self.services.task_id,
+                    arguments,
+                )
+            )
+
+        if self.is_read_only(arguments):
+            try:
+                return await action()
+            except (RequestStoreError, ValueError) as exc:
+                return self._error(str(exc))
+        return await self._run_mutation(context, action)
+
+
 class OceanSaveExperienceTool(_OceanTool):
     name = "ocean_save_experience"
     description = (
@@ -525,11 +608,7 @@ class OceanSaveExperienceTool(_OceanTool):
                 or self.services.expert_result_origin_request_id
                 or f"agent_saved:{task_id}"
             )
-            agent_id = (
-                self.services.expert_child_id
-                or self.services.agent_thread_id
-                or role
-            )
+            agent_id = self.services.expert_child_id or self.services.agent_thread_id or role
             saved = self.services.store.save_experience(
                 workspace_id=self.services.workspace_id,
                 task_id=task_id,
@@ -550,6 +629,44 @@ class OceanSaveExperienceTool(_OceanTool):
             )
 
         return await self._run_mutation(context, action)
+
+
+class OceanReadFileInput(OceanToolInput):
+    path: str = Field(min_length=1)
+    offset: int = Field(default=0, ge=0, description="Character offset, starting at zero")
+    limit: int = Field(default=6_000, ge=1, le=12_000)
+
+
+class OceanReadFileTool(_OceanTool):
+    name = "ocean_read_file"
+    description = (
+        "Read saved UTF-8 text from this Expert's persistent session, including earlier rounds. "
+        "Use the exact logs or result_bundle_path returned by ocean_expert_run_code or session "
+        "memory to retrieve omitted results without running Python or recomputing. Follow "
+        "next_offset to read more. Binary arrays require scientific code."
+    )
+    input_model = OceanReadFileInput
+
+    def effect_for(self, arguments: OceanReadFileInput) -> ToolEffect:
+        return ToolEffect.READ_ONLY
+
+    async def execute(
+        self, arguments: OceanReadFileInput, context: ToolExecutionContext
+    ) -> ToolResult:
+        service = self.services.expert_code_execution
+        if service is None or not self.services.task_id or not self.services.work_order_id:
+            return self._error("Expert file reading is unavailable in this session")
+        try:
+            return self._json(
+                service.read_expert_file(
+                    workspace_id=self.services.workspace_id,
+                    task_id=self.services.task_id,
+                    work_order_id=self.services.work_order_id,
+                    **arguments.model_dump(),
+                )
+            )
+        except (ExpertCodeExecutionError, RequestStoreError, OSError, ValueError) as exc:
+            return self._error(str(exc))
 
 
 class OceanExpertRunCodeInput(OceanToolInput):
@@ -664,7 +781,6 @@ class OceanExpertRunCodeTool(_OceanTool):
                 "outputs",
                 "code_path",
                 "work_root",
-                "result_bundle_path",
                 "result_fingerprint",
                 "discovered_results",
             ):
@@ -678,7 +794,7 @@ class OceanExpertRunCodeTool(_OceanTool):
                     # command cannot dominate every subsequent model turn.
                     payload[stream_name] = (
                         stream[:1_120]
-                        + "\n... [middle omitted; full stream is stored in the CodeExecution] ...\n"
+                        + f"\n... [middle omitted; use ocean_read_file on logs.{stream_name}] ...\n"
                         + stream[-1_120:]
                     )
                     payload[f"{stream_name}_truncated"] = True
@@ -1116,8 +1232,8 @@ async def _materialize_declared_result(
 
 
 class OceanPublishOutputsInput(OceanToolInput):
-    accepted_paths: tuple[Annotated[str, Field(min_length=1, max_length=512)], ...] = (
-        Field(min_length=1, max_length=64)
+    accepted_paths: tuple[Annotated[str, Field(min_length=1, max_length=512)], ...] = Field(
+        min_length=1, max_length=64
     )
     review_summary: str = Field(
         min_length=1,
@@ -1169,8 +1285,8 @@ class OceanPublishOutputsTool(_OceanTool):
             )
             candidates: dict[str, tuple[Any, ExpertOutput]] = {}
             for record in records:
-                if context.request_id and record.work_order.parent_request_id != context.request_id:
-                    continue
+                # Candidates belong to the task, including earlier interrupted
+                # requests. A follow-up Coordinator can review and publish them.
                 if record.result is None:
                     continue
                 for output in record.result.outputs:
@@ -1188,7 +1304,9 @@ class OceanPublishOutputsTool(_OceanTool):
                 work_record, candidate = candidates[output_path]
                 execution = self.services.store.get_code_execution(candidate.execution_id)
                 if execution is None or execution.result is None:
-                    return self._error(f"Candidate execution is not a durable record: {output_path}")
+                    return self._error(
+                        f"Candidate execution is not a durable record: {output_path}"
+                    )
                 declared: _FrameworkResultEvent | None = None
                 for raw_event in execution.result.get("discovered_results", ()):
                     if not isinstance(raw_event, dict):
@@ -1380,6 +1498,17 @@ class OceanTodoInput(OceanToolInput):
 
 
 class OceanAssignmentInput(OceanToolInput):
+    research_question: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=1_000,
+        description=(
+            "For an investigation, supply its root research question on EVERY wave, including "
+            "supporting data checks and follow-ups. This initializes a missing research tree and "
+            "returns its context with Expert results. The user need not explicitly request a tree. "
+            "Leave null only for direct tasks such as a specified plot, download or calculation."
+        ),
+    )
     plan_goal: str = Field(
         min_length=1,
         max_length=8_000,
@@ -1427,15 +1556,15 @@ class OceanAssignmentInput(OceanToolInput):
             for todo_id in self.dispatch
         ]
         duplicate_experts = sorted(
-            expert
-            for expert in set(dispatched_experts)
-            if dispatched_experts.count(expert) > 1
+            expert for expert in set(dispatched_experts) if dispatched_experts.count(expert) > 1
         )
         if duplicate_experts:
             raise ValueError(
                 "dispatch may contain at most one todo per Expert instance; sequence additional "
                 "work through that stable instance or use distinct expert_key values: "
-                + ", ".join(f"{profile_id}/{expert_key}" for profile_id, expert_key in duplicate_experts)
+                + ", ".join(
+                    f"{profile_id}/{expert_key}" for profile_id, expert_key in duplicate_experts
+                )
             )
         return self
 
@@ -1444,7 +1573,9 @@ class OceanAssignmentTool(_OceanTool):
     name = "ocean_assign"
     description = (
         "Submit the Coordinator's complete finite scientific TodoPlan and dispatch one selected "
-        "wave from it. Include every todo in todos on every call; list only the ids selected for "
+        "wave. For investigations set research_question and maintain hypotheses with ocean_exploration; "
+        "update the finite plan as evidence changes, rather than preplanning all scientific tests. "
+        "Include every todo in todos on every call; list only the ids selected for "
         "this wave in dispatch. Independent dispatched todos run in parallel. After ExpertResults "
         "return, the Coordinator alone decides whether to accept, follow up, or revisit a todo. "
         "profile_id selects the capability type and expert_key selects a stable task-scoped Expert "
@@ -1474,8 +1605,44 @@ class OceanAssignmentTool(_OceanTool):
             return self._error("Team assignment is unavailable")
 
         async def action() -> ToolResult:
-            value = await self.services.team_assign_sink(arguments.model_dump(mode="json"), context)
-            return self._json(value, metadata={"team_work": value})
+            research = arguments.research_question is not None
+
+            def tree_action(action, **kwargs):
+                return exploration_action(
+                    self.services.store,
+                    self.services.workspace_id,
+                    self.services.task_id,
+                    ExplorationInput(action=action, **kwargs),
+                )
+
+            if research:
+                tree = tree_action("read")
+                if tree["revision"] == 0:
+                    tree_action(
+                        "start",
+                        expected_revision=0,
+                        goal=arguments.research_question,
+                        mode="iterative",
+                    )
+                elif not tree["active"] or tree["mode"] != "iterative":
+                    tree_action("resume", expected_revision=tree["revision"], mode="iterative")
+            # Research context belongs to the Coordinator, not the expert WorkOrder schema.
+            value = await self.services.team_assign_sink(
+                arguments.model_dump(mode="json", exclude={"research_question"}), context
+            )
+            payload = dict(value)
+            if research:
+                payload["research_exploration"] = tree_action("read")
+                payload["research_next_step"] = (
+                    "Update the tested hypothesis with returned evidence before selecting another "
+                    "test. If this was prerequisite inspection, propose evidence-grounded hypotheses "
+                    "now. Act on UCB expand: propose children or record branch_status=exhausted/blocked "
+                    "with a reason and select another branch. supported is not solved. Finish only "
+                    "when a main branch resolves the root question or all branches are exhausted; "
+                    "budget/user stops are interruptions. "
+                    "Include the saved tree_text in your final answer."
+                )
+            return self._json(payload, metadata={"team_work": value})
 
         return await self._run_mutation(context, action)
 
@@ -1625,9 +1792,7 @@ def _create_web_search_tool(services: OceanToolServices) -> WebSearchTool:
     return WebSearchTool(on_response=record_search)
 
 
-def _register_agent_skill_tools(
-    registry: ToolRegistry, services: OceanToolServices
-) -> None:
+def _register_agent_skill_tools(registry: ToolRegistry, services: OceanToolServices) -> None:
     if services.skill_role is None:
         return
     registry.register(OceanListSkillsTool(services))
@@ -1639,15 +1804,13 @@ def _register_agent_skill_tools(
 def create_ocean_lead_tool_registry(services: OceanToolServices) -> ToolRegistry:
     registry = ToolRegistry()
     _register_agent_skill_tools(registry, services)
+    if services.task_id is not None and services.skill_role == "coordinator":
+        registry.register(OceanExplorationTool(services))
     for tool in (
         OceanResourcesTool(services),
         _create_web_search_tool(services),
         *((OceanAssignmentTool(services),) if services.team_assign_sink else ()),
-        *(
-            (OceanRequestPaperSelectionTool(services),)
-            if services.paper_selection_sink
-            else ()
-        ),
+        *((OceanRequestPaperSelectionTool(services),) if services.paper_selection_sink else ()),
         *((OceanPublishOutputsTool(services),) if services.expert_deliverables else ()),
     ):
         registry.register(tool)
@@ -1663,6 +1826,7 @@ def create_ocean_expert_tool_registry(services: OceanToolServices) -> ToolRegist
         registry.register(JinaReaderTool())
     if services.expert_code_execution is not None:
         registry.register(OceanExpertRunCodeTool(services))
+        registry.register(OceanReadFileTool(services))
     return registry
 
 

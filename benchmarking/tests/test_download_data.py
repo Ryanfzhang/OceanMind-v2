@@ -1,4 +1,4 @@
-"""Offline regression tests; run with python -m unittest discover -s benchmarking/download."""
+"""Offline downloader regression tests; run with pytest benchmarking/tests."""
 import copy
 import importlib.util
 import json
@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-spec = importlib.util.spec_from_file_location("download_data", Path(__file__).with_name("download_data.py"))
+spec = importlib.util.spec_from_file_location("download_data", Path(__file__).resolve().parents[1] / "download/download_data.py")
 down = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(down)
 

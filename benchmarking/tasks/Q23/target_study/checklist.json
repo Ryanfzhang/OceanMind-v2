@@ -1,0 +1,386 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.1-panel-evidence-draft",
+  "status": "draft",
+  "task_id": "Q23",
+  "title": "2023 East China Sea marine heatwave",
+  "query_sha256": "e1c08c78d8cb5e6be3c43ffb77d819a9f2cd468716b23468eae011895d61229a",
+  "data_fingerprint": null,
+  "reference_mode": "Original paper period and domain; freeze OISST release and exact climatology implementation.",
+  "paper": {
+    "citation": "Oh et al. (2024)",
+    "title": "Late-arriving 2023 summer marine heatwave in the East China Sea and implications for global warming",
+    "doi": "10.1038/s41612-024-00846-4",
+    "url": "https://doi.org/10.1038/s41612-024-00846-4"
+  },
+  "reference_text": "Score actual executed evidence, not agreement by quotation. Published figures support diagnostic comparison; frozen-data numerical tolerances require independent computation. Do not require unperformed extensions or unavailable model experiments.\n\nPublished result context (not a validated numerical answer): Oh Results/Fig. 2 reports an August 12–October 13 long event (63 days), with maximum intensity about 2.06 C on September 29. Freeze exact OISST processing, event joining and reporting boundaries before numerical tolerances; event counts and total heatwave days are different statistics.",
+  "criteria": [
+    {
+      "id": "Q23-C1",
+      "weight": 20,
+      "description": "Build the regional SST series and fixed 1982–2011 calendar-day climatology/90th-percentile threshold using 11-day windows; document spatial averaging, leap-day and valid-mask treatment.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Results, first subsection:1982–2011, 11-day thresholds and five-day events.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q23-C2",
+      "weight": 25,
+      "description": "Detect episodes exceeding the threshold for at least five consecutive days, joining one-day gaps as specified. Preserve true event boundaries outside the reporting window.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Results states one-day gaps; Figure 2a and event discussion cross the reporting boundary.",
+      "reference_figures": [
+        "images/Oh2024_Fig2_sst_threshold.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q23-V01",
+          "reference_figure": "images/Oh2024_Fig2_sst_threshold.png",
+          "source_panel": "Fig. 2a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "2023 SST, fixed-baseline climatology and 90th-percentile threshold on a dated axis with temperature units.",
+            "Event intervals, onset and intensity must follow the specified persistence/gap rules, not a hand-drawn warm period."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2a; Results states one-day gaps; Figure 2a and event discussion cross the reporting boundary."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q23-C3",
+      "weight": 25,
+      "description": "Calculate2023 onset, duration, maximum intensity and total MHW days, then compare annual event frequency, intensity, longest duration and seasonal timing across 1982–2023.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Results and Fig. 2a–c: event and historical metrics.",
+      "reference_figures": [
+        "images/Oh2024_Fig2_sst_threshold.png",
+        "images/Oh2024_Fig2_seasonal_distribution.png",
+        "images/Oh2024_Fig2_annual_metrics.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q23-V01",
+          "reference_figure": "images/Oh2024_Fig2_sst_threshold.png",
+          "source_panel": "Fig. 2a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "2023 SST, fixed-baseline climatology and 90th-percentile threshold on a dated axis with temperature units.",
+            "Event intervals, onset and intensity must follow the specified persistence/gap rules, not a hand-drawn warm period."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2a; Results and Fig. 2a–c: event and historical metrics."
+        },
+        {
+          "id": "Q23-V02",
+          "reference_figure": "images/Oh2024_Fig2_seasonal_distribution.png",
+          "source_panel": "Fig. 2b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "Historical seasonal timing of MHW occurrence with binning and denominator stated.",
+            "Distinguish probability density, event counts and MHW days; connect the 2023 timing to the historical record."
+          ],
+          "acceptable_alternatives": [
+            "Histogram, seasonal probability curve or equivalent timing distribution with the same denominator."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2b; Results and Fig. 2a–c: event and historical metrics."
+        },
+        {
+          "id": "Q23-V03",
+          "reference_figure": "images/Oh2024_Fig2_annual_metrics.png",
+          "source_panel": "Fig. 2c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "1982-2023 annual event frequency, intensity and longest duration with distinct units/axes.",
+            "Separate whole-event duration from June-October overlap days; quantify the 2023 comparison."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2c; Results and Fig. 2a–c: event and historical metrics."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q23-C4",
+      "weight": 20,
+      "description": "Present the seasonal SST/threshold plot and historical distributions/time series, clearly distinguishing event counts from MHW days and whole-event duration from days within June–October.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Fig. 2's three panels; distinguish its frequency axis from the text's total MHW-day statistic.",
+      "reference_figures": [
+        "images/Oh2024_Fig2_sst_threshold.png",
+        "images/Oh2024_Fig2_seasonal_distribution.png",
+        "images/Oh2024_Fig2_annual_metrics.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q23-V01",
+          "reference_figure": "images/Oh2024_Fig2_sst_threshold.png",
+          "source_panel": "Fig. 2a",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "2023 SST, fixed-baseline climatology and 90th-percentile threshold on a dated axis with temperature units.",
+            "Event intervals, onset and intensity must follow the specified persistence/gap rules, not a hand-drawn warm period."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2a; Fig. 2's three panels; distinguish its frequency axis from the text's total MHW-day statistic."
+        },
+        {
+          "id": "Q23-V02",
+          "reference_figure": "images/Oh2024_Fig2_seasonal_distribution.png",
+          "source_panel": "Fig. 2b",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "Historical seasonal timing of MHW occurrence with binning and denominator stated.",
+            "Distinguish probability density, event counts and MHW days; connect the 2023 timing to the historical record."
+          ],
+          "acceptable_alternatives": [
+            "Histogram, seasonal probability curve or equivalent timing distribution with the same denominator."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2b; Fig. 2's three panels; distinguish its frequency axis from the text's total MHW-day statistic."
+        },
+        {
+          "id": "Q23-V03",
+          "reference_figure": "images/Oh2024_Fig2_annual_metrics.png",
+          "source_panel": "Fig. 2c",
+          "requirement": "scientific_information",
+          "evidence_group": "Q23-Oh2024_Fig02",
+          "required_information": [
+            "1982-2023 annual event frequency, intensity and longest duration with distinct units/axes.",
+            "Separate whole-event duration from June-October overlap days; quantify the 2023 comparison."
+          ],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+          "source_basis": "10.1038/s41612-024-00846-4; Fig. 2c; Fig. 2's three panels; distinguish its frequency axis from the text's total MHW-day statistic."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q23-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Oh2024_Fig2_sst_threshold.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 3,
+      "crop_fraction_top_left": [
+        0.39,
+        0.056,
+        0.946,
+        0.23556
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "fa314314c341d812550c75d17181ea195ab86de85b3111d6bef6e34971e25166",
+      "criterion_ids": [
+        "Q23-C2",
+        "Q23-C3",
+        "Q23-C4"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "2023 SST, fixed-baseline climatology and 90th-percentile threshold on a dated axis with temperature units. Event intervals, onset and intensity must follow the specified persistence/gap rules, not a hand-drawn warm period.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 150739,
+      "source_panel": "Fig. 2a",
+      "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.39,
+            0.056,
+            0.946,
+            0.23556
+          ],
+          "role": "Fig. 2a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Oh2024_Fig2_seasonal_distribution.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 3,
+      "crop_fraction_top_left": [
+        0.39,
+        0.23823999999999998,
+        0.946,
+        0.40975999999999996
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "7b8fbd2ed254fbdac8f225cbfce180d624c869c462f20878a278b77e151ec80c",
+      "criterion_ids": [
+        "Q23-C3",
+        "Q23-C4"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "Historical seasonal timing of MHW occurrence with binning and denominator stated. Distinguish probability density, event counts and MHW days; connect the 2023 timing to the historical record.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 72061,
+      "source_panel": "Fig. 2b",
+      "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.39,
+            0.23823999999999998,
+            0.946,
+            0.40975999999999996
+          ],
+          "role": "Fig. 2b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Oh2024_Fig2_annual_metrics.png",
+      "source_doi": "10.1038/s41612-024-00846-4",
+      "pdf_page": 3,
+      "crop_fraction_top_left": [
+        0.39,
+        0.41565599999999997,
+        0.946,
+        0.592
+      ],
+      "source_pdf_sha256": "9634ffb11bc4bb0ed3e88e9cb2473a427c81f051fe9d2747c482cdb664556cb8",
+      "sha256": "9253fc54d2ab7f38217197eb54061c5445f84bb0970060e59a7c7c8d03051d56",
+      "criterion_ids": [
+        "Q23-C3",
+        "Q23-C4"
+      ],
+      "source_url": "https://doi.org/10.1038/s41612-024-00846-4",
+      "role": "1982-2023 annual event frequency, intensity and longest duration with distinct units/axes. Separate whole-event duration from June-October overlap days; quantify the 2023 comparison.",
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "reviewed": true,
+      "bytes": 211129,
+      "source_panel": "Fig. 2c",
+      "source_context": "Style, dual axes and colors are not prescribed. Numerical event definitions and the frozen SST release control the comparison.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.39,
+            0.41565599999999997,
+            0.946,
+            0.592
+          ],
+          "role": "Fig. 2c",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "release_requirements": [
+    "Obtain authorized original-period inputs, record product versions/QC and freeze the input fingerprint.",
+    "Freeze spatial masks, interpolation, temporal processing and any unresolved original-method parameters.",
+    "Independently compute numerical targets and review tolerances on those inputs.",
+    "Review source-image permissions and notebook execution before validated release."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

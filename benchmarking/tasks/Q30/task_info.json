@@ -1,7 +1,84 @@
 {
   "id": "Q30",
   "track": "idea_hypothesis",
-  "title": "Improving a surface-based subsurface estimate",
-  "query": "Using the supplied papers and Gulf of Mexico data, propose and test one interpretable modification to an SSH-based estimate of subsurface thermal structure. Evaluate whether it improves performance on withheld periods or eddies rather than only fitting the training data.\n\nFormulate one specific, falsifiable hypothesis before testing it. Define the test, a plausible alternative explanation, and the conditions for rejecting the hypothesis. Report whether the evidence supports, contradicts, or cannot resolve it.",
-  "data_status": "pending_subset_selection"
+  "title": "An idea about surface information and subsurface hydrography",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "query": "Read the supplied related work on Gulf of Mexico hydrography and sea-level structure. Using only co-located public GLORYS temperature, salinity and sea-surface height for July 2011-August 2015 (98-82 W, 18-30 N), propose and test one falsifiable idea about information in sea level for upper-ocean or thermocline structure. Choose the response and comparator yourself. If predicting subsurface properties, use blocked time or space evaluation and a meaningful climatological baseline; model-internal held-out performance is not independent observational validation. No original float cycles or additional satellite archive is required. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "analysis_period": "July 2011–August 2015",
+  "data_groups": [
+    "P_GULF"
+  ],
+  "required_variables": [
+    "thetao",
+    "so",
+    "zos",
+    "coordinates/depth"
+  ],
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_scope": {
+    "source": "GLORYS12 daily public reanalysis",
+    "period": "July 2011–August 2015",
+    "region": "98–82 W, 18–30 N",
+    "sampling": "Daily",
+    "depth": "Native levels from surface to 2000 m",
+    "fields": [
+      "thetao",
+      "so",
+      "zos",
+      "coordinates/depth"
+    ],
+    "access": "https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description",
+    "status": "scripted_acquisition_pending_execution",
+    "limits": "The papers' observations are not identical to GLORYS inputs; same-region methodological inspiration only. Do not claim independent validation using variables from one assimilating model."
+  },
+  "related_work": [
+    {
+      "id": "miranda2025",
+      "citation": "Miranda et al. (2025)",
+      "title": "Neural Synthetic Profiles from Remote Sensing and Observations (NeSPReSO) — Reconstructing temperature and salinity fields in the Gulf of Mexico",
+      "year": 2025,
+      "journal": "Ocean Modelling",
+      "doi": "10.1016/j.ocemod.2025.102550",
+      "url": "https://doi.org/10.1016/j.ocemod.2025.102550",
+      "verification_source": "https://www.sciencedirect.com/science/article/pii/S1463500325000538",
+      "verification_scope": "publisher_abstract",
+      "source_dataset": "Gulf of Mexico Argo profiles, satellite surface data and additional glider evaluation; not the same frozen float/cycle sample as Hamilton2018.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "thirion2024",
+      "citation": "Thirion et al. (2024)",
+      "title": "Loop Current Eddies as a Possible Cause of the Rapid Sea Level Rise in the Gulf of Mexico",
+      "year": 2024,
+      "journal": "Journal of Geophysical Research: Oceans",
+      "doi": "10.1029/2023JC019764",
+      "url": "https://doi.org/10.1029/2023JC019764",
+      "verification_source": "https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2023JC019764",
+      "verification_scope": "publisher_abstract_and_summary",
+      "source_dataset": "Gulf of Mexico altimetry and Argo-derived subsurface products;1993–2020 basin analysis, not a matched short float campaign.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    },
+    {
+      "id": "hamilton2018",
+      "citation": "Hamilton et al. (2018)",
+      "title": "Hydrography of the Gulf of Mexico Using Autonomous Floats",
+      "year": 2018,
+      "journal": "Journal of Physical Oceanography",
+      "doi": "10.1175/JPO-D-17-0205.1",
+      "url": "https://doi.org/10.1175/JPO-D-17-0205.1",
+      "verification_source": "https://doi.org/10.1175/JPO-D-17-0205.1",
+      "verification_scope": "existing_benchmark_paper_record",
+      "source_dataset": "Gulf of Mexico autonomous/APEX and Argo profiles with matched altimetry, July2011–August2015.",
+      "full_text_pack_status": "pending_staging_and_full_text_review",
+      "staged_path": null,
+      "sha256": null
+    }
+  ],
+  "reading_pack_status": "citations_selected_full_text_pack_not_staged",
+  "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
+  "reading_data_alignment": "The papers' observations are not identical to GLORYS inputs; same-region methodological inspiration only. Do not claim independent validation using variables from one assimilating model."
 }

@@ -1,0 +1,416 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "status": "draft",
+  "task_id": "Q18",
+  "title": "Tracking a Loop Current-region eddy in reanalysis",
+  "query_sha256": "ce0eb78c9c58a102801d2d2d0bdde2969248021bad2ad975b9dffbb1ec17f1e9",
+  "data_fingerprint": null,
+  "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "paper": {
+    "citation": "Meunier et al. (2018)",
+    "title": "The Vertical Structure of a Loop Current Eddy",
+    "doi": "10.1029/2018JC013801",
+    "url": "https://doi.org/10.1029/2018JC013801"
+  },
+  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing daily GLORYS sea-surface height in the Gulf of Mexico from July 2015 to November 2016, identify one resolved anticyclonic feature that separates from the Loop Current region. Track its centre, enclosed area and westward displacement over its reliably connected trajectory and show representative maps. State sensitivity to the sea-level criterion and gaps/ambiguous matches; do not require the feature or dates to coincide with the observed Poseidon chronology. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "criteria": [
+    {
+      "id": "Q18-C1",
+      "weight": 20,
+      "description": "Define detection and temporal matching using model zos with a consistent datum, relative contour and domain; distinguish a local maximum from a detached connected component.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.1.1 defines satellite-based eddy identification. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q18-C2",
+      "weight": 25,
+      "description": "Show representative maps before/after identified separation and throughout the reliable track, with a documented connectivity criterion. If no robust separation is resolved, present the tested maps/rules as a negative result.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3.1.1 and Fig. 2 document necking, separation and reattachment. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Meunier2018_Fig2_apr_may.png",
+        "images/Meunier2018_Fig2_jun_jul.png",
+        "images/Meunier2018_Fig2_aug_sep.png",
+        "images/Meunier2018_Fig2_oct_nov.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q18-V01",
+          "reference_figure": "images/Meunier2018_Fig2_apr_may.png",
+          "source_panel": "Fig. 2, apr / may 2016",
+          "requirement": "context_only",
+          "evidence_group": "Q18-G-P2_Fig02",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Dated ADT snapshots, a trajectory/connectivity visualization or another spatial-temporal display resolving the same events."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2018JC013801; Fig. 2, apr / may 2016; Section 3.1.1 and Fig. 2 document necking, separation and reattachment."
+        },
+        {
+          "id": "Q18-V02",
+          "reference_figure": "images/Meunier2018_Fig2_jun_jul.png",
+          "source_panel": "Fig. 2, jun / jul 2016",
+          "requirement": "context_only",
+          "evidence_group": "Q18-G-P2_Fig02",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Dated ADT snapshots, a trajectory/connectivity visualization or another spatial-temporal display resolving the same events."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2018JC013801; Fig. 2, jun / jul 2016; Section 3.1.1 and Fig. 2 document necking, separation and reattachment."
+        },
+        {
+          "id": "Q18-V03",
+          "reference_figure": "images/Meunier2018_Fig2_aug_sep.png",
+          "source_panel": "Fig. 2, aug / sep 2016",
+          "requirement": "context_only",
+          "evidence_group": "Q18-G-P2_Fig02",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Dated ADT snapshots, a trajectory/connectivity visualization or another spatial-temporal display resolving the same events."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2018JC013801; Fig. 2, aug / sep 2016; Section 3.1.1 and Fig. 2 document necking, separation and reattachment."
+        },
+        {
+          "id": "Q18-V04",
+          "reference_figure": "images/Meunier2018_Fig2_oct_nov.png",
+          "source_panel": "Fig. 2, oct / nov 2016",
+          "requirement": "context_only",
+          "evidence_group": "Q18-G-P2_Fig02",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Dated ADT snapshots, a trajectory/connectivity visualization or another spatial-temporal display resolving the same events."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1029/2018JC013801; Fig. 2, oct / nov 2016; Section 3.1.1 and Fig. 2 document necking, separation and reattachment."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q18-C3",
+      "weight": 25,
+      "description": "Calculate centre trajectory, enclosed area and displacement/speed in physical units on reliable matches only; do not join ambiguous features into a fictitious long track.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Fig. 3 reports position/motion, area and ADT evolution. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q18-C4",
+      "weight": 20,
+      "description": "Check a reasonable contour/matching perturbation, report uncertain dates and stop ambiguous tracking. Published Poseidon dates and areas are contextual, not imposed numerical answers.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Paper chronology plus benchmark reproducibility checks; no new generic event forecast. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q18-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Meunier2018_Fig2_apr_may.png",
+      "sha256": "fd6b73363210bb4d803516e6e77c7b04881268a06141d80b939525994ccffe96",
+      "bytes": 545023,
+      "paper_id": "G-P2",
+      "authors": "Meunier et al. (2018)",
+      "title": "The Vertical Structure of a Loop Current Eddy",
+      "source_url": "https://doi.org/10.1029/2018JC013801",
+      "acquisition": "User-supplied publisher PDF, 2026-09-07",
+      "source_pdf_sha256": "77d205fa6fff4fd8387ce9c3bfc6d3293dfff4e4e468c3c28321b99a7680d2a1",
+      "figure": 2,
+      "pdf_page": 4,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q18-C2"
+      ],
+      "source_doi": "10.1029/2018JC013801",
+      "role": "Georeferenced ADT and Loop Current/eddy connectivity at these successive stages with dates, contours and eddy-center/track context. Separation, reattachment and propagation chronology must follow consecutive data, not merely resemble an isolated map.",
+      "crop_fraction_top_left": [
+        0.28,
+        0.115,
+        0.57925,
+        0.4955
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 2, apr / may 2016",
+      "source_context": "Shared ADT colorbar retained without changing its values. Dates are source-stage anchors, not mandatory output dates.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.28,
+            0.115,
+            0.57925,
+            0.4955
+          ],
+          "role": "Fig. 2, apr / may 2016",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.86786,
+            0.1911,
+            0.945,
+            0.8151200000000001
+          ],
+          "role": "Original shared ADT (m) colorbar, uniformly scaled.",
+          "uniform_scale": 0.57,
+          "position_points_top_left": [
+            187.14100000000002,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Two consecutive monthly maps are retained together to show evolution; these are stage anchors, not eight mandatory output dates."
+    },
+    {
+      "path": "images/Meunier2018_Fig2_jun_jul.png",
+      "sha256": "aad351b6f3e697421cdb9f0594ffc79a714971a9828e96b7d6cc867fade4d653",
+      "bytes": 540011,
+      "paper_id": "G-P2",
+      "authors": "Meunier et al. (2018)",
+      "title": "The Vertical Structure of a Loop Current Eddy",
+      "source_url": "https://doi.org/10.1029/2018JC013801",
+      "acquisition": "User-supplied publisher PDF, 2026-09-07",
+      "source_pdf_sha256": "77d205fa6fff4fd8387ce9c3bfc6d3293dfff4e4e468c3c28321b99a7680d2a1",
+      "figure": 2,
+      "pdf_page": 4,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q18-C2"
+      ],
+      "source_doi": "10.1029/2018JC013801",
+      "role": "Georeferenced ADT and Loop Current/eddy connectivity at these successive stages with dates, contours and eddy-center/track context. Separation, reattachment and propagation chronology must follow consecutive data, not merely resemble an isolated map.",
+      "crop_fraction_top_left": [
+        0.28,
+        0.4955,
+        0.57925,
+        0.876
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 2, jun / jul 2016",
+      "source_context": "Shared ADT colorbar retained without changing its values. Dates are source-stage anchors, not mandatory output dates.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.28,
+            0.4955,
+            0.57925,
+            0.876
+          ],
+          "role": "Fig. 2, jun / jul 2016",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.86786,
+            0.1911,
+            0.945,
+            0.8151200000000001
+          ],
+          "role": "Original shared ADT (m) colorbar, uniformly scaled.",
+          "uniform_scale": 0.57,
+          "position_points_top_left": [
+            187.14100000000002,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Two consecutive monthly maps are retained together to show evolution; these are stage anchors, not eight mandatory output dates."
+    },
+    {
+      "path": "images/Meunier2018_Fig2_aug_sep.png",
+      "sha256": "0ef1912effe8455654d4a966d9956b5f590615f8d3dfd6694c98727d2ec85e25",
+      "bytes": 558016,
+      "paper_id": "G-P2",
+      "authors": "Meunier et al. (2018)",
+      "title": "The Vertical Structure of a Loop Current Eddy",
+      "source_url": "https://doi.org/10.1029/2018JC013801",
+      "acquisition": "User-supplied publisher PDF, 2026-09-07",
+      "source_pdf_sha256": "77d205fa6fff4fd8387ce9c3bfc6d3293dfff4e4e468c3c28321b99a7680d2a1",
+      "figure": 2,
+      "pdf_page": 4,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q18-C2"
+      ],
+      "source_doi": "10.1029/2018JC013801",
+      "role": "Georeferenced ADT and Loop Current/eddy connectivity at these successive stages with dates, contours and eddy-center/track context. Separation, reattachment and propagation chronology must follow consecutive data, not merely resemble an isolated map.",
+      "crop_fraction_top_left": [
+        0.5726,
+        0.115,
+        0.8519,
+        0.4955
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 2, aug / sep 2016",
+      "source_context": "Shared ADT colorbar retained without changing its values. Dates are source-stage anchors, not mandatory output dates.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.5726,
+            0.115,
+            0.8519,
+            0.4955
+          ],
+          "role": "Fig. 2, aug / sep 2016",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.86786,
+            0.1911,
+            0.945,
+            0.8151200000000001
+          ],
+          "role": "Original shared ADT (m) colorbar, uniformly scaled.",
+          "uniform_scale": 0.57,
+          "position_points_top_left": [
+            174.9316,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Two consecutive monthly maps are retained together to show evolution; these are stage anchors, not eight mandatory output dates."
+    },
+    {
+      "path": "images/Meunier2018_Fig2_oct_nov.png",
+      "sha256": "e3b68aef471a6887bd04427d2f19725f16db4ff440ddb19cba5cf59b707300df",
+      "bytes": 558891,
+      "paper_id": "G-P2",
+      "authors": "Meunier et al. (2018)",
+      "title": "The Vertical Structure of a Loop Current Eddy",
+      "source_url": "https://doi.org/10.1029/2018JC013801",
+      "acquisition": "User-supplied publisher PDF, 2026-09-07",
+      "source_pdf_sha256": "77d205fa6fff4fd8387ce9c3bfc6d3293dfff4e4e468c3c28321b99a7680d2a1",
+      "figure": 2,
+      "pdf_page": 4,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q18-C2"
+      ],
+      "source_doi": "10.1029/2018JC013801",
+      "role": "Georeferenced ADT and Loop Current/eddy connectivity at these successive stages with dates, contours and eddy-center/track context. Separation, reattachment and propagation chronology must follow consecutive data, not merely resemble an isolated map.",
+      "crop_fraction_top_left": [
+        0.5726,
+        0.4955,
+        0.8519,
+        0.876
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 2, oct / nov 2016",
+      "source_context": "Shared ADT colorbar retained without changing its values. Dates are source-stage anchors, not mandatory output dates.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.5726,
+            0.4955,
+            0.8519,
+            0.876
+          ],
+          "role": "Fig. 2, oct / nov 2016",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.86786,
+            0.1911,
+            0.945,
+            0.8151200000000001
+          ],
+          "role": "Original shared ADT (m) colorbar, uniformly scaled.",
+          "uniform_scale": 0.57,
+          "position_points_top_left": [
+            174.9316,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Two consecutive monthly maps are retained together to show evolution; these are stage anchors, not eight mandatory output dates."
+    }
+  ],
+  "release_requirements": [
+    "Download and verify the canonical public input groups and freeze file hashes.",
+    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
+    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

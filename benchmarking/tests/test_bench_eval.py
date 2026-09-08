@@ -9,7 +9,7 @@ from zipfile import ZipFile
 import pytest
 
 spec = importlib.util.spec_from_file_location(
-    "bench_eval", Path(__file__).with_name("bench_eval.py")
+    "bench_eval", Path(__file__).resolve().parents[1] / "evaluation/bench_eval.py"
 )
 ev = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ev)
@@ -24,8 +24,8 @@ def write(path, value):
 def case(tmp_path):
     source = tmp_path / "attempt"
     source.mkdir()
-    task = json.loads((ev.CATALOG / "Q05" / "task_info.json").read_text())
-    write(source / "result.json", {"id": "Q05", "status": "completed"})
+    task = json.loads((ev.CATALOG / "Q21" / "task_info.json").read_text())
+    write(source / "result.json", {"id": "Q21", "status": "completed"})
     write(source / "query.json", {"query": task["query"]})
     (source / "answer.md").write_text("Computed anomalies from the frozen input.")
     (source / "private.log").write_text("DO NOT EXPORT")
@@ -34,13 +34,13 @@ def case(tmp_path):
         tmp_path / "inputs.json",
         {
             "validated": True,
-            "task_id": "Q05",
+            "task_id": "Q21",
             "files": [{"path": "input.nc", "sha256": "a" * 64}],
         },
     )
     args = argparse.Namespace(
         agent="oceanx",
-        task="Q05",
+        task="Q21",
         run_id="r1",
         model_label="private-model-label",
         source=source,
@@ -191,6 +191,82 @@ def test_structured_scores_and_evidence_references(case):
         ev.validate_score(value, ref, {"answer.md"})
 
 
+def add_reference_panels(reference, count):
+    ref = json.loads(reference.read_text())
+    ref["figures"] = []
+    for index in range(count):
+        name = f"reference-panel-{index}.png"
+        body = f"image fixture {index}".encode()
+        (reference.parent / name).write_bytes(body)
+        ref["figures"].append({"path": name, "sha256": ev.digest(body),
+                               "source_panel": f"Fig. 1 panel {index}",
+                               "source_context": "Shared units are retained."})
+    return ref
+
+
+def pack_candidate_panels(args, count, tmp_path):
+    args.include = []
+    for index in range(count):
+        name = f"candidate-{index}.png"
+        (args.source / name).write_bytes(b"image fixture")
+        args.include.append(name)
+    args.out = tmp_path / "with-panels.zip"
+    ev.pack(args)
+
+
+def test_visual_scoring_policy_and_context_reach_judge(case):
+    args, reference = case
+    ref = add_reference_panels(reference, 1)
+    ref["visual_scoring_policy"] = {"comparison_target": "Scientific information, not pixels"}
+    ref["reference_mode"] = "Approved historical method transfer"
+    ref["criteria"][0]["visual_checks"] = [{"required_information": ["Depth-resolved contrast"]}]
+    write(reference, ref)
+    _, _, messages = ev.judge_payload(args.out, reference)
+    payload = json.loads(messages[1]["content"])
+    assert payload["visual_scoring_policy"] == ref["visual_scoring_policy"]
+    assert payload["reference_mode"] == ref["reference_mode"]
+    assert payload["criteria"][0]["visual_checks"][0]["required_information"] == ["Depth-resolved contrast"]
+    assert payload["reference_figure_context"][0]["source_context"] == "Shared units are retained."
+    assert "not inspected" in " ".join(payload["not_inspected"])
+    assert "not pixel similarity" in messages[0]["content"]
+    assert "Do not add scores per image" in messages[0]["content"]
+
+
+def test_twelve_reference_panels_and_four_candidate_images_fit(case, tmp_path):
+    args, reference = case
+    write(reference, add_reference_panels(reference, 12))
+    pack_candidate_panels(args, 4, tmp_path)
+    _, _, messages = ev.judge_payload(args.out, reference, images=True)
+    assert sum(item["type"] == "image_url" for item in messages[1]["content"]) == 16
+
+
+@pytest.mark.parametrize("reference_count,candidate_count", [(17, 0), (0, 17), (12, 5)])
+def test_panel_limit_never_silently_drops_images(case, tmp_path, reference_count, candidate_count):
+    args, reference = case
+    write(reference, add_reference_panels(reference, reference_count))
+    pack_candidate_panels(args, candidate_count, tmp_path)
+    with pytest.raises(ValueError, match="16 total candidate/reference"):
+        ev.judge_payload(args.out, reference, images=True)
+
+
+def test_combined_reference_and_candidate_image_byte_budget(case, tmp_path, monkeypatch):
+    args, reference = case
+    write(reference, add_reference_panels(reference, 1))
+    pack_candidate_panels(args, 1, tmp_path)
+    monkeypatch.setattr(ev, "MAX_REVIEW_IMAGE_BYTES", 20)
+    with pytest.raises(ValueError, match="Review images exceed"):
+        ev.judge_payload(args.out, reference, images=True)
+
+
+def test_reference_panel_hash_tampering_is_rejected(case):
+    args, reference = case
+    ref = add_reference_panels(reference, 1)
+    ref["figures"][0]["sha256"] = "0" * 64
+    write(reference, ref)
+    with pytest.raises(ValueError, match="format/hash"):
+        ev.judge_payload(args.out, reference, images=True)
+
+
 def test_default_judge_is_offline(case, tmp_path, monkeypatch):
     args, reference = case
     monkeypatch.delenv("BENCH_JUDGE_API_KEY", raising=False)
@@ -208,7 +284,7 @@ def test_default_judge_is_offline(case, tmp_path, monkeypatch):
 
 
 def test_scalar_comparison_missing_and_tolerance(tmp_path):
-    identity = {"task_id": "Q05", "query_sha256": "query", "data_fingerprint": "data"}
+    identity = {"task_id": "Q21", "query_sha256": "query", "data_fingerprint": "data"}
     actual = write(tmp_path / "actual.json", {**identity, "metrics": {"a": 10.001}})
     reference = write(
         tmp_path / "reference.json",

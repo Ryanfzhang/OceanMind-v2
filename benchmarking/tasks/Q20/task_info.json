@@ -1,7 +1,14 @@
 {
   "id": "Q20",
   "track": "autoresearch",
-  "title": "Sea level as a subsurface indicator",
-  "query": "Assess how reliably sea-surface height identifies subsurface thermal structure in the Gulf of Mexico. Evaluate its relationship with thermocline depth and upper-ocean heat content, and identify conditions under which the relationship becomes unreliable.\n\nIndependently identify relevant literature and appropriate methods. Deliver an evidence-based report, supporting figures, and one executable analysis notebook. Distinguish demonstrated results from mechanisms that the supplied data cannot establish.",
-  "data_status": "pending_subset_selection"
+  "title": "Seasonal and anomaly chlorophyll–wind association",
+  "query": "Using monthly MODIS-Aqua chlorophyll and NOAA blended scalar wind speed over 104–122 E, 1–25 N for 2003–2012, construct matched area-weighted South China Sea time series. Compare the association in the raw records with that after removal of calendar-month climatologies, and check sensitivity to omitting the first and last year. Show the series and association estimates; a full EEMD decomposition is not required. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "catalog_version": "2026-09-08-accessible-v1",
+  "data_status": "scripted_acquisition_pending_execution",
+  "data_groups": [
+    "P_MODIS",
+    "P_WIND"
+  ],
+  "analysis_period": "2003–2012",
+  "adaptation": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive."
 }

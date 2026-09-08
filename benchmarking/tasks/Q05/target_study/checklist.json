@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.0-basic-single-figure-draft",
+  "status": "draft",
+  "task_id": "Q05",
+  "title": "Monthly surface current speed",
+  "query_sha256": "b535e6a431c3245482b9923b432f0b3e47a6495b6807a2e9c95db6f85467d2e2",
+  "data_fingerprint": null,
+  "reference_mode": "Deterministic basic analysis on the same frozen one-year CMOMS inputs; no paper-result matching.",
+  "reference_text": "Use the frozen B1 collocation/rotation specification to obtain components at common wet surface cells; do not transform already prepared geographic components twice. Calculate speed in m/s at each joint-valid cell-day, then daily valid-area-weighted regional means and monthly means of valid days. Magnitude of mean components is not mean speed.\nThe 12 monthly mean speeds and strongest/weakest months match independent calculations. Check the speed calculation and aggregation order rather than accepting an expected current seasonality. Accept tied months and missing months.\nUse identical validity for u and v, preserve missing faces/cells and do not replace one absent component by zero or shift to a deeper level. Report a material support limitation only when it affects the conclusion.\nNo actual CMOMS reference numbers are validated yet. The expected scientific outcome is data-dependent. One figure and one short conclusion are sufficient; do not require extra panels, an extensive report, sensitivity experiments or separately packaged diagnostic tables. Inspect retained calculation code for verification.",
+  "criteria": [
+    {
+      "id": "Q05-C1",
+      "weight": 20,
+      "description": "Use the frozen B1 collocation/rotation specification to obtain components at common wet surface cells; do not transform already prepared geographic components twice. Calculate speed in m/s at each joint-valid cell-day, then daily valid-area-weighted regional means and monthly means of valid days. Magnitude of mean components is not mean speed.",
+      "evidence_requirements": "Retained calculation code and declared input/aggregation choices; no extra report is required.",
+      "source_basis": "Benchmark-defined basic calculation, derived from the public query and frozen B1 input contract; not reproduction of a paper result.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q05-C2",
+      "weight": 50,
+      "description": "The 12 monthly mean speeds and strongest/weakest months match independent calculations. Check the speed calculation and aggregation order rather than accepting an expected current seasonality. Accept tied months and missing months.",
+      "evidence_requirements": "Values underlying the requested figure, checked against independent numerical reference outputs; intermediate arrays may be inspected in retained code/results without demanding additional user-facing figures or tables.",
+      "source_basis": "Benchmark-defined basic calculation, derived from the public query and frozen B1 input contract; not reproduction of a paper result.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q05-C3",
+      "weight": 10,
+      "description": "Use identical validity for u and v, preserve missing faces/cells and do not replace one absent component by zero or shift to a deeper level. Report a material support limitation only when it affects the conclusion.",
+      "evidence_requirements": "Missing-data handling in code/results and any interpretation-relevant qualification in the short conclusion.",
+      "source_basis": "Benchmark-defined basic calculation, derived from the public query and frozen B1 input contract; not reproduction of a paper result.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q05-C4",
+      "weight": 10,
+      "description": "One month-versus-speed line chart with m/s units and identifiable gaps. No vector map, mean-vector comparison or energy diagnostic is required.",
+      "evidence_requirements": "The single requested figure; judge information and legibility, not pixel similarity.",
+      "source_basis": "Public query's one-figure deliverable; weights are benchmark design choices.",
+      "reference_figures": [],
+      "visual_checks": [
+        {
+          "id": "Q05-V01",
+          "requirement": "scientific_information",
+          "required_information": [
+            "One month-versus-speed line chart with m/s units and identifiable gaps. No vector map, mean-vector comparison or energy diagnostic is required."
+          ],
+          "acceptable_alternatives": [
+            "Equivalent plot styles conveying the required information without extra panels."
+          ],
+          "reference_figure": null
+        }
+      ]
+    },
+    {
+      "id": "Q05-C5",
+      "weight": 10,
+      "description": "One short statement identifies strongest/weakest months from the computed speed. Acknowledge that daily-mean component data do not resolve sub-daily variability if discussing the meaning of the speed statistic.",
+      "evidence_requirements": "One short conclusion grounded in the calculated figure; do not reward extra length or unrequested causal claims.",
+      "source_basis": "Public query's short-conclusion deliverable.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [],
+  "figure_status": "no_paper_target_required_independent_data_reference_pending",
+  "visual_scoring_policy": {
+    "version": "1.0-basic-single-figure",
+    "comparison_target": "Correct scientific quantities, axes, units and valid support, not pixel similarity.",
+    "evidence_mapping": "One submitted figure is enough. Do not award extra points for additional panels or deliverables.",
+    "full_credit": "Any scientifically equivalent readable representation can receive full visual credit. Grade numerical correctness under C2, not again under C4.",
+    "uninspected_images": "An unseen image is unassessed, not verified by its caption.",
+    "tolerance_policy": "No pixel-based or invented tolerance. Freeze numerical tolerances using independent reference calculations before evaluation."
+  },
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design: method 20, numerical correctness 50, validity/support 10, one figure 10, one short conclusion 10. Not paper-authored weights.",
+    "anchors": {
+      "0": "Absent or fundamentally incorrect.",
+      "1": "Major errors; little reliable evidence.",
+      "2": "Partially correct with substantial omissions or errors.",
+      "3": "Substantially correct with minor gaps.",
+      "4": "Fully supported within the public query's bounded scope."
+    },
+    "no_double_counting": "C1 scores implemented operations, C2 verified values, C3 validity handling, C4 visual communication, C5 conclusion-to-evidence alignment. Do not mechanically penalize the same root error under every criterion or add hidden deliverables."
+  },
+  "reference_preparation": {
+    "expected_outputs": [
+      "monthly_mean_surface_speed[month]",
+      "strongest/weakest_month_ids"
+    ],
+    "edge_cases": [
+      "(3,4) components give speed 5.",
+      "Opposing daily vectors do not cancel daily speed.",
+      "One missing component.",
+      "Unequal areas and missing days."
+    ],
+    "independent_generation": "A trusted implementation independent of the evaluated agent must compute these outputs on frozen B1. Check edge cases on synthetic fixtures first; synthetic numbers are not CMOMS ground truth.",
+    "comparison": "Align actual and reference values by their coordinates and calendar, compare masks/status flags as well as values, and record tested element counts, discrepancies and maxima. Do not judge a full field using one hand-picked scalar.",
+    "tolerance_status": "pending_independent_validation",
+    "tolerances": "Freeze per-variable absolute/relative tolerances based on precision and independent implementation agreement. Counts and masks are exact under identical frozen validity rules. Record numerical tie handling. Do not use tolerances to conceal a different estimator or redefine the physical hypoxia threshold.",
+    "score_use": "Provide independently recorded numerical-comparison evidence to the judge for C2. The current compare helper handles named scalar metrics only; it is not an array-oracle generator. LLM confidence or visually matching patterns cannot substitute for numerical validation."
+  },
+  "release_requirements": [
+    "Obtain authorized 2011 B1 files and confirm all six science fields, daily calendar and full-depth geometry.",
+    "Freeze file hashes, analysis/shelf masks, depth levels, cell areas and any velocity collocation/rotation; include the input specification in both agent handouts.",
+    "Confirm the supplied salinity convention and actual units; do not infer missing metadata from a variable name.",
+    "Independently compute reference outputs and test the task-specific edge cases; archive code, dependency versions and execution evidence outside agent workspaces.",
+    "Freeze query hash, data fingerprint, comparison rules and scientifically reviewed numerical tolerances before examining benchmark submissions.",
+    "Only then mark this checklist validated. No paper image or unpublished CMOMS figure is required to draft the rubric."
+  ]
+}

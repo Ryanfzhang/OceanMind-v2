@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "status": "draft",
+  "task_id": "Q14",
+  "title": "Gulf mixed-layer seasonal cycle in GLORYS",
+  "query_sha256": "f45a3bb4c3746dfc5a88738e40bf366c4655709e7e6e59861873dffe77aa0671",
+  "data_fingerprint": null,
+  "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "paper": {
+    "citation": "Hamilton et al. (2018)",
+    "title": "Hydrography of the Gulf of Mexico Using Autonomous Floats",
+    "doi": "10.1175/JPO-D-17-0205.1",
+    "url": "https://doi.org/10.1175/JPO-D-17-0205.1"
+  },
+  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing daily GLORYS temperature and salinity in the Gulf of Mexico (98–82 W, 18–30 N) from July 2011 to August 2015, calculate mixed-layer depth from a density increase of 0.03 kg m-3 relative to 10 m. Compare with an absolute temperature change of 0.2 degrees C relative to 10 m. Calculate the diagnostics before monthly aggregation, plot their seasonal cycles and explain their differences. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "criteria": [
+    {
+      "id": "Q14-C1",
+      "weight": 20,
+      "description": "Convert supplied potential temperature/salinity consistently to the density convention used; interpolate the 10 m reference and threshold crossings. Mark unresolved/bottom-limited columns without forcing a crossing.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 3 diagnostic definitions, Section 5 and Fig. 14b; temperature criterion must be frozen from the original implementation. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q14-C2",
+      "weight": 25,
+      "description": "Derive both thresholds for daily grid columns before area-weighted monthly aggregation. Report valid area and unequal numbers of sampled years for calendar months.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 5 and Fig. 14 aggregate float observations by month. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Hamilton2018_Fig14b_mld.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q14-V01",
+          "reference_figure": "images/Hamilton2018_Fig14b_mld.png",
+          "source_panel": "Fig. 14b",
+          "requirement": "context_only",
+          "evidence_group": "Q14-G-P1_Fig14",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1175/JPO-D-17-0205.1; Fig. 14b; Section 5 and Fig. 14 aggregate float observations by month."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q14-C3",
+      "weight": 25,
+      "description": "Plot both calendar-month cycles with dispersion and quantify peak/trough month, amplitude and definition sensitivity; distinguish grid-cell dependence from independent sample size.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Fig. 14b compares temperature/density MLD cycles. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Hamilton2018_Fig14b_mld.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q14-V01",
+          "reference_figure": "images/Hamilton2018_Fig14b_mld.png",
+          "source_panel": "Fig. 14b",
+          "requirement": "context_only",
+          "evidence_group": "Q14-G-P1_Fig14",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.1175/JPO-D-17-0205.1; Fig. 14b; Fig. 14b compares temperature/density MLD cycles."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q14-C4",
+      "weight": 20,
+      "description": "Explain computed seasonal deepening and stratification differences without attributing mechanisms to unprovided wind/flux measurements. Reanalysis is not the paper's float sample.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 5 explicitly cautions about monthly sampling; no additional causal experiment required. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q14-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Hamilton2018_Fig14b_mld.png",
+      "sha256": "23e86498127042d7eaad7e367d71f7c02a2d0691a11452109965d06db6a6857f",
+      "bytes": 202101,
+      "paper_id": "G-P1",
+      "authors": "Hamilton et al. (2018)",
+      "title": "Hydrography of the Gulf of Mexico Using Autonomous Floats",
+      "source_url": "https://www2.whoi.edu/site/bower-lab/wp-content/uploads/sites/12/2020/04/Hamilton_et_al_2018_JPO_Hydrography.pdf",
+      "source_pdf_sha256": "ffa3baf11dfa3d5edbaae5f2734dffbc691151a5e2664840714aee9759a2633e",
+      "figure": 14,
+      "pdf_page": 18,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q14-C2",
+        "Q14-C3"
+      ],
+      "source_doi": "10.1175/JPO-D-17-0205.1",
+      "role": "Monthly MLD from both temperature and density criteria, depth units and dispersion. Seasonal phase, extrema and per-month sampling support; compute individual-profile thresholds before aggregation.",
+      "crop_fraction_top_left": [
+        0.21,
+        0.33502000000000004,
+        0.79,
+        0.589
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 14b",
+      "source_context": "Upper-panel equivalent height, heat content and surface temperature are excluded.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.21,
+            0.33502000000000004,
+            0.79,
+            0.589
+          ],
+          "role": "Fig. 14b",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    }
+  ],
+  "release_requirements": [
+    "Download and verify the canonical public input groups and freeze file hashes.",
+    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
+    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

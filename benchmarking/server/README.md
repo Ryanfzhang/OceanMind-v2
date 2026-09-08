@@ -1,35 +1,10 @@
-# OceanX / Claude Science: non-CMOMS server evaluation
+# Running OceanX on a shared-data server
 
-## Actual readiness
+This is the execution guide. [Download setup](../download/README.md), [data/paper correspondence](../preparation/DATA_PREPARATION.md), and [export/judging](../evaluation/README.md) each have one separate home.
 
-This directory is preparation for a two-system comparison, not a claim that both
-agents already run unattended. Claude Science is not installed on the user's server.
-No Claude Code `-p` command, fabricated Science API, login token or automatic GUI
-driver is substituted for Claude Science.
+## 1. One-time environment and model checks
 
-The 13 non-CMOMS tasks are **Q05, Q15–Q23, Q28–Q30** (1 analysis, 9 autoresearch,
-3 idea/testing). This is a selected subset, not the original 30-task benchmark.
-See `non_cmoms.json` for blocking inputs. None is declared scientifically ready
-merely because a download endpoint exists. Current canonical queries remain in
-`benchmarking/tasks`; do not rewrite them differently for different agents.
-
-## 1. Conda environment
-
-For Claude Science's user-level Linux launcher/sandbox dependencies, use the
-separate **Conda** spec file (not `pip install -r`):
-
-```bash
-conda create -n claude-science-tools --override-channels -c conda-forge \
-  --file benchmarking/server/claude-science-requirements.txt
-conda activate claude-science-tools
-```
-
-This does not require sudo. It does not install the Science/CC Switch applications,
-replace Science's managed analysis environments, enable kernel user namespaces,
-or provide a graphical desktop for CC Switch. This user-level dependency route
-must still pass the actual Science startup checks on the target Linux host.
-
-From the repository root on Linux:
+From the repository root, with a normal account (no sudo required for Python):
 
 ```bash
 conda create -n oceanx-bench python=3.11
@@ -39,261 +14,223 @@ python -m pip install -e .
 export OCEAN_SANDBOX_PYTHON="$CONDA_PREFIX/bin/python"
 ocean doctor
 ocean sandbox-self-check
-python -m pip freeze > /srv/ocean-evaluation/python-freeze.txt
 ```
 
-Create `/srv/ocean-evaluation` or substitute a writable evaluator directory first.
-The requirements are compatible ranges, not a bitwise environment lock; retain
-the resolved freeze, OS, Conda environment export and code commit for each run.
-The host also needs `curl`, `bubblewrap`, `libseccomp2` and working unprivileged
-namespaces. Have the administrator provide them if necessary. Do not disable the
-sandbox, run generated code as root, or assume installation implies a passing self-check.
-This Python environment does not install Claude Science or cc-switch. Verify the
-actual scientific environment used by Science independently after installation.
+The Linux host also needs bubblewrap, libseccomp and working unprivileged namespaces.
+If the self-check fails because of administrator policy, downloads alone do not
+make the benchmark runnable; ask the administrator to permit the required
+execution environment. Do not disable isolation. See the [headless runtime
+contract](../../docs/evals/headless-benchmark.md).
 
-## 2. Download available public products
+Existing OceanX model profiles on this server can be reused. Otherwise run
+`ocean configure-models < /absolute/private/role-config.json` with the supported
+role profiles (`coordinator`, `expert`, `skill_curator`). Keep keys outside the
+shared data/archive/repository. The server configuration is separate from cc-switch.
+The batch runner disables Curator for the primary comparison.
 
-Reuse the tested standalone downloader; no CMOMS authorization or data is needed:
+## 2. The data root is exactly the downloader's --output
+
+If both download commands used `--output /import/home4/share`, the expected layout is:
+
+```text
+/import/home4/share/
+  _download_all/coverage.json
+  MODIS_Aqua/chlorophyll/...
+  CMEMS_Gulf/thetao/...
+  OISST/sst/...
+  ...
+```
+
+Then `--data-root /import/home4/share` is correct. If the downloader instead used
+`/import/home4/share/ocean-data`, use that exact child directory. Do not move/copy
+data into individual query folders. Give the runner read access to the selected
+variable directories, not the entire shared directory or evaluator references.
+
+Before the first official run, recheck the downloaded files:
 
 ```bash
-python benchmarking/download/download_data.py --list
-python benchmarking/download/download_data.py \
-  --output /srv/ocean-data/public --modis-bbox 104 121 1 25
+python benchmarking/download/download_all.py verify --output /import/home4/share
 ```
 
-The bbox is an example enclosing rectangle, **not** a validated scientific mask.
-The command previews current remote metadata, coordinates and missing months.
-Only after inspecting the report, repeat with `--execute`. Add `--allow-missing`
-only if you explicitly accept downloading available months while leaving missing
-months unresolved; it is not permission to fill gaps or treat an incomplete task
-as ready. See [download guide](../download/README.md) for date/product options.
+This hashes existing files and can take time on a large archive; it does not
+download or call models. A nonzero exit or incomplete coverage means fix/resume
+the download first. Do not run download and verification against the same archive
+concurrently. The current numerical inventory covers all 15 non-CMOMS tasks.
 
-Currently automated: MODIS monthly chlorophyll, SeaWiFS monthly chlorophyll,
-NOAA blended monthly winds. Gulf reanalysis/altimetry/profile products, events,
-ETOPO5 and scientific masks are still unresolved. Do not silently replace them
-with generic CMEMS/Argo/new bathymetry. Q05/Q21 are the first preparation targets;
-Q22/Q28 require a sampling-scale decision; Q23 requires gaps/mask/EEMD validation.
+## 3. Run the 12 autoresearch tasks first
 
-Freeze one evaluator-owned input manifest per task after inspecting the data:
-
-```json
-{
-  "validated": false,
-  "task_id": "Q05",
-  "selection": "Exact product/release, time, region/mask, units, grid and coverage decisions",
-  "files": [{"path": "/srv/ocean-data/actual-file.nc", "sha256": "ACTUAL_FILE_SHA256"}]
-}
-```
-
-Include all required data, masks, metadata and permitted background papers.
-Use the downloader's verified receipt hashes or hash local files. Set `validated`
-only after human/data preparation validation; the packer does NOT perform that
-scientific validation. Both agents must use the SAME manifest, read-only files
-and query. Shared original files are not duplicated into result bundles.
-
-## 3. DeepSeek configuration
-
-### OceanX
-
-Uses its existing role settings, independently of cc-switch:
+These are Q13–Q24. They do not require a supplied private-data or full-text reading
+pack. Literature searches may still occur under the configured identical policy.
 
 ```bash
-export OCEANMIND_CONFIG_DIR=/srv/private/oceanx-bench-config
-ocean configure-models < /srv/private/role-config.json
+python benchmarking/server/prepare_queries.py \
+  --data-root /import/home4/share --preset autoresearch \
+  --output "$HOME/oceanx-bench-inputs/autoresearch.jsonl"
+
+ocean batch --queries "$HOME/oceanx-bench-inputs/autoresearch.jsonl" \
+  --output "$HOME/oceanx-bench-runs/autoresearch-r1"
 ```
 
-Privately create `role-config.json` with this structure, repeating a full profile
-for `coordinator`, `expert`, and `skill_curator`:
+The preparation command checks current catalogue/download completion reports and
+source paths before producing anything; it leaves the English queries unchanged.
+It does not copy NetCDF files or invoke a model. This is not a second hash audit
+or independent scientific coverage review. Existing output JSONL files are not overwritten.
 
-```json
-{"roles": {
-  "coordinator": {"provider":"openai", "base_url":"https://api.deepseek.com/v1", "model":"YOUR_MODEL_ID", "api_key":"YOUR_KEY"},
-  "expert": {"provider":"openai", "base_url":"https://api.deepseek.com/v1", "model":"YOUR_MODEL_ID", "api_key":"YOUR_KEY"},
-  "skill_curator": {"provider":"openai", "base_url":"https://api.deepseek.com/v1", "model":"YOUR_MODEL_ID", "api_key":"YOUR_KEY"}
-}}
-```
+The default per-task time limit is 3600 seconds; `--timeout 7200` at preparation
+changes it explicitly. Use the same limit for both compared agents. The output
+run directory must be new and separate from source directories. Runs invoke the
+configured model and consume API credits.
 
-Keep private directories owner-only and secret files mode `0600`, outside source,
-data and exports. Replace the model with a real enabled model ID. The primary
-batch runner disables Curator; it does not spend review calls during the benchmark.
-
-### Claude Science + cc-switch
-
-Install Science from its [official product page](https://claude.com/product/claude-science)
-using its current Linux instructions and legitimate account access. Confirm the
-CLI version/help before configuring unattended operation. Configure DeepSeek in
-the installed cc-switch provider using its official Anthropic-compatible base:
-`https://api.deepseek.com/anthropic`. Keep the real key in cc-switch's private store.
-
-[Community integration reference](https://github.com/ZhangYiqun018/claude-science-cc-switch-guide)
-documents main `/v1/messages` routing, model mapping and thinking/tool-choice
-adaptation. It is not an official Science provider contract; some scripts use
-macOS `launchctl` and cannot be copied directly to Linux. `managed_endpoints`
-alone does not establish replacement of the main research agent. Do not fabricate
-login credentials. No Science login/profile changes are made by these scripts.
-
-Before benchmarking, verify one real task that invokes Python, writes a small
-table and a figure, then exports them. Check that main/sub-agent/reviewer calls
-use the intended model, tools work, and no unnoticed fallback to Claude occurs.
-Do not log keys. Record Science version, cc-switch version, resolved model and
-the compatibility rewrites; they are part of the treatment being evaluated.
-
-**Pending Science adapter contract:** create isolated project/session; register
-approved inputs; submit the exact query; observe explicit completion/error or
-interaction; export the final answer and selected derived artifacts. Only implement
-this after verifying the installed version's real interface. If only GUI operation
-exists, use a verified version-pinned UI adapter or label runs manual-assisted.
-`claude -p` is Claude Code and is NOT a substitute.
-
-## 4. Run OceanX now, Science after interface validation
-
-Prepare a runner JSONL from canonical queries and resolved file paths. Only use
-the allowed QueryCase fields documented in [headless runner](../../docs/evals/headless-benchmark.md).
-`non_cmoms.json` and `task_info.json` are not runner inputs.
+For a single inexpensive pilot, use the existing explicit selection:
 
 ```bash
-ocean batch --queries /srv/ocean-inputs/public-queries.jsonl \
-  --output /srv/ocean-runs/oceanx-r1
+python benchmarking/server/prepare_queries.py \
+  --data-root /import/home4/share --tasks Q21 \
+  --bindings /import/home4/share/_download_all/data_bindings.json \
+  --output "$HOME/oceanx-bench-inputs/q21.jsonl"
+ocean batch --queries "$HOME/oceanx-bench-inputs/q21.jsonl" \
+  --output "$HOME/oceanx-bench-runs/q21-pilot"
 ```
 
-Use a fresh output directory for each repetition. `--resume` retries failures,
-not an independent repeat; preserve every attempt. Unexpected interactions become
-`needs_interaction`. Fix the human intervention, paper policy and budgets equally
-for both agents, rather than auto-approving one system's prompts. For both systems,
-reset conversation/project memory and freeze initial Skills between tasks. Science
-isolation must be validated, not assumed. No cross-system results/references may
-be exposed to either agent. Read-only data permission is NOT protection against
-reading evaluator answers if you mount the entire benchmark repository.
+Explicit `--tasks` checks paths only; use the download verification above. It also
+supports manual CMOMS bindings once authorized, without adding CMOMS downloads.
 
-## 5. Common result bundle (implemented)
+## 4. Add Q28–Q30 only after staging the readings
 
-Both systems export the SAME schema. OceanX uses its existing `query.json` and
-`result.json` to check task/query identity and status. Science currently requires
-an explicit export and status; the packer is not a Science execution driver.
+The full non-CMOMS preset contains Q13–Q24 and Q28–Q30. The latter three queries
+require the selected related-work full texts, not just citations or abstracts.
+
+Place authorized PDFs under e.g. `/import/home4/share/Papers/Q28/` and create a
+separate custom bindings JSON with a `papers` list for Q28, Q29 and Q30. Their
+required reading counts are 2, 3 and 3 respectively; see the canonical tasks.
+If copying the generated bindings as a starting point, do not edit the generated
+copy in place: a later download rerun regenerates it.
 
 ```bash
-python benchmarking/evaluation/bench_eval.py pack \
-  --agent oceanx --task Q05 --run-id r1 --model-label YOUR_MODEL_ID \
-  --source /srv/ocean-runs/oceanx-r1/Q05/attempt-ACTUAL_ID \
-  --data-manifest /srv/ocean-evaluation/Q05-inputs.json \
-  --report answer.md \
-  --include RELATIVE_PATH_TO_ANALYSIS.ipynb \
-  --include RELATIVE_PATH_TO_SMALL_DERIVED_TABLE.csv \
-  --include RELATIVE_PATH_TO_FIGURE.png \
-  --out /srv/ocean-evaluation/bundles/oceanx-Q05-r1.zip
+python benchmarking/server/prepare_queries.py \
+  --data-root /import/home4/share --preset non-cmoms \
+  --bindings "$HOME/oceanx-paper-bindings.json" \
+  --output "$HOME/oceanx-bench-inputs/non-cmoms.jsonl"
+ocean batch --queries "$HOME/oceanx-bench-inputs/non-cmoms.jsonl" \
+  --output "$HOME/oceanx-bench-runs/non-cmoms-r1"
 ```
 
-For Science, point `--source` at its real export folder, use `--agent claude-science`
-and `--status completed` (or the actual terminal state), and select its actual
-report/files. The files are not regenerated by a third LLM. For failures without
-an answer, omit `--report`; preserve the failure bundle for the denominator.
+The preset rejects missing/duplicate/non-PDF reading files; it cannot establish
+their bibliographic identity, completeness or licensing. Review and freeze the
+same full texts for both systems. Do not include evaluator checklists or target images.
 
-Bundle: `manifest.json` (task/query/data fingerprint, agent/model/run/status and
-available usage), `answer.md`, and explicitly selected evidence. Every exported
-file has a hash. No source datasets, hidden reference answers, state databases,
-credentials or raw logs are collected automatically. No recursive copy, symlink
-following or file overwrite. Only selected small derived artifacts are copied
-into the ZIP; original data remain in place. Each file is limited to 20 MiB and
-the selected payload to 64 MiB. Bundles are review evidence, not standalone runtime
-environments; preserve the original run for notebook replay with original data.
+## 5. Results, retries and evaluation
 
-This is a LOCAL export, not a guarantee of secret anonymization. Inspect reports,
-notebook source and tables before using `--send`; they can contain sensitive text.
-Model/agent identity is excluded from structured judge context, but content can
-still reveal the author. Use equivalent artifact selection rules on both sides.
+The batch writes `results.jsonl` and per-attempt `query.json`, `result.json`,
+`answer.md`, event logs and derived artifacts. It runs cases sequentially, while
+the existing Coordinator/Experts still collaborate normally within a case.
 
-## 6. Numerical and LLM judging (implemented primitives; references still needed)
+Resume the same batch with `ocean batch --queries ... --output ... --resume`.
+This retries unsuccessful cases in new attempts; it is not a resumed model checkpoint
+or an independent repetition. For an independent repetition use a new output directory.
 
-Keep evaluators/reference answers outside both agent workspaces. Start with
-`../evaluation/reference.example.json`: it is intentionally **draft** and the
-judge refuses it. Fill actual reference results; freeze task/query/data hashes
-and per-task criteria/weights, then independently validate it. Do not flip its
-status merely to make the command run. Its weights are a proposal, not a validated
-benchmark rubric. Autoresearch/idea tasks require their own rubrics, not Q05's.
+`completed` is a runtime outcome, not a score or proof of correct science.
+Unexpected human-input requests become `needs_interaction`; no blanket approval
+is added by this workflow. Preserve failed/timed-out attempts in the denominator.
 
-### Numerical comparison
+[Export, numerical comparison and LLM judging](../evaluation/README.md#export-and-judging-cli-reference)
+are separate. All current per-query references remain draft: independently compute
+and validate references on the frozen downloaded data before official grading.
+Do not change `draft` to `validated` just to bypass the evaluator.
 
-Use a trusted task-specific extractor to read actual derived result tables; do not
-use the evaluated agent's claim of correctness as the reference. Independently
-compute reference scalars from the SAME data. Example file shapes:
+## 6. Claude Code + DeepSeek: run the same JSONL and keep results
 
-```json
-{"task_id":"Q05", "query_sha256":"...", "data_fingerprint":"...",
- "metrics":{"january_anomaly_2011_percent":12.3}}
-```
-
-```json
-{"status":"validated", "task_id":"Q05", "query_sha256":"...", "data_fingerprint":"...",
- "metrics":{"january_anomaly_2011_percent":{"value":12.3,"atol":0.01,"rtol":0.001}}}
-```
-
-Numbers above demonstrate syntax ONLY; they are not Q05 answers or approved tolerances.
+`run_claude.py` runs the installed **Claude Code**, not Claude Science. It inherits
+your existing direct DeepSeek API configuration/environment. No cc-switch or new
+API configuration is required. Activate the same scientific Python environment;
+make sure `claude --version` and your existing CLI API connection work there.
 
 ```bash
-python benchmarking/evaluation/bench_eval.py compare \
-  --actual /srv/ocean-evaluation/Q05-actual.json \
-  --reference /srv/ocean-evaluation/Q05-numeric-reference.json \
-  --out /srv/ocean-evaluation/Q05-numeric-checks.json
+python benchmarking/server/run_claude.py \
+  --queries "$HOME/oceanx-bench-inputs/autoresearch.jsonl" \
+  --output "$HOME/claude-bench-runs/autoresearch-r1" \
+  --allow-tools Read Glob Grep Bash Write Edit NotebookEdit WebSearch WebFetch
 ```
 
-Comparison checks each required scalar using `abs(error) <= atol + rtol*abs(reference)`;
-missing/non-finite actual values fail. It does not validate the extractor, units,
-spatial maps or methodology. Reference computation and extraction are still
-task-specific work, not implemented golden analyses. Do not treat visually similar
-plots, correlation alone, or pixel similarity as scientific equivalence.
+This explicitly approves the listed Claude tools for unattended execution. There
+is **no** `--dangerously-skip-permissions`; other permissions remain governed by
+Claude settings. Without `--allow-tools`, no new approvals are added and required
+operations may be denied. Bash approval permits general shell execution: this
+runner does not add OceanX's OS sandbox, enforce read-only files, or block network
+uploads. Use an account/job environment restricted to the intended data/output,
+with original data mounted read-only where possible. Do not expose private keys,
+evaluator references, other attempts or unrelated data to executable agent code.
+The read-only and literature restrictions in the prompt are instructions, not
+security boundaries. `--add-dir` grants access to supplied dataset directories;
+individual file references do not automatically grant their whole parent folder.
 
-### LLM evidence review
+The wrapper reads exactly the same JSONL schema/query text and uses each case's
+timeout. It adds only execution instructions (paths, output location, literature
+policy), saved in `prompt.txt`. Existing OceanX-specific `permission_tools` cannot
+be translated to Claude names and are rejected before execution; generated default
+JSONL files have no such approvals. Questions/selected papers are supplied as
+context, not handled by an OceanX protocol adapter.
 
-Dry run validates input and performs NO API call:
+Options:
+- `--claude /absolute/path/to/claude` if the executable is not on PATH.
+- `--model MODEL_ID` only if you want to override the existing CLI model selection.
+- `--model-label LABEL` records an experiment label without changing API routing.
+- Add `--resume` with the same arguments to skip completed cases and create new
+  attempts for others. Never overwrites an earlier attempt. Inputs, tool approvals,
+  model options and runner version must match; otherwise start a new output folder.
+
+Run a pilot first by replacing the JSONL with `q21.jsonl` and using a fresh output
+directory. No command-line API key is needed. Keep the actual API model/version,
+user settings, plugins, hooks and environment fixed across comparisons. The runner
+does not copy those settings or secrets into results. Each task starts a fresh
+process/session with `--no-session-persistence`, no `--continue`/`--resume` passed
+to Claude, and a new working directory outside the repository. Global Claude
+memory/customizations may still load; this is not a claim of fully isolated memory.
+
+```text
+claude-bench-runs/autoresearch-r1/
+  manifest.json              # inputs, CLI version, runner hash and explicit options
+  results.jsonl              # one record per finished attempt
+  Q13/attempt-.../
+    query.json               # original query + resolved dataset paths
+    prompt.txt               # exact text sent to Claude
+    command.json             # CLI flags, no copied API configuration
+    events.jsonl             # live Claude stream (64 MiB limit)
+    stderr.log               # stderr (64 MiB limit)
+    claude_result.json       # terminal CLI result if emitted
+    answer.md                # final response if emitted, including error responses
+    partial_answer.md        # available intermediate assistant text
+    result.json              # status, elapsed seconds, exit code, usage when reported
+    artifacts.json           # workspace file paths/sizes, without following symlinks
+    workspace/               # generated code, notebooks, figures and tables in place
+```
+
+No data or generated artifacts are copied for auditing. No code/image is invented
+if the agent fails to produce it. A success CLI result with no reported error is
+`completed`, **not** scientifically verified. Nonzero exit, error result, missing
+terminal result or exceeded log limit becomes `failed`; permission denials in a
+terminal result conservatively become `needs_interaction`. No automatic tool
+approval escalation occurs. Timeouts become `timed_out`; SIGINT/SIGTERM records
+`cancelled` and stops the batch. Failed/timed-out cases retain partial files and
+the next case runs. Process-group cleanup covers ordinary descendants, not escaped
+daemon sessions; hard resource confinement needs host/job isolation. SIGKILL or
+machine failure can leave an attempt without `result.json`; its files remain and
+`--resume` creates a fresh attempt. CLI cost figures, if present, are provider/CLI
+reports and may not reflect a third-party DeepSeek bill.
+
+The current evaluation packer still accepts only `oceanx`/`claude-science`, so do
+not relabel these Claude Code results to use it. This addition saves baseline
+results only; automatic cross-system packing and judging are separate work.
+
+CLI contract: [programmatic use](https://code.claude.com/docs/en/headless) and
+[CLI flags](https://code.claude.com/docs/en/cli-reference). Tested with a simulated
+CLI subprocess, not your server's paid DeepSeek API.
+
+## Tests
 
 ```bash
-python benchmarking/evaluation/bench_eval.py judge \
-  --bundle /srv/ocean-evaluation/bundles/oceanx-Q05-r1.zip \
-  --reference /srv/ocean-evaluation/Q05-reference.json \
-  --model YOUR_JUDGE_MODEL_ID \
-  --out /srv/ocean-evaluation/scores/oceanx-Q05-r1-judgeA.json
+python -m pytest benchmarking/tests tests/test_oceanx/test_batch.py
 ```
 
-After reviewing exactly what will be sent, set `BENCH_JUDGE_API_KEY` securely in
-the terminal environment and add `--send`. The default base is
-`https://api.deepseek.com/v1`; use `--base-url` for another OpenAI-compatible judge.
-Use an independently configured judge, ideally a different model family than
-the contestants, and a second judge with the SAME reference. Missing/malformed
-responses cause failure, not a zero score; there are no automatic paid retries.
-
-Each call is capped at 80,000 text characters and 4,096 output tokens, with a
-120-second timeout. Oversized text is rejected, not silently truncated. `--images`
-opts into up to eight total candidate/reference figures for a confirmed vision-
-capable judge. Add reference figures as `{"path":"reference.png","sha256":"..."}`
-in reference `figures`. Without `--images`, figure inspection is explicitly marked
-unavailable. Notebook rich outputs are not decoded automatically; export selected
-figures separately. Notebook code is read, NEVER executed by this evaluator.
-
-Outputs contain every criterion's 0–4 score, evidence IDs and concise justification,
-weighted score out of 100, provider-reported usage and hashes of bundle/reference/
-prompt/evaluator. This is LLM evidence review, not an execution or numerical
-certificate. API failures, unseen figures and incomplete evidence remain distinct.
-Do notebook replay in a dedicated restricted execution environment with read-only
-data and no judge credentials, not on the judge host using unrestricted nbclient.
-
-## 7. Report the comparison honestly
-
-Report all attempted tasks, status distribution, completion rate, per-track quality,
-independent numerical checks, independent notebook replay, time and available usage.
-Do not silently exclude failures or average only successful retries. Keep first
-attempt outcomes and retry outcomes separate. Missing usage is unknown, not zero.
-Use the same frozen task/reference for both systems; show paired task differences,
-repeat variation and human-adjudicated judge disagreements. A rejected hypothesis
-can be a valid scientific result. This subset is only 13 selected tasks, with 1
-simple-analysis task; do not generalize its aggregate to the full benchmark.
-
-**Still pending:** full data selection/validation and golden outputs; 13 finalized
-rubrics; trusted metric extractors; Science installation/cc-switch smoke test and
-verified driver; an automatic cross-system scheduler and score aggregator. This
-change delivers the common export/judge components, not that completed experiment.
-
-Offline tests:
-
-```bash
-python -m pytest benchmarking/evaluation/test_bench_eval.py benchmarking/download/test_download_data.py
-```
+Tests use fixtures/no paid model calls. Passing on macOS does not prove the
+server's Linux sandbox passes. No desktop or multi-agent runtime code is changed.

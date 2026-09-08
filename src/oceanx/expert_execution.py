@@ -241,6 +241,16 @@ class ExpertCodeExecutionResult:
             "returncode": self.returncode,
             "stdout": self.stdout,
             "stderr": self.stderr,
+            "logs": {
+                stream: str(
+                    Path(self.work_root)
+                    / "executions"
+                    / self.execution_id
+                    / "logs"
+                    / f"{stream}.txt"
+                )
+                for stream in ("stdout", "stderr")
+            },
             "duration_seconds": self.duration_seconds,
             "output_files": list(self.output_files),
             "outputs": [dict(item) for item in self.outputs],
@@ -332,6 +342,62 @@ class ExpertCodeExecutionService:
         """Return the process-pinned runtime failure, if startup validation failed."""
 
         return self._runtime_error
+
+    def read_expert_file(
+        self,
+        *,
+        workspace_id: str,
+        task_id: str,
+        work_order_id: str,
+        path: str,
+        offset: int = 0,
+        limit: int = 6_000,
+    ) -> dict[str, object]:
+        """Read saved text across rounds of the same logical Expert session."""
+        task = self.store.get_research_task(task_id)
+        work = self.store.get_team_work(work_order_id)
+        if (
+            task is None
+            or task.workspace_id != workspace_id
+            or work is None
+            or work.workspace_id != workspace_id
+            or work.work_order.task_id != task_id
+        ):
+            raise ExpertCodeExecutionError("Expert file session is unavailable")
+        if offset < 0 or not 1 <= limit <= 12_000:
+            raise ExpertCodeExecutionError("Invalid text offset or limit")
+        root = self.task_workspaces.expert_session_root(
+            task_id, work.work_order.job_key or work_order_id
+        ).resolve()
+        target = Path(path)
+        target = (target if target.is_absolute() else root / target).resolve()
+        if not target.is_relative_to(root):
+            raise ExpertCodeExecutionError("File is outside this Expert's session")
+        if not target.is_file():
+            raise ExpertCodeExecutionError("Saved text file does not exist")
+        try:
+            with target.open(encoding="utf-8") as stream:
+                remaining = offset
+                while remaining:
+                    skipped = stream.read(min(remaining, 8_192))
+                    if not skipped:
+                        break
+                    remaining -= len(skipped)
+                content = stream.read(limit + 1)
+                if "\x00" in content:
+                    raise UnicodeError("binary content")
+        except (OSError, UnicodeError) as exc:
+            raise ExpertCodeExecutionError(
+                "Cannot read this file as UTF-8 text; use scientific code for binary data"
+            ) from exc
+        eof = len(content) <= limit
+        return {
+            "path": str(target),
+            "content": content[:limit],
+            "offset": offset,
+            "next_offset": None if eof else offset + limit,
+            "eof": eof,
+        }
 
     def require_runtime(self) -> ExpertPythonRuntime:
         """Return the pinned runtime or fail before an Expert model is started."""

@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "status": "draft",
+  "task_id": "Q21",
+  "title": "MODIS coastal versus offshore chlorophyll",
+  "query_sha256": "52ef882ecf78f85a199a91fa962c4fc8d052fd945bb5c290e76b404df25a905c",
+  "data_fingerprint": null,
+  "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "paper": {
+    "citation": "Shang et al. (2014)",
+    "title": "On the consistency of MODIS chlorophyll a products in the northern South China Sea",
+    "doi": "10.5194/bg-11-269-2014",
+    "url": "https://doi.org/10.5194/bg-11-269-2014"
+  },
+  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing monthly MODIS-Aqua chlorophyll for 2003–2012, compare the SEATS-area box 115.5–116.5 E, 17.5–18.5 N with the Pearl River coastal box 112–115 E, 21–23 N. Calculate regional time series and seasonal climatologies, identify supported contrasts and anomalies, and assess how valid-pixel coverage affects interpretation. Only the supplied chlorophyll product is required; do not attempt a three-algorithm or in-situ validation. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "criteria": [
+    {
+      "id": "Q21-C1",
+      "weight": 20,
+      "description": "Extract the two benchmark-defined boxes using coordinate-derived cell area and supplied valid pixels. Record the actual algorithm/reprocessing release; these boxes approximate, not reproduce, original station/polygon sampling.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Sections 2.1/3.1/3.3: NSCS MODIS2002–2012, SEATS and coastal extraction. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q21-C2",
+      "weight": 25,
+      "description": "Calculate area-weighted time series and 12-month climatologies for both regions, keeping missing values and sample coverage explicit.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Figs.5 and8 show regional seasonal cycles and interannual records. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Shang2014_Fig5a_seats_cycle.png",
+        "images/Shang2014_Fig5b_seats_oc3m.png",
+        "images/Shang2014_Fig8b_pearl_anomalies.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q21-V01",
+          "reference_figure": "images/Shang2014_Fig5a_seats_cycle.png",
+          "source_panel": "Fig. 5a",
+          "requirement": "context_only",
+          "evidence_group": "Q21-S-P2_Fig05",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/bg-11-269-2014; Fig. 5a; Figs.5 and8 show regional seasonal cycles and interannual records."
+        },
+        {
+          "id": "Q21-V02",
+          "reference_figure": "images/Shang2014_Fig5b_seats_oc3m.png",
+          "source_panel": "Fig. 5b, OC3M row",
+          "requirement": "context_only",
+          "evidence_group": "Q21-S-P2_Fig05",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/bg-11-269-2014; Fig. 5b, OC3M row; Figs.5 and8 show regional seasonal cycles and interannual records."
+        },
+        {
+          "id": "Q21-V03",
+          "reference_figure": "images/Shang2014_Fig8b_pearl_anomalies.png",
+          "source_panel": "Fig. 8b, January/July anomaly pair",
+          "requirement": "context_only",
+          "evidence_group": "Q21-S-P2_Fig08",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/bg-11-269-2014; Fig. 8b, January/July anomaly pair; Figs.5 and8 show regional seasonal cycles and interannual records."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q21-C3",
+      "weight": 25,
+      "description": "Plot and quantify coastal/offshore contrast, seasonality and supported anomaly years; assess sensitivity to low-coverage months.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Sections 3.1/3.3 and Figs.5/8 provide the compared analyses. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [
+        "images/Shang2014_Fig5a_seats_cycle.png",
+        "images/Shang2014_Fig5b_seats_oc3m.png",
+        "images/Shang2014_Fig8b_pearl_anomalies.png"
+      ],
+      "visual_checks": [
+        {
+          "id": "Q21-V01",
+          "reference_figure": "images/Shang2014_Fig5a_seats_cycle.png",
+          "source_panel": "Fig. 5a",
+          "requirement": "context_only",
+          "evidence_group": "Q21-S-P2_Fig05",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/bg-11-269-2014; Fig. 5a; Sections 3.1/3.3 and Figs.5/8 provide the compared analyses."
+        },
+        {
+          "id": "Q21-V02",
+          "reference_figure": "images/Shang2014_Fig5b_seats_oc3m.png",
+          "source_panel": "Fig. 5b, OC3M row",
+          "requirement": "context_only",
+          "evidence_group": "Q21-S-P2_Fig05",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/bg-11-269-2014; Fig. 5b, OC3M row; Sections 3.1/3.3 and Figs.5/8 provide the compared analyses."
+        },
+        {
+          "id": "Q21-V03",
+          "reference_figure": "images/Shang2014_Fig8b_pearl_anomalies.png",
+          "source_panel": "Fig. 8b, January/July anomaly pair",
+          "requirement": "context_only",
+          "evidence_group": "Q21-S-P2_Fig08",
+          "required_information": [],
+          "acceptable_alternatives": [
+            "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
+          ],
+          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
+          "source_basis": "10.5194/bg-11-269-2014; Fig. 8b, January/July anomaly pair; Sections 3.1/3.3 and Figs.5/8 provide the compared analyses."
+        }
+      ],
+      "visual_scoring": {
+        "full_credit": "All required scientific information is correctly supported, including this criterion's nonvisual requirements. Equivalent plot types and many-to-many evidence mapping are allowed.",
+        "no_extra_panel_points": true,
+        "no_pixel_matching": true,
+        "required_numerical_support": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence."
+      }
+    },
+    {
+      "id": "Q21-C4",
+      "weight": 20,
+      "description": "Discuss coastal retrieval uncertainty without claiming in-situ validation or comparison of absent GSM/GIOP algorithms. Original paper figures guide the diagnostic, not numerical scoring of this release.",
+      "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
+      "source_basis": "Motivation: Section 4.1: algorithm and masking effects. This task selects the OC3M panels, not an invented full validation. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    },
+    {
+      "id": "Q21-C5",
+      "weight": 10,
+      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
+      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "reference_figures": [],
+      "visual_checks": []
+    }
+  ],
+  "figures": [
+    {
+      "path": "images/Shang2014_Fig5a_seats_cycle.png",
+      "sha256": "1b1921c9936f3c57a51e7d334f81ccdddf202ab9c44f40e6a8fc87b8fe3c9904",
+      "bytes": 35116,
+      "paper_id": "S-P2",
+      "authors": "Shang et al. (2014)",
+      "title": "On the consistency of MODIS chlorophyll a products in the northern South China Sea",
+      "source_url": "https://bg.copernicus.org/articles/11/269/2014/bg-11-269-2014.pdf",
+      "source_pdf_sha256": "e075e82ff55afddde2ec3ec3b3d04c1fd374886f6e462cd2468db6d43f53f5a5",
+      "figure": 5,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q21-C2",
+        "Q21-C3"
+      ],
+      "source_doi": "10.5194/bg-11-269-2014",
+      "role": "SEATS monthly climatology from valid OC3M data, with units, peak phase and seasonal amplitude. Only available July 2002-December 2012 months contribute; give support for the climatological average.",
+      "crop_fraction_top_left": [
+        0.074,
+        0.079,
+        0.49,
+        0.22896
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 5a",
+      "source_context": "OC3M circles are the target series; GSM/GIOP are not required.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.074,
+            0.079,
+            0.49,
+            0.22896
+          ],
+          "role": "Fig. 5a",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Shang2014_Fig5b_seats_oc3m.png",
+      "sha256": "ce028daf95afb53ee00cd45e43299eef984e22f0502860e631c70a0b1aed0ab3",
+      "bytes": 35301,
+      "paper_id": "S-P2",
+      "authors": "Shang et al. (2014)",
+      "title": "On the consistency of MODIS chlorophyll a products in the northern South China Sea",
+      "source_url": "https://bg.copernicus.org/articles/11/269/2014/bg-11-269-2014.pdf",
+      "source_pdf_sha256": "e075e82ff55afddde2ec3ec3b3d04c1fd374886f6e462cd2468db6d43f53f5a5",
+      "figure": 5,
+      "pdf_page": 5,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q21-C2",
+        "Q21-C3"
+      ],
+      "source_doi": "10.5194/bg-11-269-2014",
+      "role": "SEATS OC3M year-to-year monthly record with gaps, units and identifiable anomaly periods. Climatology and record must agree; do not manufacture pre-launch months.",
+      "crop_fraction_top_left": [
+        0.096048,
+        0.23287200000000002,
+        0.49,
+        0.28372800000000004
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 5b, OC3M row",
+      "source_context": "OC3M row only; mg/m3 chlorophyll. Red marked samples are paper context, not additional benchmark data.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.096048,
+            0.23287200000000002,
+            0.49,
+            0.28372800000000004
+          ],
+          "role": "Fig. 5b, OC3M row",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        },
+        {
+          "crop_fraction_top_left": [
+            0.096048,
+            0.376964,
+            0.49,
+            0.405
+          ],
+          "role": "Original shared year labels from Fig. 5b.",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            43.931978632000096
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Independently interpretable scientific diagnostic."
+    },
+    {
+      "path": "images/Shang2014_Fig8b_pearl_anomalies.png",
+      "sha256": "a2f73b9d73ec7f311688c838b85f3d58f3dcbddc1a02ba31d745ca9f9efe6972",
+      "bytes": 47019,
+      "paper_id": "S-P2",
+      "authors": "Shang et al. (2014)",
+      "title": "On the consistency of MODIS chlorophyll a products in the northern South China Sea",
+      "source_url": "https://bg.copernicus.org/articles/11/269/2014/bg-11-269-2014.pdf",
+      "source_pdf_sha256": "e075e82ff55afddde2ec3ec3b3d04c1fd374886f6e462cd2468db6d43f53f5a5",
+      "figure": 8,
+      "pdf_page": 6,
+      "reviewed": true,
+      "criterion_ids": [
+        "Q21-C2",
+        "Q21-C3"
+      ],
+      "source_doi": "10.5194/bg-11-269-2014",
+      "role": "Pearl River january chlorophyll variability/anomaly by year, with valid retrievals, units and an explicit anomaly baseline. Identify supported anomalous years and coastal-offshore contrasts without claiming three-algorithm validation. Pearl River july chlorophyll variability/anomaly by year, with valid retrievals, units and an explicit anomaly baseline.",
+      "crop_fraction_top_left": [
+        0.14501999999999998,
+        0.22954000000000002,
+        0.40486,
+        0.465
+      ],
+      "rights": "Original rights retained; review permission before redistribution or external Judge submission.",
+      "source_panel": "Fig. 8b, January/July anomaly pair",
+      "source_context": "Only OC3M (+ symbols) is scored. January/July are source seasonal anchors; a complete monthly coastal record is an acceptable and more informative alternative. Source y-axis is percentage anomaly.",
+      "source_regions": [
+        {
+          "crop_fraction_top_left": [
+            0.14501999999999998,
+            0.22954000000000002,
+            0.40486,
+            0.465
+          ],
+          "role": "Fig. 8b, January/July anomaly pair",
+          "uniform_scale": 1,
+          "position_points_top_left": [
+            0,
+            0
+          ]
+        }
+      ],
+      "extraction": "Original PDF regions only; shared axes/legends may be repositioned with uniform scaling. No scientific curves, values or labels are redrawn.",
+      "grouping_reason": "Keep the adjoining January/July plots together because they share their year axis and algorithm legend."
+    }
+  ],
+  "release_requirements": [
+    "Download and verify the canonical public input groups and freeze file hashes.",
+    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
+    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+  ],
+  "scoring": {
+    "scale": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "total_formula": "sum(weight * score / 4)",
+    "weight_origin": "Benchmark design choices, not paper-authored marks."
+  },
+  "figure_status": "scientific_panel_crops_attached",
+  "visual_scoring_policy": {
+    "version": "1.0-scientific-information",
+    "comparison_target": "Scientific information and quantitative support, not pixel similarity.",
+    "style_invariant": [
+      "Plot type",
+      "Panel count and arrangement",
+      "Colors and colormaps",
+      "Fonts and decorative elements"
+    ],
+    "required_invariants": [
+      "Correct variables and units",
+      "Declared domain, period, baseline and valid support",
+      "Correct definitions and processing",
+      "Quantitative magnitudes, signs, phase, spatial or vertical structure supported by calculations",
+      "Honest uncertainty and limitations"
+    ],
+    "evidence_mapping": "Match the required information collectively. One submitted figure may cover several reference panels, and several submitted figures may cover one check. A complete scientific comparison does not require one output image per reference image.",
+    "scoring_unit": "Retain the five criterion weights and the 100-point total. Visual checks are evidence requirements within those criteria, not extra per-panel scores. Count each scientific finding once; distinct methodological and interpretive aspects may refer to the same plot.",
+    "full_credit": "Award full credit for a criterion only when its required scientific information and nonvisual evidence are correctly demonstrated. Equivalent plots can earn full credit; matching prose or a visually similar shape without computed support cannot.",
+    "partial_credit": "Use the existing 0-4 scale based on completeness and correctness, not the fraction of reference panels imitated. Minor readable-label omissions differ from wrong units, masks, signs or periods.",
+    "comparison_scope": "Follow reference_mode. Q09-Q11 use approved 2018-2022 method transfers; scientifically justified disagreement with the climatological paper can earn full credit. For matched-period tasks, establish product/sample/run equivalence before imposing published numbers.",
+    "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
+    "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
+    "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
+  }
+}

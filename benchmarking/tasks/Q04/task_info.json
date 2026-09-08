@@ -1,7 +1,40 @@
 {
   "id": "Q04",
   "track": "data_analysis",
-  "title": "Subsurface salinity maximum",
-  "query": "Using the supplied Gulf of Mexico data, calculate the maximum salinity and its depth between 50 and 300 m. Map their seasonal distributions and quantify sensitivity to the available vertical resolution.",
-  "data_status": "pending_subset_selection"
+  "title": "Summer subsurface salinity maximum",
+  "catalog_version": "2026-09-07-basic-v1",
+  "query": "Using the 2011 CMOMS salinity data and supplied analysis mask, make one map of the summer (June-August) mean subsurface salinity maximum. For each daily profile, find the largest valid sampled salinity between 50 and 300 m inclusive, then average these maxima over valid summer days at each cell. Do not extrapolate outside sampled depths. Give one short conclusion describing where this sampled maximum is relatively high or low. Use the frozen B1 manifest for masks and geometry, keep missing values distinct from zero, and retain the calculation code for checking. Only one figure and one short conclusion are requested.",
+  "analysis_period": "2011",
+  "data_groups": [
+    "B1"
+  ],
+  "required_variables": [
+    "salt"
+  ],
+  "input_contract": {
+    "data_group": "B1",
+    "source": "CMOMS",
+    "period": "2011-01-01/2011-12-31",
+    "sampling": "daily mean",
+    "depth": "all supplied fixed physical depth levels; do not surface-trim the shared archive",
+    "science_fields": [
+      "temp",
+      "salt",
+      "u",
+      "v",
+      "oxygen",
+      "chlorophyll"
+    ],
+    "metadata_required": [
+      "provider-confirmed units and temperature/salinity conventions",
+      "calendar, time bounds, fill values and QC",
+      "longitude/latitude, positive-down depth and wet/land masks",
+      "cell areas and bathymetry",
+      "velocity staggering/orientation and collocation/rotation specification",
+      "fixed analysis and shelf masks"
+    ],
+    "availability": "pending_authorization_and_file_validation",
+    "notes": "One shared archive, not six copies. Science fields exist in the supplied avg_info.cdl, but the header does not prove the 2011 files or geometry are available. temp is labelled potential temperature; salt convention must be confirmed. Freeze physical bottom-level indices before applying daily data validity; a missing bottom value is not permission to substitute a shallower value. Use the user's per-year/per-variable fixed-depth layout. Freeze any preprocessing and bottom mapping before evaluation, and give both systems the identical prepared grid."
+  },
+  "data_status": "pending_authorization_and_file_validation"
 }
