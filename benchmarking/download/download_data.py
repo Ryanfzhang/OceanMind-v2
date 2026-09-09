@@ -289,8 +289,17 @@ def transfer(chunk, output, timeout=600, runner=curl, verifier=verify_netcdf):
     final.parent.mkdir(parents=True, exist_ok=True)
     partial = final.with_suffix(".nc.part")
     # ERDDAP dynamically generates files and may not support byte ranges. Restart only this unfinished slice.
-    runner(chunk["url"], destination=partial, timeout=timeout)
-    counts = verifier(partial, chunk)
+    # A prior attempt may have downloaded the whole slice before validation failed.
+    # Only reuse it after the full current verifier accepts the exact request.
+    counts = None
+    if partial.is_file():
+        try:
+            counts = verifier(partial, chunk)
+        except (DownloadError, OSError, ValueError, RuntimeError):
+            pass
+    if counts is None:
+        runner(chunk["url"], destination=partial, timeout=timeout)
+        counts = verifier(partial, chunk)
     saved = {"request_sha256": chunk["request_sha256"], "sha256": file_hash(partial),
              "bytes": partial.stat().st_size, "valid_counts": counts, "source_url": chunk["url"],
              "completed_utc": dt.datetime.now(dt.timezone.utc).isoformat()}
