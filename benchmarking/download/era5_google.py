@@ -21,7 +21,7 @@ class Store:
 
         self.session = requests.Session()
         retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504],
-                      allowed_methods=["GET"], backoff_max=30)
+                      allowed_methods=["GET"])
         self.session.mount("https://", HTTPAdapter(max_retries=retry))
         self.metadata = self.get(".zmetadata").json()["metadata"]
 
