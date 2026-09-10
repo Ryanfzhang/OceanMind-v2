@@ -1,6 +1,7 @@
 import {Component, useRef, useState, type ReactNode} from 'react';
 import {BarChart3, Image as ImageIcon, LoaderCircle, Maximize2, Minus, Plus, X} from 'lucide-react';
 import type {FeatureCollection, Geometry} from 'geojson';
+import type {ResultCategory} from './result-features.js';
 
 import {asRecord} from '../app-utils.js';
 import type {ArtifactVersion, EventPayload} from '../types.js';
@@ -29,6 +30,7 @@ export type SpatialPayload = {
   values: Array<Array<number | null>>;
   bounds: [number, number, number, number];
   colorbar?: EventPayload;
+  categories?: ResultCategory[];
   rendering?: {
     kind?: 'continuous' | 'categorical';
     interpolation?: 'linear' | 'nearest';
@@ -239,8 +241,8 @@ function legacyToScientific(payload: LegacyStructuredPayload): ScientificPayload
   };
 }
 
-export function StructuredView({payload, compactHeader = false}: {payload: StructuredPayload; compactHeader?: boolean}): React.JSX.Element {
-  return <ScientificView payload={isScientificPayload(payload) ? payload : legacyToScientific(payload)} compactHeader={compactHeader} />;
+export function StructuredView({payload, compactHeader = false, featureId}: {payload: StructuredPayload; compactHeader?: boolean; featureId?: string}): React.JSX.Element {
+  return <ScientificView payload={isScientificPayload(payload) ? payload : legacyToScientific(payload)} compactHeader={compactHeader} featureId={featureId} />;
 }
 
 export function InteractiveViewWorkbench({artifact, loading, data, previewUrl, error, onClose}: {

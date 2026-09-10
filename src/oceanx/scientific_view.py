@@ -14,6 +14,7 @@ import math
 import os
 import re
 from collections.abc import Iterable, Mapping, Sequence
+from itertools import pairwise
 from numbers import Real
 from pathlib import Path
 from typing import Any, Literal
@@ -22,6 +23,58 @@ Scalar = int | float | str | None
 AxisScale = Literal["linear", "log", "time", "category"]
 FieldRender = Literal["filled_contour", "smooth", "cells"]
 FieldInterpolation = Literal["linear", "nearest"]
+
+
+def validate_result_features(features: Any) -> list[dict[str, Any]]:
+    """Validate the shared object contract, also at the publication boundary."""
+    if not isinstance(features, list):
+        raise TypeError("Result features must be a list")
+    seen: set[str] = set()
+    depths = {"Point": 0, "MultiPoint": 1, "LineString": 1, "Polygon": 2, "MultiPolygon": 3}
+    for feature in features:
+        if not isinstance(feature, dict):
+            raise TypeError("Invalid result feature")
+        key = feature.get("id")
+        if (
+            not isinstance(key, str)
+            or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,79}", key)
+            or key in seen
+        ):
+            raise ValueError("Result feature IDs must be unique identifiers")
+        seen.add(key)
+        if not isinstance(feature.get("label"), str) or not feature["label"].strip():
+            raise ValueError("Result feature requires a label")
+        geometry = feature.get("geometry", {})
+        if not isinstance(geometry, dict) or geometry.get("type") not in depths:
+            raise ValueError("Unsupported result feature geometry")
+
+        def check(value: Any, depth: int) -> None:
+            if not isinstance(value, (list, tuple)) or not value:
+                raise ValueError("Feature geometry must not be empty")
+            if depth == 0:
+                if len(value) != 2:
+                    raise ValueError("Feature positions require x and y")
+                for number in value:
+                    _finite_number(number, name="feature coordinate")
+            else:
+                for item in value:
+                    check(item, depth - 1)
+
+        check(geometry.get("coordinates"), depths[geometry["type"]])
+        polygons = (
+            [geometry["coordinates"]]
+            if geometry["type"] == "Polygon"
+            else geometry["coordinates"]
+            if geometry["type"] == "MultiPolygon"
+            else []
+        )
+        for polygon in polygons:
+            for ring in polygon:
+                if len(ring) < 4 or ring[0] != ring[-1]:
+                    raise ValueError("Feature polygon rings must be closed")
+        if geometry["type"] == "LineString" and len(geometry["coordinates"]) < 2:
+            raise ValueError("Feature line needs at least two points")
+    return features
 
 
 def _finite_number(value: Any, *, name: str) -> float:
@@ -360,6 +413,7 @@ class ScientificPanel:
         x: Any | None = None,
         y: Any | None = None,
         label: str = "",
+        layer_id: str | None = None,
         color: str | None = None,
         style: Mapping[str, Any] | None = None,
     ) -> ScientificPanel:
@@ -374,6 +428,8 @@ class ScientificPanel:
         ):
             raise ValueError("line requires at least two finite coordinate pairs")
         layer: dict[str, Any] = {"type": "line", "x": x_field, "y": y_field}
+        if layer_id is not None:
+            self._assign_layer_id(layer, layer_id)
         if label:
             layer["label"] = label
         normalized_style = _bounded_style(style, color=color)
@@ -389,6 +445,7 @@ class ScientificPanel:
         y: Any | None = None,
         color_values: Any | None = None,
         label: str = "",
+        layer_id: str | None = None,
         color: str | None = None,
         color_scale: Literal["linear", "log"] = "linear",
         color_domain: Sequence[float] | None = None,
@@ -427,6 +484,8 @@ class ScientificPanel:
         ):
             raise ValueError("scatter requires at least one finite coordinate pair")
         layer: dict[str, Any] = {"type": "scatter", "x": x_field, "y": y_field}
+        if layer_id is not None:
+            self._assign_layer_id(layer, layer_id)
         if color_values is not None:
             if not colorbar_label.strip():
                 raise ValueError(
@@ -463,6 +522,15 @@ class ScientificPanel:
             layer["style"] = normalized_style
         self.layers.append(layer)
         return self
+
+    def _assign_layer_id(self, layer: dict[str, Any], layer_id: str) -> None:
+        if (
+            not isinstance(layer_id, str)
+            or not layer_id.strip()
+            or any(entry.get("id") == layer_id for entry in self.layers)
+        ):
+            raise ValueError("Layer IDs must be nonempty and unique within the panel")
+        layer["id"] = layer_id
 
     def heatmap(
         self,
@@ -503,6 +571,7 @@ class ScientificPanel:
         variable: str = "",
         units: str = "",
         field_kind: Literal["continuous", "categorical"] = "continuous",
+        category_labels: Mapping[int | float, str] | None = None,
         palette: str | Sequence[str] = "viridis",
         color_scale: Literal["linear", "log"] = "linear",
         color_domain: Sequence[float] | None = None,
@@ -539,6 +608,21 @@ class ScientificPanel:
             raise ValueError(f"Unsupported field2d interpolation: {interpolation}")
         if field_kind not in {"continuous", "categorical"}:
             raise ValueError(f"Unsupported field2d field kind: {field_kind}")
+        categories = None
+        if field_kind == "categorical":
+            observed = sorted({float(value) for value in values if isinstance(value, (int, float))})
+            labels = category_labels or {}
+            if category_labels is not None and set(labels) != set(observed):
+                raise ValueError("category_labels must cover exactly the finite field values")
+            if any(not isinstance(label, str) or not label.strip() for label in labels.values()):
+                raise ValueError("Category labels must be nonempty strings")
+            categories = [
+                {"value": value, "label": labels.get(value, f"Class {value:g}")}
+                for value in observed
+            ]
+            render, interpolation = "cells", "nearest"
+        elif category_labels is not None:
+            raise ValueError("category_labels requires field_kind='categorical'")
         if isinstance(levels, int):
             if levels < 3 or levels > 32:
                 raise ValueError("field2d levels must be between 3 and 32")
@@ -564,9 +648,11 @@ class ScientificPanel:
             "variable": variable_name or z_field,
             "units": units.strip(),
             "field_kind": field_kind,
+            **({"categories": categories} if categories is not None else {}),
         }
         layer: dict[str, Any] = {
             "type": "field2d",
+            **({"categories": categories} if categories is not None else {}),
             "x": self.x,
             "y": self.y,
             "z": z_field,
@@ -758,18 +844,10 @@ class ScientificPanel:
                 "path_data": {
                     "x": self.figure._add_data(f"{prefix}_x", flat_x, dims=(point_dim,)),
                     "y": self.figure._add_data(f"{prefix}_y", flat_y, dims=(point_dim,)),
-                    "start": self.figure._add_data(
-                        f"{prefix}_start", starts, dims=(path_dim,)
-                    ),
-                    "count": self.figure._add_data(
-                        f"{prefix}_count", counts, dims=(path_dim,)
-                    ),
-                    "level": self.figure._add_data(
-                        f"{prefix}_level", levels, dims=(path_dim,)
-                    ),
-                    "label": self.figure._add_data(
-                        f"{prefix}_label", labels, dims=(path_dim,)
-                    ),
+                    "start": self.figure._add_data(f"{prefix}_start", starts, dims=(path_dim,)),
+                    "count": self.figure._add_data(f"{prefix}_count", counts, dims=(path_dim,)),
+                    "level": self.figure._add_data(f"{prefix}_level", levels, dims=(path_dim,)),
+                    "label": self.figure._add_data(f"{prefix}_label", labels, dims=(path_dim,)),
                 },
                 **({"label": label} if label else {}),
                 "style": _bounded_style(
@@ -909,6 +987,143 @@ class ScientificFigure:
         self.data_specs: dict[str, dict[str, Any]] = {}
         self.field_metadata: dict[str, dict[str, Any]] = {}
         self.panels: list[ScientificPanel] = []
+        self.features: list[dict[str, Any]] = []
+
+    def add_feature(
+        self,
+        *,
+        id: str,
+        label: str,
+        panel_id: str | None = None,
+        geometry: Mapping[str, Any] | None = None,
+        mask: Any = None,
+        point: Sequence[float] | None = None,
+        bounds: Sequence[float] | None = None,
+        layer_id: str | None = None,
+    ) -> str:
+        """Name an actual region, point, interval (bounds), or curve for citation.
+
+        Supply exactly one selector. Geometry uses GeoJSON shapes in the panel's
+        data coordinates (longitude/latitude for maps). Masks follow panel y,x.
+        No coordinates are inferred later from the answer's prose.
+        """
+        import numpy as np
+
+        panels = [p for p in self.panels if panel_id is None or p.panel_id == panel_id]
+        if len(panels) != 1:
+            raise ValueError("Feature must select exactly one existing panel")
+        panel = panels[0]
+
+        def coordinate(value: Any, channel: str) -> float:
+            if panel.payload["axes"][channel].get("scale") == "time" and not isinstance(
+                value, Real
+            ):
+                instant = np.datetime64(value, "ms")
+                if np.isnat(instant):
+                    raise ValueError("Feature time coordinate must be a valid date")
+                return float(instant.astype("int64"))
+            return _finite_number(value, name="feature coordinate")
+
+        def normalize_positions(value: Any) -> Any:
+            if isinstance(value, (list, tuple, np.ndarray)):
+                if len(value) == 2 and not isinstance(value[0], (list, tuple, np.ndarray)):
+                    x, y = coordinate(value[0], "x"), coordinate(value[1], "y")
+                    if self.plot_kind == "spatial_map":
+                        if not -90 <= y <= 90:
+                            raise ValueError("Map feature latitude must be in [-90,90]")
+                        normalized = ((x + 180) % 360) - 180
+                        x = 180.0 if normalized == -180 and x > 0 else normalized
+                    return [x, y]
+                return [normalize_positions(item) for item in value]
+            return value
+
+        if sum(v is not None for v in (geometry, mask, point, bounds, layer_id)) != 1:
+            raise ValueError("Feature requires exactly one geometry/mask/point/bounds/layer_id")
+        if point is not None:
+            geometry = {"type": "Point", "coordinates": list(point)}
+        elif bounds is not None:
+            if len(bounds) != 4:
+                raise ValueError("Feature bounds require xmin,ymin,xmax,ymax")
+            a, b, c, d = [
+                coordinate(value, channel) for value, channel in zip(bounds, "xyxy", strict=True)
+            ]
+            if a >= c or b >= d:
+                raise ValueError("Feature bounds must be increasing")
+            geometry = {
+                "type": "Polygon",
+                "coordinates": [[[a, b], [c, b], [c, d], [a, d], [a, b]]],
+            }
+        elif layer_id is not None:
+            layer = next((v for v in panel.layers if v.get("id") == layer_id), None)
+            if layer is None or layer.get("type") not in {"line", "scatter"}:
+                raise ValueError("Feature layer_id must identify a line or scatter layer")
+            xy = list(zip(self.data[layer["x"]], self.data[layer["y"]], strict=True))
+            if any(x is None or y is None for x, y in xy):
+                raise ValueError("Split a gapped series into finite feature geometries")
+            geometry = {
+                "type": "LineString" if layer["type"] == "line" else "MultiPoint",
+                "coordinates": xy,
+            }
+        elif mask is not None:
+            xs = np.asarray([coordinate(value, "x") for value in self.data[panel.x]])
+            ys = np.asarray([coordinate(value, "y") for value in self.data[panel.y]])
+            selected = np.asarray(mask)
+            if (
+                selected.dtype.kind != "b"
+                or selected.shape != (len(ys), len(xs))
+                or not selected.any()
+            ):
+                raise ValueError(
+                    "Feature mask must be a nonempty boolean array aligned to panel y,x"
+                )
+
+            def edges(values):
+                if (
+                    len(values) < 2
+                    or not np.isfinite(values).all()
+                    or not ((np.diff(values) > 0).all() or (np.diff(values) < 0).all())
+                ):
+                    raise ValueError("Feature mask coordinates must be monotonic and finite")
+                return np.r_[
+                    values[0] - (values[1] - values[0]) / 2,
+                    (values[:-1] + values[1:]) / 2,
+                    values[-1] + (values[-1] - values[-2]) / 2,
+                ]
+
+            xe, ye = edges(xs), edges(ys)
+            polygons = []
+            # Exact selected cells, merged into row runs; holes and disconnected
+            # components remain excluded without a new geometry dependency.
+            for row in range(len(ys)):
+                runs = np.flatnonzero(np.diff(np.r_[False, selected[row], False]))
+                for start, stop in runs.reshape(-1, 2):
+                    a, c = sorted((float(xe[start]), float(xe[stop])))
+                    b, d = sorted((float(ye[row]), float(ye[row + 1])))
+                    polygons.append([[[a, b], [c, b], [c, d], [a, d], [a, b]]])
+            geometry = {"type": "MultiPolygon", "coordinates": polygons}
+        feature = {"id": id, "label": label, "panel_id": panel.panel_id, "geometry": dict(geometry)}
+        feature["geometry"]["coordinates"] = normalize_positions(
+            feature["geometry"].get("coordinates")
+        )
+        # Normalize tuples/NumPy scalars into the exact persisted representation.
+        feature = json.loads(json.dumps(feature, default=lambda value: value.item()))
+        validate_result_features([*self.features, feature])
+        if self.plot_kind == "spatial_map" and feature["geometry"]["type"] not in {
+            "Point",
+            "MultiPoint",
+        }:
+
+            def check_dateline(value: Any) -> None:
+                if isinstance(value[0][0], Real):
+                    if any(abs(a[0] - b[0]) > 180 for a, b in pairwise(value)):
+                        raise ValueError("Split map feature lines/polygons at the antimeridian")
+                else:
+                    for child in value:
+                        check_dateline(child)
+
+            check_dateline(feature["geometry"]["coordinates"])
+        self.features.append(feature)
+        return id
 
     def _add_data(
         self,
@@ -973,6 +1188,7 @@ class ScientificFigure:
             "data": self.data_specs,
             "layout": {"columns": self.columns},
             "panels": [panel.payload for panel in self.panels],
+            "features": validate_result_features(self.features),
         }
         if self.subtitle:
             payload["subtitle"] = self.subtitle
@@ -1066,6 +1282,7 @@ class ScientificFigure:
             "layout": payload["layout"],
             "panels": payload["panels"],
             "interaction": {"tooltip": True, "zoom": True},
+            "features": payload["features"],
             **(
                 {"spatial_context": payload["spatial_context"]}
                 if "spatial_context" in payload
@@ -1085,9 +1302,7 @@ class ScientificFigure:
             {
                 "ocean_view_schema": "ocean-view-netcdf/v1",
                 "ocean_view_type": self._view_type(),
-                "ocean_view": json.dumps(
-                    figure_payload, ensure_ascii=False, separators=(",", ":")
-                ),
+                "ocean_view": json.dumps(figure_payload, ensure_ascii=False, separators=(",", ":")),
             }
         )
         temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
@@ -1165,7 +1380,9 @@ class ScientificFigure:
         spatial_payload = {
             "schema_version": "ocean-interactive-spatial/v2",
             "view_kind": "spatial_map",
+            "features": validate_result_features(self.features),
             "dataset_file": path.name,
+            **({"categories": metadata["categories"]} if "categories" in metadata else {}),
             "variable": variable,
             "units": units,
             "longitude_coordinate": "longitude",
@@ -1175,16 +1392,12 @@ class ScientificFigure:
             "colorbar": {
                 "label": panel.payload.get("display", {}).get("colorbar_label") or units,
                 "colormap": palette if isinstance(palette, str) else "viridis",
-                "levels": [
-                    float(value) for value in np.linspace(scale_min, scale_max, 9)
-                ],
+                "levels": [float(value) for value in np.linspace(scale_min, scale_max, 9)],
             },
             "rendering": {
                 "kind": metadata.get("field_kind", "continuous"),
                 "interpolation": (
-                    "nearest"
-                    if metadata.get("field_kind") == "categorical"
-                    else "linear"
+                    "nearest" if metadata.get("field_kind") == "categorical" else "linear"
                 ),
             },
             "spatial_context": self.spatial_context

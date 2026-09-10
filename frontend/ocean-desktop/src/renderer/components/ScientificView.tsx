@@ -1,4 +1,5 @@
 import {useEffect, useId, useMemo, useRef, useState} from 'react';
+import {FEATURE_COLORS, MASK_STYLE, categoryColor, featureBounds, featurePoints, prepareResultFeature, type ResultFeature} from './result-features.js';
 import {Focus, ZoomIn, ZoomOut} from 'lucide-react';
 
 import {
@@ -149,6 +150,13 @@ function axisTickValues(domain: [number, number], axis: ScientificAxis, count: n
   return tickValues([low, high], count).map((value) => 10 ** value);
 }
 
+export function scientificAxisTicks(domain: [number, number], axis: ScientificAxis) {
+  const count = Math.max(3, Math.min(6, axis.tick_count ?? 5));
+  const step = Math.abs(domain[1] - domain[0]) / (count - 1);
+  const precision = axis.precision ?? Math.min(10, Math.max(0, Math.ceil(-Math.log10(step || 1)) + 1));
+  return axisTickValues(domain, axis, count).map(value => ({value, label: axisText(value, {...axis, precision})}));
+}
+
 function lerpColor(leftColor: string, rightColor: string, ratio: number): string {
   const parse = (value: string) => [1, 3, 5].map((offset) => Number.parseInt(value.slice(offset, offset + 2), 16));
   const left = parse(leftColor);
@@ -260,6 +268,7 @@ function fieldImageDataUrl({
     return (Math.floor(ratio * bandCount) + .5) / bandCount;
   };
   const colorLookup = Array.from({length: 256}, (_, index) => rgb(paletteColor(palette, index / 255)));
+  const categoryColors = new Map(layer.categories?.map((entry, index) => [entry.value, rgb(categoryColor(index))]));
   const sample = (x: Bracket, y: Bracket): number | null => {
     const nearestRow = y.ratio < .5 ? y.lower : y.upper;
     const nearestColumn = x.ratio < .5 ? x.lower : x.upper;
@@ -301,7 +310,7 @@ function fieldImageDataUrl({
           image.data[offset + 3] = 0;
           continue;
         }
-        const [red, green, blue] = colorLookup[Math.max(0, Math.min(255, Math.round(renderedRatio(value) * 255)))]!;
+        const [red, green, blue] = categoryColors.get(value) ?? colorLookup[Math.max(0, Math.min(255, Math.round(renderedRatio(value) * 255)))]!;
         image.data[offset] = red;
         image.data[offset + 1] = green;
         image.data[offset + 2] = blue;
@@ -379,7 +388,8 @@ function drawCanvasMarker(context: CanvasRenderingContext2D, marker: NonNullable
   context.fill();
 }
 
-function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePayload; panel: ScientificPanel; index: number}): React.JSX.Element {
+function ScientificPanelView({figure, panel, index, featureId}: {figure: ScientificFigurePayload; panel: ScientificPanel; index: number; featureId?: string}): React.JSX.Element {
+  const panelRef = useRef<HTMLElement | null>(null);
   const instanceId = useId().replaceAll(':', '');
   const clipId = `scientific-clip-${instanceId}`;
   const fieldClipId = `scientific-field-clip-${instanceId}`;
@@ -392,6 +402,32 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
   const xAxis = panel.axes.x;
   const yAxis = panel.axes.y;
   const data = figure.data;
+  const features = useMemo(() => (figure.features ?? [])
+    .filter(f => f.panel_id === panel.id || (!f.panel_id && figure.panels.length === 1))
+    .map(prepareResultFeature), [figure.features, figure.panels.length, panel.id]);
+  const focusedFeature = features.find(f => f.id === featureId);
+  useEffect(() => {
+    if (!focusedFeature) {setViewport({}); return;}
+    const bounds = featureBounds(focusedFeature);
+    if (!bounds) return;
+    const [a,b,c,d] = bounds;
+    const padding = (low: number, high: number, axis: ScientificAxis) => {
+      if (high > low) return (high-low)*.15;
+      const values = (data[axis.field] ?? []).flatMap(value => {
+        const number = axisNumber(value, axis, null);
+        return number === null ? [] : [number];
+      });
+      const [minimum, maximum] = rawExtent(values);
+      return Math.max((maximum-minimum)*.05, Math.abs(low)*1e-6, .01);
+    };
+    const dx = padding(a, c, xAxis);
+    const dy = padding(b, d, yAxis);
+    setViewport({x: [a-dx,c+dx], y: [b-dy,d+dy]});
+    if (figure.panels.length > 1) {
+      const frame = requestAnimationFrame(() => panelRef.current?.scrollIntoView({block: 'nearest', behavior: 'smooth'}));
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [focusedFeature, data, xAxis, yAxis, figure.panels.length]);
   const seriesColors = figure.theme?.series?.length ? figure.theme.series : DEFAULT_SERIES;
 
   const geometry = useMemo(() => {
@@ -460,10 +496,10 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
     };
     const xTicks = xCategories
       ? [...xCategories.entries()].filter((_, tickIndex, all) => tickIndex % Math.max(1, Math.ceil(all.length / 7)) === 0).map(([label, value]) => ({label, value}))
-      : axisTickValues(xDomain, xAxis, Math.max(3, Math.min(6, xAxis.tick_count ?? 5))).map((value) => ({label: axisText(value, xAxis), value}));
+      : scientificAxisTicks(xDomain, xAxis);
     const yTicks = yCategories
       ? [...yCategories.entries()].filter((_, tickIndex, all) => tickIndex % Math.max(1, Math.ceil(all.length / 6)) === 0).map(([label, value]) => ({label, value}))
-      : axisTickValues(yDomain, yAxis, Math.max(3, Math.min(6, yAxis.tick_count ?? 5))).map((value) => ({label: axisText(value, yAxis), value}));
+      : scientificAxisTicks(yDomain, yAxis);
     return {baseX, baseY, xDomain, yDomain, px, py, xTicks, yTicks};
   }, [data, panel.layers, viewport, xAxis, yAxis]);
 
@@ -476,6 +512,7 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
     ? colorLayer.color_domain
     : colorMode === 'log' ? logExtent(colorValues) : rawExtent(colorValues);
   const colorPalette = paletteFor(colorLayer);
+  const fieldCategories = colorLayer?.type === 'field2d' ? colorLayer.categories ?? [] : [];
   const colorFor = (value: number) => {
     const ratio = colorMode === 'log'
       ? (Math.log10(Math.max(value, Number.MIN_VALUE)) - Math.log10(Math.max(colorDomain[0], Number.MIN_VALUE)))
@@ -719,7 +756,7 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
     })}><i style={{background: entry.color}} />{entry.label}</button>)}
   </div> : null;
 
-  return <article className="scientific-panel" style={{aspectRatio: panel.display?.aspect_ratio}}>
+  return <article ref={panelRef} className="scientific-panel" style={{aspectRatio: panel.display?.aspect_ratio}}>
     {(panel.label || inferredTitle || panel.subtitle || figure.panels.length > 1) ? <header className="scientific-panel-heading">
       <span className="scientific-panel-letter">{panel.label ?? String.fromCharCode(97 + index)}</span>
       <div>{inferredTitle ? <strong>{inferredTitle}</strong> : null}{panel.subtitle ? <small>{panel.subtitle}</small> : null}</div>
@@ -796,12 +833,12 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
             {colorPalette.map((color, colorIndex) => <stop key={`${color}-${colorIndex}`} offset={`${colorIndex / (colorPalette.length - 1) * 100}%`} stopColor={color} />)}
           </linearGradient>
         </defs>
-        {geometry.yTicks.map((tick) => <g key={`y-${tick.label}`}>
+        {geometry.yTicks.map((tick, tickIndex) => <g key={`y-${tickIndex}`}>
           {yAxis.grid === true ? <line x1={MARGIN.left} y1={geometry.py(tick.value)} x2={MARGIN.left + PLOT_WIDTH} y2={geometry.py(tick.value)} className="scientific-grid" /> : null}
           <line x1={MARGIN.left - 5} y1={geometry.py(tick.value)} x2={MARGIN.left} y2={geometry.py(tick.value)} className="scientific-tick-mark" />
           <text x={MARGIN.left - 10} y={geometry.py(tick.value) + 4} textAnchor="end" className="scientific-tick">{tick.label}</text>
         </g>)}
-        {geometry.xTicks.map((tick) => <g key={`x-${tick.label}`}>
+        {geometry.xTicks.map((tick, tickIndex) => <g key={`x-${tickIndex}`}>
           {xAxis.grid ? <line x1={geometry.px(tick.value)} y1={MARGIN.top} x2={geometry.px(tick.value)} y2={MARGIN.top + PLOT_HEIGHT} className="scientific-grid" /> : null}
           <line x1={geometry.px(tick.value)} y1={MARGIN.top + PLOT_HEIGHT} x2={geometry.px(tick.value)} y2={MARGIN.top + PLOT_HEIGHT + 5} className="scientific-tick-mark" />
           <text x={geometry.px(tick.value)} y={MARGIN.top + PLOT_HEIGHT + 20} textAnchor="middle" className="scientific-tick">{tick.label}</text>
@@ -943,9 +980,37 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
             return null;
           })}
         </g>
+        <g clipPath={`url(#${clipId})`} aria-label="Result objects">
+          {features.map(feature => {
+            const featureIndex = (figure.features ?? []).findIndex(f => f.id === feature.id);
+            const color = FEATURE_COLORS[featureIndex % FEATURE_COLORS.length]!;
+            const active = feature.id === featureId;
+            const points = featurePoints(feature);
+            const first = points[0];
+            if (!first) return null;
+            function paths(f: ResultFeature): number[][][] {
+              const g = f.geometry;
+              if (g.type === 'LineString') return [g.coordinates];
+              if (g.type === 'Polygon') return g.coordinates;
+              if (g.type === 'MultiPolygon') return g.coordinates.flat();
+              return [];
+            }
+            const isMask = feature.geometry.type.includes('Polygon');
+            const pathData = paths(feature).map(path => path.map(([x,y], i) => `${i ? 'L' : 'M'}${geometry.px(x!)} ${geometry.py(y!)}`).join(' ') + (isMask ? ' Z' : '')).join(' ');
+            return <g key={feature.id} data-feature-id={feature.id} data-selected={active} opacity={featureId && !active ? .45 : 1}>
+              <title>{feature.label}</title>
+              {pathData ? isMask ? <>
+                <path data-mask-part="fill" d={pathData} fillRule="evenodd" fill={color} fillOpacity={active ? MASK_STYLE.selectedFill : MASK_STYLE.fill} stroke="none" />
+                <path data-mask-part="halo" d={pathData} fill="none" stroke="white" strokeWidth={active ? MASK_STYLE.selectedHalo : MASK_STYLE.halo} strokeLinejoin="round" />
+                <path data-mask-part="boundary" d={pathData} fill="none" stroke={color} strokeWidth={active ? MASK_STYLE.selectedEdge : MASK_STYLE.edge} strokeLinejoin="round" />
+              </> : <path d={pathData} fill="none" stroke={color} strokeWidth={active ? 3 : 1.5} /> : points.map(([x,y], i) => <circle key={i} cx={geometry.px(x)} cy={geometry.py(y)} r={active ? 6 : 4} fill={color} />)}
+              <text x={geometry.px(first[0])+7} y={geometry.py(first[1])-7} fill={color} stroke="white" strokeWidth={3} paintOrder="stroke" fontSize={12}>{featureIndex + 1}</text>
+            </g>;
+          })}
+        </g>
         <text x={MARGIN.left + PLOT_WIDTH / 2} y={HEIGHT - 13} textAnchor="middle" className="scientific-axis-label">{xAxis.label ?? xAxis.field}{xAxis.units ? ` (${xAxis.units})` : ''}</text>
         <text x="17" y={MARGIN.top + PLOT_HEIGHT / 2} textAnchor="middle" transform={`rotate(-90 17 ${MARGIN.top + PLOT_HEIGHT / 2})`} className="scientific-axis-label">{yAxis.label ?? yAxis.field}{yAxis.units ? ` (${yAxis.units})` : ''}</text>
-        {colorValues.length && panel.display?.colorbar !== false ? <g><rect className="scientific-colorbar" x={WIDTH - 45} y={MARGIN.top + 8} width="9" height={PLOT_HEIGHT - 16} fill={`url(#${gradientId})`} />
+        {!fieldCategories.length && colorValues.length && panel.display?.colorbar !== false ? <g><rect className="scientific-colorbar" x={WIDTH - 45} y={MARGIN.top + 8} width="9" height={PLOT_HEIGHT - 16} fill={`url(#${gradientId})`} />
           <line x1={WIDTH - 35} y1={MARGIN.top + 8} x2={WIDTH - 31} y2={MARGIN.top + 8} className="scientific-tick-mark" />
           <line x1={WIDTH - 35} y1={MARGIN.top + PLOT_HEIGHT / 2} x2={WIDTH - 31} y2={MARGIN.top + PLOT_HEIGHT / 2} className="scientific-tick-mark" />
           <line x1={WIDTH - 35} y1={MARGIN.top + PLOT_HEIGHT - 8} x2={WIDTH - 31} y2={MARGIN.top + PLOT_HEIGHT - 8} className="scientific-tick-mark" />
@@ -964,11 +1029,12 @@ function ScientificPanelView({figure, panel, index}: {figure: ScientificFigurePa
       {hover ? <output className="scientific-hover-readout"><strong>{hover.title}</strong><span>{hover.value}</span></output> : null}
     </div>
     {legendPosition === 'bottom' ? legend : null}
+    {fieldCategories.length ? <div className="field-category-legend" aria-label="Field categories">{fieldCategories.map((entry, index) => <span key={entry.value}><i style={{backgroundColor: categoryColor(index)}} />{entry.value}: {entry.label}</span>)}</div> : null}
   </article>;
 }
 
-export function ScientificView({payload, compactHeader = false}: {payload: ScientificPayload; compactHeader?: boolean}): React.JSX.Element {
-  const figure = normalizeScientificFigure(payload);
+export function ScientificView({payload, compactHeader = false, featureId}: {payload: ScientificPayload; compactHeader?: boolean; featureId?: string}): React.JSX.Element {
+  const figure = useMemo(() => normalizeScientificFigure(payload), [payload]);
   const columns = figure.layout?.columns ?? (figure.panels.length === 1 ? 1 : 2);
   const autoHeroLayout = figure.panels.length === 3 && !figure.panels.some((panel) => panel.grid);
   const themeStyle = {
@@ -987,7 +1053,7 @@ export function ScientificView({payload, compactHeader = false}: {payload: Scien
       {figure.panels.map((panel, index) => <div key={panel.id} className="scientific-panel-slot" style={{
         gridColumn: panel.grid?.column ? `${panel.grid.column} / span ${panel.grid.column_span ?? 1}` : undefined,
         gridRow: panel.grid?.row ? `${panel.grid.row} / span ${panel.grid.row_span ?? 1}` : undefined,
-      }}><ScientificPanelView figure={figure} panel={panel} index={index} /></div>)}
+      }}><ScientificPanelView figure={figure} panel={panel} index={index} featureId={featureId} /></div>)}
     </div>
     {figure.caption ? <footer className="scientific-figure-caption">{figure.caption}</footer> : null}
   </section>;

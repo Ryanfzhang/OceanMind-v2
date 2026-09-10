@@ -32,6 +32,24 @@ Use exact artifact refs rather than latest-version labels. Keep unsupported pros
 ## process_checkpoints
 The receiving Expert checks that cited refs and stated limitations are present; the Coordinator decides whether the evidence supports the final wording.
 
+For each consequential attribution, compare the wording with the actual diagnostic and its scope.
+"Consistent with" is not "demonstrates"; a budget residual is not an independently observed driver;
+absence of a required diagnostic does not rule out a mechanism. State what was measured, what was
+inferred under assumptions, and what remains untested beside the claim, not only in a final caveat.
+
+If prose, logs, figures, or Experts disagree on a consequential quantity, name the conflict and
+request a focused verification. Retain competing estimates and their definitions until the evidence
+resolves them. Do not rename an inconvenient estimate "noise", select the preferred estimate, or
+upgrade certainty during a text-only closing round without supporting checks. After a correction,
+use the corrected evidence and identify which earlier claim or output it supersedes; otherwise
+retain the unresolved limitation in the main conclusion.
+
+Match the temporal and spatial scope of each claim to its evidence. A period-mean sign does not
+establish the same sign throughout formation, persistence, and decay, nor does a regional mean
+exclude a local contribution. When a consequential term reverses sign, distinguish the phases or
+subregions and retain the counterexample in the synthesis. Define the aggregation window before
+comparing mechanisms; do not silently select a window that removes contradictory evidence.
+
 ## expected_artifacts
 ClaimArtifact, ReportArtifact, and DecisionArtifact.
 

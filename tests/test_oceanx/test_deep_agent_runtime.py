@@ -273,6 +273,35 @@ def test_token_budget_enters_wind_down_then_returns_a_hard_limit_handoff() -> No
     terminal = middleware.wrap_model_call(request, unexpected_handler)
     assert not handler_called
     assert "reached its token budget" in str(terminal.result[0].content)
+    assert terminal.result[0].additional_kwargs["oceanx_budget_exhausted"] is True
+
+
+@pytest.mark.asyncio
+async def test_budget_short_circuit_without_model_event_is_not_retried():
+    from types import SimpleNamespace
+    from oceanx.agent_contract import ErrorEvent
+
+    class BudgetGraph:
+        async def aget_state(self, config):
+            return SimpleNamespace(values={"messages": [AIMessage(
+                content="Token budget exhausted; partial work is saved.",
+                additional_kwargs={"oceanx_budget_exhausted": True},
+            )]}, next=())
+
+        async def astream_events(self, *args, **kwargs):
+            if False:
+                yield {}
+
+    engine = DeepAgentEngine(
+        graph=BudgetGraph(), thread_id="budget-test", system_prompt="Test",
+        max_turns=4, operation_id_factory=lambda *args: "operation",
+    )
+    events = [e async for e in engine.submit_message("question", request_id="req")]
+    errors = [e for e in events if isinstance(e, ErrorEvent)]
+    assert len(errors) == 1
+    assert errors[0].code == "budget_exhausted"
+    assert errors[0].retryable is False
+    assert not engine._empty_response_pending
 
 
 @pytest.mark.asyncio
@@ -308,10 +337,14 @@ async def test_nested_agent_events_inside_a_tool_do_not_leak_into_parent_stream(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("disconnect", [False, True])
+@pytest.mark.parametrize("delivery", ["normal", "disconnect", "empty", "length", "refusal"])
 async def test_deep_agent_exposes_only_ocean_tools_and_returns_one_final_answer(
-    tmp_path: Path, disconnect: bool,
+    tmp_path: Path, delivery: str, monkeypatch,
 ) -> None:
+    async def sleep(delay):
+        pass
+    monkeypatch.setattr("oceanx.model_recovery.asyncio.sleep", sleep)
+    disconnect = delivery == "disconnect"
     model = (_DisconnectAfterToolModel if disconnect else _BoundFakeModel)(
         responses=[
             AIMessage(
@@ -328,6 +361,10 @@ async def test_deep_agent_exposes_only_ocean_tools_and_returns_one_final_answer(
             AIMessage(content="The bounded result is 2."),
         ]
     )
+    if delivery == "empty":
+        model.responses.insert(1, AIMessage(content="", response_metadata={"finish_reason": "stop"}))
+    elif delivery in {"length", "refusal"}:
+        model.responses[1] = AIMessage(content="", response_metadata={"finish_reason": delivery})
     # Fake model provider identity is its llm type.
     _disable_generic_deep_agent_tools(type(model).__name__.lower())
     backend = StateBackend()
@@ -360,10 +397,21 @@ async def test_deep_agent_exposes_only_ocean_tools_and_returns_one_final_answer(
     events = [event async for event in _coordinator_events(engine, "run", "req-1")]
     assert len(increment.contexts) == 1
     snapshot = await graph.aget_state(engine._config("req-1"))
-    assert sum(isinstance(m, HumanMessage) for m in snapshot.values["messages"]) == 1
+    assert sum(isinstance(m, HumanMessage) and m.content == "run"
+               for m in snapshot.values["messages"]) == 1
+    assert sum(isinstance(m, HumanMessage) for m in snapshot.values["messages"]) == (
+        2 if delivery == "empty" else 1
+    )
 
     assert any(isinstance(event, ToolExecutionStarted) for event in events)
     assert any(isinstance(event, ToolExecutionCompleted) for event in events)
+    if delivery in {"length", "refusal"}:
+        from oceanx.agent_contract import ErrorEvent
+        assert isinstance(events[-1], ErrorEvent)
+        assert events[-1].code == "model_output_error"
+        assert events[-1].retryable is False
+        assert not events[-1].retries_exhausted
+        return
     final = [event for event in events if isinstance(event, AssistantTurnComplete)][-1]
     assert final.message.text == "The bounded result is 2."
     if disconnect:

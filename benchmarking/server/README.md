@@ -1,5 +1,101 @@
 # Running OceanX on a shared-data server
 
+## Benchmark file delivery (opt-in)
+
+Both `--query` and `--queries` run every OceanX model role with **deepseek-v4-pro**
+using the configured Coordinator API endpoint and credential. This override is
+process-local: saved settings and frontend role models are untouched. Configure
+a Coordinator endpoint that serves this model before running; no fallback to Flash
+is intended. Each attempt records `model_protocol.json`. Curator remains disabled.
+For Claude comparisons explicitly pass `--model deepseek-v4-pro`; check actual
+reported model usage for auxiliary calls as well as the main model.
+
+For science comparisons that should not depend on Desktop interactive-view publication,
+use the separate runner:
+
+```bash
+python benchmarking/server/run_oceanx.py --queries /absolute/queries.jsonl \
+  --output /absolute/new-benchmark-run
+```
+
+For an ad-hoc query test, the same delivery and literature-selection policy applies:
+
+```bash
+python benchmarking/server/run_oceanx.py --query "Your research question" \
+  --dataset /absolute/temperature.zarr --dataset /absolute/salinity.zarr \
+  --timeout 7200 --output /absolute/new-query-test
+```
+
+This replaces only `ocean_publish_outputs` inside the dedicated benchmark backend
+process. Coordinator-accepted candidates (including ScientificFigure `.nc` files)
+and their declared supporting files are copied, hash-checked, and recorded under
+`attempt-*/delivery_manifest.json`. Assigned input references
+are preserved as provenance, including multiple sources. Input datasets are not
+copied. NetCDF views are rendered to PNG with the existing backend figure-reproduction
+templates; the receipt includes PNG paths and the reusable `render_figures.py`.
+This does not repeat the analysis or claim scientific correctness. Set
+`OCEAN_BENCH_RENDER_PYTHON` to the Python environment with matplotlib, xarray and
+NetCDF dependencies if needed (defaults to `OCEAN_SANDBOX_PYTHON`, then runner Python).
+The Coordinator receives a file-delivery receipt and can return its final answer
+without registering a Desktop result. `answer.md` and the runtime `result.json`
+retain their usual meanings. `outputs.json` still describes Desktop results and
+can therefore be empty; evaluate the separate benchmark manifests instead.
+
+All single-query and JSONL tests use the same per-attempt layout:
+
+```text
+attempt-*/
+  answer.md
+  figures/<expert>/           # current PNGs; revisions update the same names
+  analysis.ipynb             # editable visualization of saved derived data
+  artifacts/<expert>/        # OceanX derived data and declared supporting files
+  render_figures.py
+  delivery_manifest.json     # current accepted files, not historical receipts
+  events.jsonl, backend.log  # raw execution evidence retained
+```
+
+Continuation references are deduplicated and the latest saved candidate for an
+Expert/file is used when accepted. Different Experts have stable namespaces;
+genuinely conflicting unqualified names return explicit owner-qualified choices.
+Final collection reads only the current manifest, never every historical work order.
+Older receipt-based runs can still be collected without rewriting their results.
+Claude uses the same `answer.md`, `figures/`, `analysis.ipynb` layout and retains its
+`code/` and `outputs/` relative paths. A missing notebook is not fabricated.
+
+Use this same adapter for both OceanX arms. Record the delivery mode in comparisons;
+`delivery_protocol.json` records it and the adapter hash for each attempt. This is
+an intentional delivery intervention and is not a test of native UI publication.
+Literature selection interactions automatically select all offered papers, as
+authorized for unattended benchmarks; this policy is recorded in the attempt.
+The normal `ocean batch` command, production code, scientific prompts, tree policy,
+and execution sandbox are unchanged; only the benchmark model override above applies. This adapter does not
+auto-approve unrelated permissions, fabricate a missing final answer, or turn an
+interrupted run into a completed one. Existing attempts are not rewritten.
+
+### Collecting all results
+
+The test runner automatically collects finished attempt records on exit, including
+failed/interrupted attempts that have a `result.json`. It prints the collection
+directory. Open `collected/collection-*/index.md` for the full run, or inspect
+`summary.json` for runtime status, final-answer presence, PNG counts, usage and
+collection errors. Each task/attempt contains the original `answer.md`, a portable
+`review.md` with a PNG gallery, and verified delivery files (`.nc`, PNG, renderer,
+declared supporting outputs and provenance). All retries remain separate;
+no successful attempt is silently substituted for a failed one.
+
+You can collect again without rerunning the models:
+
+```bash
+python benchmarking/server/collect_oceanx.py --run /absolute/benchmark-run \
+  --output /absolute/new-collected-results
+```
+
+The collector does not scrape unaccepted workspace files, copy input datasets,
+execute agent programs, or infer a final answer from intermediate reports. Old
+native runs without benchmark receipts retain their answer/status but will not
+automatically gain PNG outputs. Collections are review inputs, not scientific
+scores; use the separate evaluation workflow to judge the selected evidence.
+
 This is the execution guide. [Download setup](../download/README.md), [data/paper correspondence](../preparation/DATA_PREPARATION.md), and [export/judging](../evaluation/README.md) each have one separate home.
 
 ## 1. One-time environment and model checks
@@ -67,7 +163,7 @@ python benchmarking/server/prepare_queries.py \
   --data-root /import/home4/share --preset autoresearch \
   --output "$HOME/oceanx-bench-inputs/autoresearch.jsonl"
 
-ocean batch --queries "$HOME/oceanx-bench-inputs/autoresearch.jsonl" \
+python benchmarking/server/run_oceanx.py --queries "$HOME/oceanx-bench-inputs/autoresearch.jsonl" \
   --output "$HOME/oceanx-bench-runs/autoresearch-r1"
 ```
 
@@ -88,7 +184,7 @@ python benchmarking/server/prepare_queries.py \
   --data-root /import/home4/share --tasks Q21 \
   --bindings /import/home4/share/_download_all/data_bindings.json \
   --output "$HOME/oceanx-bench-inputs/q21.jsonl"
-ocean batch --queries "$HOME/oceanx-bench-inputs/q21.jsonl" \
+python benchmarking/server/run_oceanx.py --queries "$HOME/oceanx-bench-inputs/q21.jsonl" \
   --output "$HOME/oceanx-bench-runs/q21-pilot"
 ```
 
@@ -111,7 +207,7 @@ python benchmarking/server/prepare_queries.py \
   --data-root /import/home4/share --preset non-cmoms \
   --bindings "$HOME/oceanx-paper-bindings.json" \
   --output "$HOME/oceanx-bench-inputs/non-cmoms.jsonl"
-ocean batch --queries "$HOME/oceanx-bench-inputs/non-cmoms.jsonl" \
+python benchmarking/server/run_oceanx.py --queries "$HOME/oceanx-bench-inputs/non-cmoms.jsonl" \
   --output "$HOME/oceanx-bench-runs/non-cmoms-r1"
 ```
 
@@ -125,7 +221,7 @@ The batch writes `results.jsonl` and per-attempt `query.json`, `result.json`,
 `answer.md`, event logs and derived artifacts. It runs cases sequentially, while
 the existing Coordinator/Experts still collaborate normally within a case.
 
-Resume the same batch with `ocean batch --queries ... --output ... --resume`.
+Resume the same batch with `python benchmarking/server/run_oceanx.py --queries ... --output ... --resume`.
 This retries unsuccessful cases in new attempts; it is not a resumed model checkpoint
 or an independent repetition. For an independent repetition use a new output directory.
 
@@ -195,6 +291,7 @@ claude-bench-runs/autoresearch-r1/
     query.json               # original query + resolved dataset paths
     prompt.txt               # exact text sent to Claude
     command.json             # CLI flags, no copied API configuration
+    token_usage.json         # whole-call model totals, cache counts and deduplicated observed steps
     events.jsonl             # live Claude stream (64 MiB limit)
     stderr.log               # stderr (64 MiB limit)
     claude_result.json       # terminal CLI result if emitted
@@ -225,6 +322,19 @@ results only; automatic cross-system packing and judging are separate work.
 CLI contract: [programmatic use](https://code.claude.com/docs/en/headless) and
 [CLI flags](https://code.claude.com/docs/en/cli-reference). Tested with a simulated
 CLI subprocess, not your server's paid DeepSeek API.
+
+### Claude token accounting
+
+Use `token_usage.json` → `whole_call_totals` for comparison. Its source is the final
+`result.modelUsage` summed across models, including subagents. Report input,
+output, cache-read and cache-creation tokens separately. `result.usage` only covers
+the main loop: do not add it to the model totals. Raw `events.jsonl` and
+`claude_result.json` are retained for audit. Per-step messages are deduplicated by
+message ID and parent tool ID; their output-token placeholders are not treated as
+actual totals. Missing final usage stays unknown, never zero. These are CLI-reported
+counts, not a billing audit; `total_cost_usd` is not the DeepSeek invoice.
+
+See [Claude's usage documentation](https://code.claude.com/docs/en/agent-sdk/cost-tracking).
 
 ## Tests
 

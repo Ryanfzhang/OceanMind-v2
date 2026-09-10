@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from collections import deque
 from collections.abc import AsyncIterator, Awaitable, Callable
@@ -39,21 +40,26 @@ from oceanx.agent_contract import (
     _message_text,
 )
 from oceanx.agent_tools import ToolRegistry
+from oceanx.expert_context import ExpertContextMiddleware
 from oceanx.model_config import OceanModelProfile, create_chat_model
+from oceanx.model_recovery import model_error_event
 from oceanx.storage import OceanPaths
 from oceanx.tool_history import ToolHistoryRepairMiddleware
 
 TOKEN_WIND_DOWN_RATIO = 0.85
-_TOKEN_WIND_DOWN_INSTRUCTION = """# Expert token-budget wind-down
+log = logging.getLogger(__name__)
+_TOKEN_WIND_DOWN_INSTRUCTION = """# Agent token-budget wind-down
 
-This WorkOrder has entered its delivery reserve. Stop open-ended exploration. Use another tool only
+This agent run has entered its delivery reserve. Stop open-ended exploration. Use another tool only
 when it directly repairs the latest concrete error or saves a specifically requested missing output.
 Otherwise finish now from durable evidence: state the supported conclusion, cite the saved outputs,
 and make every unresolved limitation explicit. Do not start a broader replacement analysis.
+For a Coordinator, summarize accepted evidence and unfinished work without claiming the research is
+complete. A budget limit is not evidence for any hypothesis or a reason to force terminal tree states.
 """
 _TOKEN_BUDGET_FINAL = (
-    "This Expert round reached its token budget after preserving its durable executions and outputs. "
-    "Treat them as partial evidence and request only the unresolved delta in a follow-up WorkOrder."
+    "This agent run reached its token budget. Any saved executions and outputs are partial evidence, "
+    "not a completed research conclusion. Continue only the unresolved work in a follow-up."
 )
 
 
@@ -178,7 +184,10 @@ class TokenBudgetWindDownMiddleware(AgentMiddleware):
 
     def _before_call(self, request: ModelRequest) -> tuple[ModelRequest, ModelResponse | None]:
         if self._hard_limit_reached():
-            return request, ModelResponse(result=[AIMessage(content=_TOKEN_BUDGET_FINAL)])
+            return request, ModelResponse(result=[AIMessage(
+                content=_TOKEN_BUDGET_FINAL,
+                additional_kwargs={"oceanx_budget_exhausted": True},
+            )])
         if self._wind_down_reached():
             return self._wind_down_request(request), None
         return request, None
@@ -240,6 +249,7 @@ class DeepAgentEngine:
         self._model_call_state_hook: Callable[[bool], None] | None = None
         self._turn_context = ""
         self._stream_turn_index = 0
+        self._empty_response_pending = False
 
     @property
     def messages(self) -> list[ConversationMessage]:
@@ -328,7 +338,7 @@ class DeepAgentEngine:
         self._turn_context = ""
         return [*prefix, HumanMessage(content=contextual_text)]
 
-    async def _refresh_messages(self, config: dict[str, Any]) -> None:
+    async def _refresh_messages(self, config: dict[str, Any]) -> BaseMessage | None:
         snapshot = await self.graph.aget_state(config)
         raw = snapshot.values.get("messages", ()) if snapshot.values else ()
         self._messages = [
@@ -336,6 +346,7 @@ class DeepAgentEngine:
             for message in raw
             if isinstance(message, BaseMessage)
         ]
+        return raw[-1] if raw and isinstance(raw[-1], BaseMessage) else None
 
     async def submit_message(
         self, text: str, *, request_id: str | None = None, _resume: bool = False
@@ -344,9 +355,21 @@ class DeepAgentEngine:
         if _resume:
             snapshot = await self.graph.aget_state(config)
             if not snapshot.next:
-                yield ErrorEvent(message="No pending model checkpoint to resume", code="model_error", retryable=False)
-                return
-            inputs = None
+                if not self._empty_response_pending:
+                    yield ErrorEvent(message="No pending model checkpoint to resume", code="model_error", retryable=False)
+                    return
+                # An empty terminal AI message leaves no graph node pending. A bounded delivery
+                # reminder resumes reasoning from saved messages, never the original tool calls.
+                inputs = {"messages": [HumanMessage(content=(
+                    "[Runtime delivery recovery] The previous model response ended without an "
+                    "answer. Continue the pending assignment from the saved conversation and tool "
+                    "results. Reuse completed work; do not repeat successful tool calls. Decide "
+                    "whether further work is needed or deliver the evidence-bound answer, including "
+                    "unresolved limitations. This reminder grants no new authority and does not "
+                    "change the researcher's requested language."
+                ))]}
+            else:
+                inputs = None
         else:
             inputs = {"messages": await self._input_messages(config, text)}
             self._stream_turn_index = 0
@@ -356,6 +379,8 @@ class DeepAgentEngine:
         model_turns: dict[str, str] = {}
         completed_model_runs: set[str] = set()
         turn_index = self._stream_turn_index
+        last_model_message: AIMessage | None = None
+        self._empty_response_pending = False
         try:
             async for event in self.graph.astream_events(inputs, config=config, version="v2"):
                 name = str(event.get("event") or "")
@@ -402,6 +427,12 @@ class DeepAgentEngine:
                     message = _ai_message(data.get("output"))
                     if message is None:
                         continue
+                    last_model_message = message
+                    log.info("Model response request=%s turn=%s finish=%s text_chars=%s tools=%s",
+                             request_id, turn_index,
+                             message.response_metadata.get("finish_reason") or
+                             message.response_metadata.get("stop_reason"),
+                             len(_message_text(message)), len(message.tool_calls))
                     turn_id = model_turns.get(run_id) or f"{request_id or self.thread_id}:turn:{turn_index}"
                     for call in message.tool_calls:
                         pending_calls.append(
@@ -467,19 +498,33 @@ class DeepAgentEngine:
                         operation_id=operation_id,
                         duration_seconds=max(0.0, time.monotonic() - started),
                     )
-            await self._refresh_messages(config)
+            final_message = await self._refresh_messages(config)
+            if (isinstance(final_message, AIMessage)
+                    and final_message.additional_kwargs.get("oceanx_budget_exhausted") is True):
+                self._empty_response_pending = False
+                yield ErrorEvent(message=_message_text(final_message),
+                                 code="budget_exhausted", retryable=False)
+                return
+            if (last_model_message is None or not _message_text(last_model_message).strip()
+                    or last_model_message.tool_calls):
+                metadata = last_model_message.response_metadata if last_model_message else {}
+                extra = last_model_message.additional_kwargs if last_model_message else {}
+                finish = metadata.get("finish_reason") or metadata.get("stop_reason")
+                log.warning("Missing model answer request=%s finish=%s tool_calls=%s",
+                            request_id, finish,
+                            len(last_model_message.tool_calls) if last_model_message else 0)
+                if finish in {"length", "max_tokens", "content_filter", "refusal"} or extra.get("refusal"):
+                    yield ErrorEvent(message=f"Model did not deliver an answer (finish_reason={finish or 'refusal'}).",
+                                     code="model_output_error", retryable=False)
+                else:
+                    self._empty_response_pending = True
+                    yield ErrorEvent(message="Model stream ended without a final answer.",
+                                     code="empty_model_response", retryable=True)
         except Exception as exc:  # noqa: BLE001 - provider adapters have no common error base
             if self._model_call_state_hook is not None:
                 self._model_call_state_hook(False)
             await self._refresh_messages(config)
-            message = str(exc)
-            lowered = message.lower()
-            retryable = any(
-                marker in lowered
-                for marker in ("timeout", "rate limit", "connection", "incomplete response")
-            )
-            code = "network_failure" if retryable else "model_error"
-            yield ErrorEvent(message=message, code=code, retryable=retryable)
+            yield model_error_event(exc)
 
     def resume_message(self, *, request_id: str | None = None) -> AsyncIterator[StreamEvent]:
         """Resume the pending graph node without appending another user message."""
@@ -519,7 +564,7 @@ async def build_deep_agent_engine(
     await checkpointer.conn.execute("PRAGMA journal_mode=WAL")
     await checkpointer.conn.execute("PRAGMA busy_timeout=30000")
     await checkpointer.setup()
-    middleware: list[AgentMiddleware] = [filesystem, ToolHistoryRepairMiddleware()]
+    middleware: list[AgentMiddleware] = [filesystem, ExpertContextMiddleware(), ToolHistoryRepairMiddleware()]
     if max_input_tokens > 0 or max_output_tokens > 0:
         middleware.append(
             TokenBudgetWindDownMiddleware(

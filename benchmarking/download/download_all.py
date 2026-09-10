@@ -81,6 +81,8 @@ def main(argv=None):
     parser.add_argument("phase", choices=["public", "services", "verify"])
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--execute", action="store_true", help="Download; otherwise show the fixed scope without network calls")
+    parser.add_argument("--workers", type=services.positive_workers, default=2,
+                        help="Concurrent CMEMS/ERA5 chunks (default: 2; 1 restores serial). Public/verify stay serial.")
     args = parser.parse_args(argv)
     manifest = load_manifest()
     root = args.output.expanduser().resolve()
@@ -105,7 +107,8 @@ def main(argv=None):
                 reports[key] = json.loads(path.read_text())
         failed = False
         for key, group in selected.items():
-            report = {"group_sha256": erddap.fingerprint(group), "complete": False, "completed_files": 0}
+            report = {"group_sha256": erddap.fingerprint(group), "complete": False, "completed_files": 0,
+                      "workers": args.workers if args.phase == "services" else 1, "failed_files": []}
             reports[key] = report
             report_path = control / f"{key}.report.json"
             plan_path = control / f"{key}.plan.json"
@@ -124,7 +127,7 @@ def main(argv=None):
                     chunks = group_plan(group)
                     erddap.write_json(plan_path, {"group_sha256": report["group_sha256"], "plan_sha256": erddap.fingerprint(chunks), "chunks": chunks})
                 report["expected_files"] = len(chunks)
-                def record(result):
+                def record(result, report=report, key=key, chunks=chunks, report_path=report_path):
                     report["completed_files"] += 1
                     print(f"{key}: {report['completed_files']}/{len(chunks)} {result['path']}", flush=True)
                     erddap.write_json(report_path, report)
@@ -133,14 +136,19 @@ def main(argv=None):
                     report["completed_files"] = len(chunks)
                 elif group["adapter"] == "ncei":
                     ncei_oisst.execute(chunks, root, record)
+                elif group["adapter"] in {"cmems", "era5"}:
+                    for result in services.execute_chunks(chunks, root, args.workers):
+                        if "error_type" in result:
+                            report["failed_files"].append(result)
+                            erddap.write_json(report_path, report)
+                            print(f"{key}: chunk FAILED ({result['error_type']}) {result['path']}", flush=True)
+                        else:
+                            record(result)
+                    if report["failed_files"]:
+                        raise erddap.DownloadError("Some service chunks failed; verified files retained")
                 else:
                     for chunk in chunks:
-                        if group["adapter"] == "erddap":
-                            record(erddap.transfer(chunk, root))
-                        else:
-                            record(erddap.transfer(chunk, root,
-                                   runner=lambda url, destination, timeout: services.fetch_service(chunk, destination),
-                                   verifier=services.verify_service_file))
+                        record(erddap.transfer(chunk, root))
                 report["complete"] = report["completed_files"] == report["expected_files"] and bool(chunks)
             except Exception as exc:
                 # Provider exceptions can contain credential-bearing URLs. Do not persist them.

@@ -1,4 +1,5 @@
 export type ScientificScalar = number | string | null;
+import type {ResultCategory, ResultFeature} from './result-features.js';
 
 export type ScientificAxis = {
   field: string;
@@ -60,6 +61,7 @@ export type HeatmapLayer = {
 };
 
 export type Field2DLayer = {
+  categories?: ResultCategory[];
   id?: string;
   type: 'field2d';
   x: string;
@@ -170,6 +172,7 @@ export type ScientificTheme = {
 };
 
 export type ScientificFigurePayload = {
+  features?: ResultFeature[];
   schema_version: 'ocean-scientific-figure/v2' | 'ocean-scientific-figure/v3' | 'ocean-scientific-figure/v4';
   plot_kind: string;
   title?: string;

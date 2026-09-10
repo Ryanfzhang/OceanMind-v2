@@ -146,3 +146,42 @@ def test_inventory_does_not_follow_symlinks(tmp_path):
     record = runner.inventory(workspace)
     assert record["files"] == []
     assert record["excluded"] == ["source"]
+
+
+def test_whole_call_tokens_no_double_counting(tmp_path):
+    events = tmp_path / "events.jsonl"
+    step = {"type": "assistant", "message": {"id": "one", "model": "pro",
+            "usage": {"input_tokens": 10, "output_tokens": 1}}}
+    events.write_text(json.dumps(step) + "\n" + json.dumps(step) + "\n")
+    terminal = {"usage": {"input_tokens": 10}, "modelUsage": {
+        "pro": {"inputTokens": 30, "outputTokens": 40,
+                "cacheReadInputTokens": 100, "cacheCreationInputTokens": 0},
+        "aux": {"inputTokens": 5, "outputTokens": 10,
+                "cacheReadInputTokens": 20, "cacheCreationInputTokens": 0}}}
+    report = runner.token_accounting(events, terminal)
+    assert report["whole_call_totals"]["total_tokens_including_cache"] == 205
+    assert report["whole_call_totals"]["input_tokens"] == 35
+    assert len(report["observed_unique_steps"]) == 1
+    assert "output_tokens" not in report["observed_unique_steps"][0]
+
+
+def test_missing_final_tokens_are_unknown(tmp_path):
+    report = runner.token_accounting(tmp_path / "missing", None)
+    assert report["whole_call_totals"]["total_tokens_including_cache"] is None
+    assert not report["final_result_present"]
+
+def test_export_delivery_preserves_paths_and_skips_source_links(tmp_path):
+    from run_claude import export_delivery
+    workspace = tmp_path / "workspace"
+    (workspace / "figures").mkdir(parents=True)
+    (workspace / "figures/view.png").write_bytes(b"png")
+    source = tmp_path / "private.nc"
+    source.write_bytes(b"input data")
+    (workspace / "figures/source.nc").symlink_to(source)
+    (workspace / "analysis.ipynb").write_text("{}")
+    destination = tmp_path / "delivery"
+    destination.mkdir()
+    export_delivery(workspace, destination)
+    assert (destination / "figures/view.png").read_bytes() == b"png"
+    assert not (destination / "figures/source.nc").exists()
+    assert (destination / "analysis.ipynb").is_file()

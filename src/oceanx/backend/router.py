@@ -256,37 +256,12 @@ class _AgentToolWaitExceeded(RuntimeError):
 
 
 async def _coordinator_events(engine, text: str, request_id: str):
-    """Retry transport failures at pending checkpoints, within the caller's budgets."""
-    retries = 0
-    active_tools = 0
-    stream = engine.submit_message(text, request_id=request_id).__aiter__()
+    """Use the same bounded model-delivery policy as Experts."""
+    from oceanx.model_recovery import model_events
+
+    stream = model_events(engine, text, request_id)
     try:
-        while True:
-            try:
-                event = await anext(stream)
-            except StopAsyncIteration:
-                return
-            if isinstance(event, ToolExecutionStarted):
-                active_tools += 1
-            elif isinstance(event, ToolExecutionCompleted):
-                active_tools = max(0, active_tools - 1)
-            resume = getattr(engine, "resume_message", None)
-            if (
-                isinstance(event, ErrorEvent)
-                and event.retryable is True
-                and event.code == "network_failure"
-                and not active_tools
-                and retries < 2
-                and callable(resume)
-            ):
-                retries += 1
-                await stream.aclose()
-                yield StatusEvent(
-                    message=f"Model connection interrupted; resuming saved state (retry {retries}/2)"
-                )
-                await asyncio.sleep(2 ** (retries - 1))
-                stream = resume(request_id=request_id).__aiter__()
-                continue
+        async for event in stream:
             yield event
     finally:
         await stream.aclose()
@@ -2624,6 +2599,7 @@ class OceanRequestRouter:
                 depends_on=tuple(todo.get("depends_on", ())),
                 profile_id=str(todo["profile_id"]),
                 expert_key=(str(todo["expert_key"]) if todo.get("expert_key") else None),
+                review=bool(todo.get("review", False)),
                 expected_outputs=tuple(todo.get("expected_outputs", ("answer",))),
             )
             for todo in todos
@@ -3041,8 +3017,10 @@ class OceanRequestRouter:
             ).ref
 
         source_refs = tuple(ref.model_dump(mode="json") for ref in result_refs)
-        markdown = answer_markdown.strip() + "\n"
         result_records = {record.ref.key: record for record in self._task_result_records(result_refs)}
+        from oceanx.result_citations import canonical_result_citations
+
+        markdown = canonical_result_citations(answer_markdown.strip(), list(result_records.values())) + "\n"
         uncited_refs = []
         for ref in result_refs:
             record = result_records.get(ref.key)
@@ -3056,6 +3034,7 @@ class OceanRequestRouter:
             for ref in uncited_refs:
                 key = f"{ref.task_id}/{ref.result_id}@v{ref.version}"
                 markdown += f"- [[result:{key}|{ref.result_id}]]\n"
+        markdown = canonical_result_citations(markdown, list(result_records.values()))
 
         task = self.store.get_research_task(task_id, workspace_id=workspace_id)
         task_title = task.title if task is not None else "OceanMind analysis"
@@ -3215,7 +3194,9 @@ class OceanRequestRouter:
                     f"{answer.rstrip()}\n\n## Research report\n\n"
                     f"- [[result:{report_key}|Open the complete research report]]"
                 )
-        return answer
+        from oceanx.result_citations import canonical_result_citations
+
+        return canonical_result_citations(answer, records)
 
     async def _execute_agent_request(
         self,
@@ -3235,48 +3216,13 @@ class OceanRequestRouter:
         tool_call_count = 0
         turn_count = 0
         last_assistant_text = ""
-        model_error: str | None = None
-        model_active_seconds = 0.0
-        model_call_started = 0.0
-        model_call_in_flight = False
-        active_budget_reached = False
+        model_error: ErrorEvent | None = None
         active_tool_calls = 0
         prior_max_turns = agent_session.runtime.engine.max_turns
         agent_session.runtime.engine.set_max_turns(budget.max_turns)
 
-        def model_call_state_hook(in_flight: bool) -> None:
-            nonlocal model_active_seconds, model_call_started, model_call_in_flight
-            now = time.monotonic()
-            if in_flight and not model_call_in_flight:
-                model_call_started = now
-                model_call_in_flight = True
-            elif not in_flight and model_call_in_flight:
-                model_active_seconds += max(0.0, now - model_call_started)
-                model_call_in_flight = False
-
-        current_task = asyncio.current_task()
-        assert current_task is not None
-
-        async def monitor_model_active_budget() -> None:
-            nonlocal active_budget_reached
-            interval = min(0.5, max(0.02, budget.max_wall_seconds / 100.0))
-            while True:
-                await asyncio.sleep(interval)
-                elapsed = model_active_seconds
-                if model_call_in_flight:
-                    elapsed += max(0.0, time.monotonic() - model_call_started)
-                if elapsed >= budget.max_wall_seconds:
-                    active_budget_reached = True
-                    current_task.cancel()
-                    return
-
-        set_state_hook = getattr(agent_session.runtime.engine, "set_model_call_state_hook", None)
-        if callable(set_state_hook):
-            set_state_hook(model_call_state_hook)
-        budget_monitor = asyncio.create_task(
-            monitor_model_active_budget(),
-            name=f"ocean-agent-active-budget-{request.request_id}",
-        )
+        # API latency is not a model-resource budget. Token/turn limits bound
+        # reasoning; cancellation and tool-progress checks remain independent.
         try:
             await self._append_transcript_item(
                 client,
@@ -3325,15 +3271,14 @@ class OceanRequestRouter:
                     usage_output_tokens += event.usage.output_tokens
                     if event.message.text and not event.message.tool_uses:
                         last_assistant_text = event.message.text
-                    # Coordinator token usage is accounting, not a termination
-                    # condition. Long research must still reach its final handoff.
-                    # Expert execution budgets remain independently enforced.
+                    # Token wind-down and hard limits are enforced by the model
+                    # middleware; this stream records usage without a second timer.
                 elif isinstance(event, ToolExecutionStarted):
                     tool_call_count += 1
                     if tool_call_count > budget.max_tool_calls:
                         raise _AgentBudgetExceeded("tool call budget reached")
                 elif isinstance(event, ErrorEvent):
-                    model_error = event.message
+                    model_error = event
 
                 self._update_task_workflow_for_event(request, event)
                 await self._emit_agent_stream_event(client, request, event)
@@ -3344,10 +3289,14 @@ class OceanRequestRouter:
                 await self._fail_request(
                     client,
                     request,
-                    code="model_error",
-                    message="Coordinator stream ended before it made a final decision",
-                    recoverable=True,
-                    details={"reason": model_error},
+                    code="budget_exhausted" if model_error.code == "budget_exhausted" else "model_error",
+                    message=(model_error.message if model_error.retries_exhausted or model_error.code == "budget_exhausted" else
+                             "Model call failed: " + model_error.message),
+                    recoverable=model_error.recoverable,
+                    details={"reason": model_error.message, "model_error_code": model_error.code,
+                             "recovery_state": "awaiting_user_retry" if model_error.retries_exhausted
+                             else "configuration_required" if model_error.code == "model_configuration_error"
+                             else "interrupted"},
                 )
                 return
             if (
@@ -3682,21 +3631,6 @@ class OceanRequestRouter:
                     details={"max_turns": exc.max_turns},
                 )
         except asyncio.CancelledError:
-            if active_budget_reached:
-                if request.request_id not in self._cancelling_agent_requests and not self._closing:
-                    await self._fail_request(
-                        client,
-                        request,
-                        code="budget_exhausted",
-                        message="OceanMind reached its model-active reasoning budget",
-                        recoverable=True,
-                        details={
-                            "max_model_active_seconds": budget.max_wall_seconds,
-                            "excluded_time": "tools, code execution, downloads, and delegated agents",
-                            "recovery_state": "incomplete",
-                        },
-                    )
-                return
             if request.request_id in self._cancelling_agent_requests or self._closing:
                 return
             raise
@@ -3713,10 +3647,6 @@ class OceanRequestRouter:
                     details={"reason": str(exc)},
                 )
         finally:
-            budget_monitor.cancel()
-            await asyncio.gather(budget_monitor, return_exceptions=True)
-            if callable(set_state_hook):
-                set_state_hook(None)
             if self.team_orchestrator is not None:
                 await self.team_orchestrator.close_request(request.request_id)
             agent_session.runtime.engine.set_max_turns(prior_max_turns)
@@ -4404,6 +4334,7 @@ class OceanRequestRouter:
                     depends_on=record.work_order.depends_on,
                     profile_id=record.work_order.profile_id or "legacy_expert",
                     expert_key=record.work_order.expert_key,
+                    review=record.work_order.review,
                     expected_outputs=record.work_order.outcome_intents,
                 )
                 for todo_id, record in latest_record_by_todo.items()

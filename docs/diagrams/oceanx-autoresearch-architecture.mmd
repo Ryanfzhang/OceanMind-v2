@@ -1,0 +1,46 @@
+flowchart TB
+    U["用户问题与海洋数据"] --> UI["OceanX Desktop"]
+    UI --> C["Coordinator<br/>理解问题 · 编排任务 · 综合证据"]
+    C -->|"开放研究问题"| T
+
+    subgraph R["研究探索闭环 · 仅 Coordinator 维护"]
+        T["研究树<br/>问题根节点 → 主假设 → 子假设"]
+        T --> S["UCB 排序 + 渐进扩展<br/>建议 test / expand / stop"]
+        S --> D["Coordinator 决策"]
+        D -->|"扩展：提出子假设"| T
+        F["Coordinator 评估<br/>证据反馈 · 信息增益 · 分支状态"] --> T
+    end
+
+    D -->|"检验：具体 WorkOrder"| E
+    C -->|"普通任务：直接委派"| E
+
+    subgraph X["Expert 执行层 · 不接收研究树"]
+        E["持久化 Expert Session<br/>复用会话与紧凑 Checkpoint"]
+        E --> A["文献检索 · 数据检查 · 分析计算"]
+        A --> W["WorkResult<br/>结论 · 证据 · 产物 · 阻碍"]
+    end
+
+    W -->|"研究任务反馈"| F
+    W -->|"交付结果"| C
+    A <--> DATA["任务工作区<br/>数据 · 代码 · 文件"]
+    W --> STORE["持久化存储<br/>证据 · 引用 · ResultBundle"]
+    T -.-> STORE
+
+    D -->|"主分支走通 / 全部不可继续 / 暂停"| C
+    C --> OUT["最终回答<br/>研究树文本 · 结论与引用 · 图表"]
+    STORE -.-> OUT
+    OUT --> UI
+
+    E -.->|"显式保存经验"| L["经验 Inbox → Curator → 版本化 Skills"]
+    C -.->|"显式保存经验"| L
+    L -.->|"按需加载"| E
+    L -.->|"按需加载"| C
+
+    classDef coord fill:#17334D,color:#fff,stroke:#17334D;
+    classDef tree fill:#E0F2EF,color:#17334D,stroke:#309889;
+    classDef expert fill:#E8EFFA,color:#17334D,stroke:#6C8CB5;
+    classDef memory fill:#F5EFE4,color:#554431,stroke:#BD9D65;
+    class C,D,F coord;
+    class T,S tree;
+    class E,A,W expert;
+    class DATA,STORE,L memory;

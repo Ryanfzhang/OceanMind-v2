@@ -43,7 +43,9 @@ def prompt_for(case):
     return (
         "Execute the research task below, not merely a plan. Treat data files as read-only. "
         "Write all code, figures, tables and editable notebooks into the current working "
-        "directory. Do not copy original datasets. Use the supplied Python environment. "
+        "directory: figures/ for final figures, code/ for reusable scripts, outputs/ for derived "
+        "data, and a single analysis.ipynb at the workspace root. Update the same figure file "
+        "when revising it. Do not copy original datasets. Use the supplied Python environment. "
         "Keep reusable calculation code and save generated figures as files. Return your "
         "final research report in your final response; describe any blockers honestly. "
         "Do not inspect evaluator files, benchmark source code, other attempts or hidden "
@@ -178,6 +180,60 @@ def classify(code, reason, terminal):
     return "completed"
 
 
+def token_accounting(events, terminal):
+    """Keep whole-call model totals separate from observable per-step inputs.
+
+    Claude's result.usage excludes subagents; result.modelUsage includes them.
+    Assistant output_tokens may be placeholders, so never use them as totals.
+    https://code.claude.com/docs/en/agent-sdk/cost-tracking
+    """
+    fields = {
+        "input_tokens": "inputTokens", "output_tokens": "outputTokens",
+        "cache_read_input_tokens": "cacheReadInputTokens",
+        "cache_creation_input_tokens": "cacheCreationInputTokens",
+    }
+    def number(value):
+        return value if isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0 else None
+
+    raw_models = (terminal or {}).get("modelUsage") or {}
+    models = {model: {name: number(raw.get(key)) for name, key in fields.items()}
+              for model, raw in raw_models.items() if isinstance(raw, dict)}
+    totals = {name: (sum(row[name] for row in models.values())
+                     if models and all(row[name] is not None for row in models.values()) else None)
+              for name in fields}
+    all_fields = list(totals.values())
+    totals["total_tokens_including_cache"] = sum(all_fields) if all(v is not None for v in all_fields) else None
+    steps = {}
+    if events.exists():
+        for line in events.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(event, dict) or event.get("type") != "assistant":
+                continue
+            message = event.get("message") or {}
+            if not isinstance(message, dict) or not message.get("id"):
+                continue
+            key = (event.get("parent_tool_use_id"), message["id"])
+            if key in steps:
+                continue
+            usage = message.get("usage") or {}
+            if not isinstance(usage, dict):
+                continue
+            steps[key] = {"message_id": message["id"], "parent_tool_use_id": key[0],
+                          "model": message.get("model"),
+                          **{name: number(usage.get(name)) for name in fields if name != "output_tokens"}}
+    return {
+        "schema_version": 1, "source": "result.modelUsage" if models else "unavailable",
+        "final_result_present": terminal is not None,
+        "whole_call_totals": totals, "by_model": models,
+        "main_loop_usage_only": (terminal or {}).get("usage"),
+        "observed_unique_steps": list(steps.values()),
+        "limitations": "CLI-reported usage, not an independent provider billing audit. Missing fields are null, not zero. Per-step output counts are not reliable. Do not add main-loop usage or step records to model totals. Failed requests without returned usage may be absent.",
+    }
+
+
 def inventory(workspace):
     files, excluded = [], []
     for root, directories, names in os.walk(workspace, followlinks=False):
@@ -221,6 +277,8 @@ def run_case(case, directory, command, cancelled):
             (directory / "answer.md").write_text(terminal["result"], encoding="utf-8")
     if partial:
         (directory / "partial_answer.md").write_text(partial, encoding="utf-8")
+    accounting = token_accounting(events, terminal)
+    write_json(directory / "token_usage.json", accounting)
     result = {
         "id": case.id, "agent": "claude-code", "status": classify(code, reason, terminal),
         "started_at": started_at, "elapsed_seconds": time.monotonic() - started,
@@ -229,16 +287,42 @@ def run_case(case, directory, command, cancelled):
         "malformed_event_lines": malformed,
         "usage": terminal.get("usage") if terminal else None,
         "model_usage": terminal.get("modelUsage") if terminal else None,
+        "whole_call_tokens": accounting["whole_call_totals"],
         "reported_cost_usd": terminal.get("total_cost_usd") if terminal else None,
         "permission_denials": terminal.get("permission_denials", []) if terminal else [],
         "limitations": "Runtime outcome only; no scientific grading or artifact completeness verification.",
     }
     try:
         write_json(directory / "artifacts.json", inventory(workspace))
+        export_delivery(workspace, directory)
     except OSError as exc:
         result["artifact_inventory_error"] = str(exc)
     write_json(directory / "result.json", result)
     return result
+
+
+def export_delivery(workspace, directory):
+    """Expose final derived artifacts using the same layout as OceanX attempts.
+
+    Never follow links to mounted inputs. Preserve subdirectories so notebook and
+    script relative references continue to work. Raw execution logs stay untouched.
+    """
+    for name in ("figures", "code", "outputs"):
+        source = workspace / name
+        if not source.is_dir() or source.is_symlink():
+            continue
+        for root, dirs, files in os.walk(source, followlinks=False):
+            dirs[:] = [d for d in dirs if not (Path(root) / d).is_symlink()]
+            for filename in files:
+                item = Path(root) / filename
+                if item.is_symlink() or not item.is_file():
+                    continue
+                target = directory / item.relative_to(workspace)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(item, target)
+    notebook = workspace / "analysis.ipynb"
+    if notebook.is_file() and not notebook.is_symlink():
+        shutil.copyfile(notebook, directory / "analysis.ipynb")
 
 
 def main(argv=None):

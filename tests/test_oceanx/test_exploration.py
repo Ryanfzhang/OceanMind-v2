@@ -1,19 +1,30 @@
+"""Current v2 contract; v1 regression fixtures live in test_exploration_legacy."""
+
+import itertools
 import json
+import uuid
+from dataclasses import replace
 
 import pytest
 
 from oceanx.agent_tools import ToolExecutionContext
 from oceanx.backend.store import RequestStore, RequestStoreError
-from oceanx.exploration import ExplorationInput, exploration_action
+from oceanx.exploration import (
+    ExplorationInput,
+    _repair_needed,
+    _synchronize,
+    begin_tests,
+    exploration_action,
+)
+from oceanx.exploration import (
+    Test as ResearchTest,
+)
 from oceanx.research_learning import ResearchObservationDraft
 from oceanx.tools import (
     OceanAssignmentInput,
     OceanAssignmentTool,
     OceanExplorationTool,
     OceanToolServices,
-    create_ocean_discussion_tool_registry,
-    create_ocean_expert_tool_registry,
-    create_ocean_lead_tool_registry,
 )
 
 
@@ -25,495 +36,462 @@ def store(tmp_path):
     value.close()
 
 
-def call(store, action, **kwargs):
+def call(store, action="read", **kwargs):
+    if action != "read" and "expected_revision" not in kwargs:
+        kwargs["expected_revision"] = call(store)["revision"]
     return exploration_action(store, "ws", "task", ExplorationInput(action=action, **kwargs))
 
 
-def candidate(name):
-    return {"idea": name, "rationale": "Distinct mechanism", "test": "Compare independent data"}
+def hypothesis(key, relation="alternatives"):
+    return {"id": key, "claim": f"Mechanism {key}", "relation_to_children": relation}
 
 
-def observation(store, task_id="task"):
+def test_plan(key, effects, cost=1, feasible=True):
+    return {
+        "id": key,
+        "targets": list(effects),
+        "method": "Measure and compare independent mechanism predictions",
+        "discriminates": [{"outcome": "observed", "effects": effects}],
+        "feasible": feasible,
+        "cost": cost,
+        "infeasible_reason": None if feasible else "Missing vertical flux observations",
+    }
+
+
+test_plan.__test__ = False  # Factory, not a test case.
+
+
+def evidence(store, task="task"):
     return store.record_research_observation(
         ResearchObservationDraft(
             workspace_id="ws",
-            task_id=task_id,
+            task_id=task,
             request_id="req",
             kind="result",
-            statement="Independent data contradict the initial explanation",
+            statement=f"Measured outcome {uuid.uuid4()}",
             outcome="supported",
         )
     ).observation_id
 
 
-def assignment(question=None):
-    return OceanAssignmentInput(
-        research_question=question,
-        plan_goal=question or "Plot temperature",
+def result(store, key, observed="observed", refs=None):
+    return call(
+        store,
+        "record",
+        test_id=key,
+        result={
+            "evidence_refs": refs or [evidence(store)],
+            "outcome_observed": observed,
+            "summary": "Independent observations and checks",
+        },
+    )
+
+
+def start(store, **kwargs):
+    return call(store, "start", goal="Explain warming", mode="iterative", **kwargs)
+
+
+def setup_pair(store, **kwargs):
+    start(store, **kwargs)
+    return call(
+        store,
+        "propose",
+        candidates=[hypothesis("A"), hypothesis("B")],
+        tests=[test_plan("AB", {"A": "established", "B": "refuted"})],
+    )
+
+
+@pytest.mark.parametrize(
+    "relation,states",
+    list(
+        itertools.product(
+            ["alternatives", "prerequisites"],
+            itertools.product(["established", "refuted", "unverifiable"], repeat=2),
+        )
+    ),
+)
+def test_strong_three_valued_truth_table_and_nested_unknown_summary(relation, states):
+    def node(key, parent, status, rel="alternatives"):
+        return {
+            "id": key,
+            "parent": parent,
+            "claim": key,
+            "status": status,
+            "relation_to_children": rel,
+            "summary": f"{key}: missing source X" if status == "unverifiable" else key,
+            "history": [],
+            "decompose_depth_without_test": 0,
+        }
+
+    tree = {
+        "hypotheses": {
+            "root": node("root", None, "untested"),
+            "P": node("P", "root", "untested", relation),
+            "A": node("A", "P", states[0]),
+            "B": node("B", "P", states[1]),
+        },
+        "tests": {},
+        "reflection_pending": [],
+    }
+    _synchronize(tree)
+    if relation == "alternatives":
+        expected = (
+            "established"
+            if "established" in states
+            else "refuted"
+            if set(states) == {"refuted"}
+            else "unverifiable"
+        )
+    else:
+        expected = (
+            "refuted"
+            if "refuted" in states
+            else "established"
+            if set(states) == {"established"}
+            else "unverifiable"
+        )
+    assert tree["hypotheses"]["P"]["status"] == expected
+    assert tree["hypotheses"]["root"]["status"] == expected
+    if "unverifiable" in states:
+        assert "missing source X" in tree["hypotheses"]["root"]["summary"]
+    pending = list(tree["reflection_pending"])
+    _synchronize(tree)
+    assert tree["reflection_pending"] == pending
+
+
+@pytest.mark.parametrize("nonterminal", ["supported", "contested", "untested"])
+def test_nonterminal_child_prevents_parent_close(store, nonterminal):
+    state = setup_pair(store)
+    tree = json.loads(
+        store._connection.execute("SELECT tree_json FROM research_exploration_trees").fetchone()[0]
+    )
+    tree["hypotheses"]["A"]["status"] = "established"
+    tree["hypotheses"]["B"]["status"] = nonterminal
+    _synchronize(tree)
+    assert tree["hypotheses"]["root"]["status"] == "untested"
+    assert state["executions_used"] == 0
+
+
+def test_direct_parent_conflict_survives_child_rollup_and_requires_test(store):
+    setup_pair(store)
+    tree = json.loads(
+        store._connection.execute("SELECT tree_json FROM research_exploration_trees").fetchone()[0]
+    )
+    tree["tests"] = {}
+    tree["hypotheses"]["A"]["status"] = "established"
+    tree["hypotheses"]["B"]["status"] = "refuted"
+    parent = dict(tree["hypotheses"]["root"])
+    parent.update(id="P", parent="root", history=[])
+    tree["hypotheses"]["P"] = parent
+    tree["hypotheses"]["A"]["parent"] = "P"
+    tree["hypotheses"]["B"]["parent"] = "P"
+    parent.update(status="contested", status_source="test", summary="Conflicting observations")
+    _synchronize(tree)
+    assert parent["status"] == "contested"
+    assert parent["summary"] == "Conflicting observations"
+    assert "P" in _repair_needed(tree)
+    assert tree["hypotheses"]["root"]["status"] not in {"established", "refuted", "unverifiable"}
+    # A later direct test resolves the conflict; ordinary synthesis can resume.
+    parent["status"] = "supported"
+    _synchronize(tree)
+    assert parent["status"] == "established"
+    assert parent["status_source"] == "children"
+
+
+def test_shared_test_charged_once_and_completion_requires_reflection(store):
+    setup_pair(store)
+    begin_tests(store, "ws", "task", ["AB"])
+    state = result(store, "AB")
+    assert state["executions_used"] == 1
+    assert state["hypotheses"]["root"]["status"] == "established"
+    assert state["recommendation"]["action"] == "reflect"
+    with pytest.raises(ValueError, match="reflection"):
+        call(store, "pause", completion_summary="Done")
+    call(
+        store, "reflect", coverage_complete=True, summary="Existing mechanisms cover this question"
+    )
+    ended = call(store, "pause", completion_summary="A explains the evidence; B rejected")
+    assert ended["stop_decision"]["exit"] == "answered"
+    with pytest.raises(ValueError):
+        result(store, "AB")
+
+
+def test_no_node_quota_and_no_charge_for_planning(store):
+    start(store, execution_budget=1)
+    state = call(store, "propose", candidates=[hypothesis(f"H{i}") for i in range(70)])
+    assert len(state["hypotheses"]) == 71
+    assert state["executions_used"] == 0
+    assert "node_budget" not in ExplorationInput.model_fields
+
+
+def test_two_decompositions_and_infeasible_reason_propagates(store):
+    start(store)
+    call(store, "propose", candidates=[hypothesis("A", "prerequisites")])
+    call(store, "propose", node_id="A", candidates=[hypothesis("P")])
+    state = call(
+        store,
+        "propose",
+        node_id="P",
+        candidates=[hypothesis("Q")],
+        tests=[test_plan("missing", {"Q": "supported"}, feasible=False)],
+    )
+    assert state["hypotheses"]["Q"]["decompose_depth_without_test"] == 2
+    assert state["hypotheses"]["root"]["status"] == "unverifiable"
+    assert "Missing vertical flux" in state["hypotheses"]["root"]["summary"]
+    call(
+        store,
+        "reflect",
+        coverage_complete=True,
+        summary="No other candidate supported by available data",
+    )
+    ended = call(store, "pause", completion_summary="Unable to answer")
+    assert ended["stop_decision"]["exit"] == "unable_to_answer"
+    call(store, "resume")
+    reopened = call(store, "plan_test", tests=[test_plan("new", {"Q": "supported"})])
+    assert reopened["hypotheses"]["root"]["status"] not in {
+        "established",
+        "refuted",
+        "unverifiable",
+    }
+
+
+def test_feasible_test_on_second_decomposition_prevents_unverifiable(store):
+    start(store)
+    call(store, "propose", candidates=[hypothesis("A")])
+    call(store, "propose", node_id="A", candidates=[hypothesis("P")])
+    state = call(
+        store,
+        "propose",
+        node_id="P",
+        candidates=[hypothesis("Q")],
+        tests=[test_plan("testQ", {"Q": "supported"})],
+    )
+    assert state["hypotheses"]["Q"]["status"] == "untested"
+    assert state["recommendation"]["test_id"] == "testQ"
+
+
+def test_established_requires_real_distinct_targets_and_effects():
+    with pytest.raises(ValueError, match="two distinct"):
+        ResearchTest(**test_plan("A", {"H": "established"}))
+    padded = test_plan("A", {"H": "supported"})
+    padded["targets"].append("unused")
+    with pytest.raises(ValueError, match="Every target"):
+        ResearchTest(**padded)
+
+
+def test_record_rejects_persisted_single_target_established_atomically(store):
+    start(store)
+    call(
+        store,
+        "propose",
+        candidates=[hypothesis("A")],
+        tests=[test_plan("audit", {"A": "supported"})],
+    )
+    begin_tests(store, "ws", "task", ["audit"])
+    # Bypass creation validation only in this fixture to exercise the write guard
+    # against an invalid persisted discriminator, not just the input schema.
+    with store._transaction():
+        raw = json.loads(
+            store._connection.execute(
+                "SELECT tree_json FROM research_exploration_trees WHERE task_id = ?",
+                ("task",),
+            ).fetchone()[0]
+        )
+        raw["tests"]["audit"]["discriminates"][0]["effects"]["A"] = "established"
+        store._connection.execute(
+            "UPDATE research_exploration_trees SET tree_json = ? WHERE task_id = ?",
+            (json.dumps(raw), "task"),
+        )
+    before = store._connection.execute(
+        "SELECT revision, tree_json FROM research_exploration_trees WHERE task_id = ?",
+        ("task",),
+    ).fetchone()
+    with pytest.raises(ValueError, match="established requires targets >= 2"):
+        result(store, "audit")
+    after = store._connection.execute(
+        "SELECT revision, tree_json FROM research_exploration_trees WHERE task_id = ?",
+        ("task",),
+    ).fetchone()
+    assert tuple(after) == tuple(before)
+
+
+def test_opposing_evidence_is_contested_and_not_silently_overwritten(store):
+    start(store)
+    call(
+        store,
+        "propose",
+        candidates=[hypothesis("A")],
+        tests=[test_plan("support", {"A": "supported"})],
+    )
+    begin_tests(store, "ws", "task", ["support"])
+    result(store, "support")
+    call(store, "plan_test", tests=[test_plan("oppose", {"A": "refuted"})])
+    begin_tests(store, "ws", "task", ["oppose"])
+    state = result(store, "oppose")
+    node = state["hypotheses"]["A"]
+    assert node["status"] == "contested"
+    assert "support" in node["summary"] and "oppose" in node["summary"]
+    assert len(state["tests"]) == 2
+    with pytest.raises(ValueError):
+        call(store, "pause", completion_summary="Done")
+
+
+def test_periodic_reflection_budget_resume_and_unexpected_outcome(store):
+    start(store, execution_budget=2, reflection_interval_percent=50)
+    call(
+        store, "propose", candidates=[hypothesis("A")], tests=[test_plan("t1", {"A": "supported"})]
+    )
+    begin_tests(store, "ws", "task", ["t1"])
+    assert call(store)["recommendation"]["action"] == "await_results"
+    result(store, "t1", observed="Unexpected instrument failure")
+    assert call(store)["hypotheses"]["A"]["status"] == "untested"
+    assert call(store)["recommendation"]["action"] == "reflect"
+    call(store, "reflect", coverage_complete=True, summary="Coverage unchanged; retry measurement")
+    call(store, "plan_test", tests=[test_plan("t2", {"A": "supported"})])
+    begin_tests(store, "ws", "task", ["t2"])
+    result(store, "t2")
+    paused = call(store, "pause")
+    assert paused["stop_decision"]["exit"] == "budget_exhausted"
+    resumed = call(store, "resume", execution_budget=3)
+    assert resumed["executions_used"] == 2 and resumed["reflection_pending"]
+
+
+def test_invalid_refs_revision_and_no_result_replay(store):
+    setup_pair(store)
+    begin_tests(store, "ws", "task", ["AB"])
+    before = call(store)["revision"]
+    with pytest.raises(ValueError, match="observation"):
+        result(store, "AB", refs=["foreign"])
+    assert call(store)["revision"] == before
+    with pytest.raises(RequestStoreError, match="revision"):
+        call(store, "pause", expected_revision=0)
+    result(store, "AB")
+    with pytest.raises(ValueError, match="unfinished"):
+        result(store, "AB")
+
+
+def test_new_root_direction_after_refutation_and_record_count_does_not_block(store):
+    start(store)
+    call(
+        store,
+        "propose",
+        candidates=[hypothesis("A")],
+        tests=[test_plan("reject", {"A": "refuted"})],
+    )
+    begin_tests(store, "ws", "task", ["reject"])
+    result(store, "reject")
+    state = call(
+        store,
+        "reflect",
+        coverage_complete=False,
+        summary="Refutation reveals another mechanism",
+        candidates=[hypothesis("B")],
+        tests=[test_plan("testB", {"B": "supported"})],
+    )
+    assert state["recommendation"]["test_id"] == "testB"
+    assert state["hypotheses"]["A"]["status"] == "refuted"
+
+
+def test_shallowest_effect_then_cost(store):
+    start(store)
+    call(store, "propose", candidates=[hypothesis("A"), hypothesis("B")])
+    call(
+        store,
+        "propose",
+        node_id="A",
+        candidates=[hypothesis("C")],
+        tests=[
+            test_plan("deep", {"C": "supported"}, cost=1),
+            test_plan("shallow", {"B": "supported"}, cost=100),
+        ],
+    )
+    assert call(store)["recommendation"]["test_id"] == "shallow"
+
+
+def test_legacy_read_only_preserves_bytes(store):
+    from oceanx.exploration_legacy import (
+        ExplorationInput as OldInput,
+    )
+    from oceanx.exploration_legacy import (
+        exploration_action as old_action,
+    )
+
+    old_action(
+        store,
+        "ws",
+        "task",
+        OldInput(action="start", expected_revision=0, goal="Old", mode="iterative"),
+    )
+    before = store._connection.execute(
+        "SELECT tree_json FROM research_exploration_trees"
+    ).fetchone()[0]
+    assert call(store)["legacy_read_only"]
+    with pytest.raises(ValueError, match="Historical"):
+        call(store, "resume")
+    assert (
+        store._connection.execute("SELECT tree_json FROM research_exploration_trees").fetchone()[0]
+        == before
+    )
+
+
+async def test_assignment_budget_handoff_and_durable_replay(store, tmp_path):
+    setup_pair(store)
+    payloads = []
+
+    async def sink(payload, context):
+        payloads.append(payload)
+        assert "research_test_ids" not in payload and "research_question" not in payload
+        assert call(store)["tests"]["AB"]["status"] == "running"
+        return {"results": [{"summary": "Evidence ready"}]}
+
+    services = OceanToolServices(
+        workspace_id="ws",
+        provider_id="test",
+        store=store,
+        task_id="task",
+        skill_role="coordinator",
+        team_assign_sink=sink,
+    )
+    tool = OceanAssignmentTool(services)
+    args = OceanAssignmentInput(
+        research_question="Explain warming",
+        research_test_ids=["AB"],
+        plan_goal="Explain warming",
         todos=[
             {
                 "todo_id": "inspect",
-                "question": "Inspect available evidence",
-                "why_this_expert": "Data coverage",
+                "question": "Compare mechanisms",
+                "why_this_expert": "Independent data analysis",
                 "profile_id": "data_reproducibility_expert",
                 "expected_outputs": ["answer"],
-                "done_when": "Report available variables",
+                "done_when": "Report evidence",
             }
         ],
         dispatch=["inspect"],
     )
-
-
-async def test_research_assignment_initializes_root_and_returns_loop_context(store, tmp_path):
-    question = "坎佩切湾持续偏暖的可能成因是什么？"
-    dispatched = []
-
-    async def sink(payload, context):
-        # Root is durable before the expert starts. No new fields reach WorkOrder parsing.
-        assert call(store, "read")["goal"] == question
-        assert set(payload) == {"plan_goal", "todos", "dispatch"}
-        dispatched.append(payload)
-        observation(store)
-        return {"results": [{"summary": "Data inspected"}]}
-
-    tool = OceanAssignmentTool(
-        OceanToolServices(
-            workspace_id="ws",
-            provider_id="test",
-            store=store,
-            task_id="task",
-            skill_role="coordinator",
-            team_assign_sink=sink,
-        )
-    )
     context = ToolExecutionContext(
         cwd=tmp_path, request_id="req", turn_id="turn", tool_call_id="call", operation_id="op"
     )
-    result = await tool.execute(assignment(question), context)
-    assert not result.is_error
-    payload = json.loads(result.output)
-    tree = payload["research_exploration"]
-    assert tree["mode"] == "iterative"
-    assert tree["recommendation"] == {"action": "expand", "node_id": "root"}
-    assert tree["recent_evidence"]
-    assert tree["tree_text"] == question
-    assert "Update the tested hypothesis" in payload["research_next_step"]
-    # A transport replay neither dispatches the expert again nor resets the tree.
-    replay = await tool.execute(assignment(question), context)
+    first = await tool.execute(args, context)
+    assert not first.is_error, first.output
+    replay = await tool.execute(args, context)
     assert replay.metadata["replayed"]
-    assert len(dispatched) == 1
-    call(store, "propose", expected_revision=1, candidates=[candidate("A")])
-    call(store, "pause", expected_revision=2)
-    resumed = await tool.execute(assignment(question), ToolExecutionContext(cwd=tmp_path))
-    assert not resumed.is_error
-    assert call(store, "read")["children"][0]["idea"] == "A"
-    assert call(store, "read")["active"]
+    assert len(payloads) == 1 and call(store)["executions_used"] == 1
 
 
-async def test_direct_assignment_does_not_create_or_resume_tree(store, tmp_path):
-    async def sink(payload, context):
-        assert "research_question" not in payload
-        return {"results": []}
-
-    tool = OceanAssignmentTool(
-        OceanToolServices(
-            workspace_id="ws",
-            provider_id="test",
-            store=store,
-            task_id="task",
-            skill_role="coordinator",
-            team_assign_sink=sink,
-        )
-    )
-    context = ToolExecutionContext(cwd=tmp_path)
-    result = await tool.execute(assignment(), context)
-    assert not result.is_error
-    assert "research_exploration" not in json.loads(result.output)
-    assert call(store, "read")["revision"] == 0
-    call(store, "start", expected_revision=0, goal="Old research", mode="ideas")
-    call(store, "pause", expected_revision=1)
-    await tool.execute(assignment(), context)
-    assert call(store, "read")["revision"] == 2
-    assert not call(store, "read")["active"]
-
-
-def test_lazy_tree_and_roles(store):
-    assert call(store, "read")["active"] is False
-    assert (
-        store._connection.execute("SELECT count(*) FROM research_exploration_trees").fetchone()[0]
-        == 0
-    )
-    services = OceanToolServices(
-        workspace_id="ws", provider_id="test", store=store, task_id="task", skill_role="coordinator"
-    )
-    assert create_ocean_lead_tool_registry(services).get("ocean_exploration")
-    assert create_ocean_expert_tool_registry(services).get("ocean_exploration") is None
-    assert create_ocean_discussion_tool_registry(services).get("ocean_exploration") is None
-
-
-def test_resume_bounded_tree_and_task_cleanup(store):
-    call(
-        store, "start", expected_revision=0, goal="Explore mechanisms", mode="ideas", node_budget=2
-    )
-    result = call(
-        store,
-        "propose",
-        expected_revision=1,
-        candidates=[candidate("Heat flux"), candidate("Advection")],
-    )
-    assert result["recommendation"]["action"] == "stop"
-    call(store, "pause", expected_revision=2)
-    reopened = RequestStore(store.path)
-    try:
-        assert call(reopened, "read")["active"] is False
-        result = call(reopened, "resume", expected_revision=3, mode="iterative")
-        assert result["recommendation"] == {"action": "test", "node_id": "idea_1"}
-    finally:
-        reopened.close()
-    store.delete_research_task(task_id="task", expected_task_revision=None)
-    assert (
-        store._connection.execute("SELECT count(*) FROM research_exploration_trees").fetchone()[0]
-        == 0
-    )
-
-
-def test_feedback_corrects_aggregates_and_explores_other_branch(store):
-    call(store, "start", expected_revision=0, goal="Mechanisms", mode="iterative", node_budget=2)
-    call(store, "propose", expected_revision=1, candidates=[candidate("A"), candidate("B")])
-    evidence_id = observation(store)
-    feedback = {
-        "outcome": "contradicted",
-        "summary": "Eliminates one explanation",
-        "evidence_ids": [evidence_id],
-        "information_gain": 0.8,
-    }
-    result = call(store, "record", expected_revision=2, node_id="idea_1", feedback=feedback)
-    assert result["recommendation"] == {"action": "test", "node_id": "idea_2"}
-    feedback.update(outcome="inconclusive", information_gain=0.2, summary="Later correction")
-    call(store, "record", expected_revision=3, node_id="idea_1", feedback=feedback)
-    first = call(store, "read")["children"][0]
-    assert first["attempts"] == 1
-    assert first["reward_sum"] == 0.2
-    assert "feedback_history" not in call(store, "read", node_id="idea_1")["path"][0]
-
-
-def test_guards_are_atomic(store):
-    call(store, "start", expected_revision=0, goal="Mechanisms", mode="ideas", node_budget=2)
-    with pytest.raises(ValueError, match="Duplicate"):
-        call(store, "propose", expected_revision=1, candidates=[candidate("A"), candidate("a")])
-    assert call(store, "read")["nodes_used"] == 0
-    call(store, "propose", expected_revision=1, candidates=[candidate("A")])
-    with pytest.raises(RequestStoreError, match="revision"):
-        call(store, "pause", expected_revision=1)
-    store.create_research_task(workspace_id="ws", task_id="other", title="Other")
-    with pytest.raises(ValueError, match="Evidence"):
-        call(
-            store,
-            "record",
-            expected_revision=2,
-            node_id="idea_1",
-            feedback={
-                "outcome": "supported",
-                "summary": "Wrong task",
-                "evidence_ids": [observation(store, "other")],
-            },
-        )
-    with pytest.raises(RequestStoreError, match="bound"):
-        exploration_action(store, "other_workspace", "task", ExplorationInput(action="read"))
-    call(store, "pause", expected_revision=2)
-    with pytest.raises(ValueError, match="paused"):
-        call(store, "propose", expected_revision=3, candidates=[candidate("B")])
-
-
-def test_deferred_work_cannot_earn_reward_and_requires_no_scientific_evidence():
-    with pytest.raises(ValueError, match="Deferred"):
-        ExplorationInput(
-            action="record",
-            expected_revision=1,
-            feedback={
-                "outcome": "deferred",
-                "summary": "Code failed",
-                "information_gain": 1,
-            },
-        )
-    with pytest.raises(ValueError, match="observation IDs"):
-        ExplorationInput(
-            action="record",
-            expected_revision=1,
-            feedback={
-                "outcome": "contradicted",
-                "summary": "Unsupported claim",
-            },
-        )
-
-
-def test_ucb_prefers_productive_branch_after_initial_exploration(store):
-    call(store, "start", expected_revision=0, goal="Mechanisms", mode="iterative", node_budget=8)
-    call(
-        store,
-        "propose",
-        expected_revision=1,
-        candidates=[candidate("A"), candidate("B"), candidate("C")],
-    )
-    evidence_id = observation(store)
-    for index, reward in enumerate([0.9, 0.1, 0.2], start=1):
-        call(
-            store,
-            "record",
-            expected_revision=index + 1,
-            node_id=f"idea_{index}",
-            feedback={
-                "outcome": "inconclusive",
-                "summary": "A bounded new constraint on the mechanism",
-                "evidence_ids": [evidence_id],
-                "information_gain": reward,
-            },
-        )
-    assert call(store, "read")["recommendation"] == {"action": "expand", "node_id": "idea_1"}
-    call(
-        store,
-        "propose",
-        expected_revision=5,
-        node_id="idea_1",
-        candidates=[candidate("A condition")],
-    )
-    branch = call(store, "read", node_id="idea_4")
-    assert [node["idea"] for node in branch["path"]] == ["A", "A condition"]
-    assert "├── A [inconclusive]\n│   └── A condition [proposed]" in branch["tree_text"]
-    assert "└── C [inconclusive]" in branch["tree_text"]
-
-
-async def test_real_tool_receipt_and_role_guard(store, tmp_path):
+async def test_tool_new_schema_and_role_isolation(store, tmp_path):
     services = OceanToolServices(
         workspace_id="ws", provider_id="test", store=store, task_id="task", skill_role="coordinator"
     )
     tool = OceanExplorationTool(services)
     context = ToolExecutionContext(
-        cwd=tmp_path,
-        request_id="req",
-        turn_id="turn",
-        tool_call_id="call",
-        operation_id="op",
+        cwd=tmp_path, request_id="req", turn_id="turn", tool_call_id="start", operation_id="op"
     )
-    result = await tool.execute(
-        ExplorationInput(action="start", expected_revision=0, goal="Ideas", mode="ideas"), context
-    )
-    assert not result.is_error
-    assert json.loads(result.output)["revision"] == 1
-    replay = await tool.execute(
-        ExplorationInput(action="start", expected_revision=0, goal="Ideas", mode="ideas"),
+    response = await tool.execute(
+        ExplorationInput(action="start", expected_revision=0, goal="Goal", mode="iterative"),
         context,
     )
-    assert not replay.is_error
-    assert replay.metadata["replayed"]
-    assert call(store, "read")["revision"] == 1
-    denied = OceanExplorationTool(
-        OceanToolServices(
-            workspace_id="ws",
-            provider_id="test",
-            store=store,
-            task_id="task",
-            skill_role="statistical_expert",
-        )
-    )
+    assert not response.is_error
+    assert json.loads(response.output)["schema_version"] == 2
+    denied = OceanExplorationTool(replace(services, skill_role="data_reproducibility_expert"))
     assert (await denied.execute(ExplorationInput(action="read"), context)).is_error
-
-
-async def test_exploration_through_langchain_adapter(store, tmp_path):
-    registry = create_ocean_lead_tool_registry(
-        OceanToolServices(
-            workspace_id="ws",
-            provider_id="test",
-            store=store,
-            task_id="task",
-            skill_role="coordinator",
-        )
-    )
-    tool = next(
-        t
-        for t in registry.as_langchain_tools(
-            cwd=tmp_path,
-            operation_id_factory=lambda request, turn, call: f"op_{call}",
-        )
-        if t.name == "ocean_exploration"
-    )
-
-    async def invoke(call_id, args):
-        message = await tool.ainvoke(
-            {"name": tool.name, "type": "tool_call", "id": call_id, "args": args},
-            config={"configurable": {"request_id": "req_adapter"}},
-        )
-        assert message.status == "success", message.content
-        return json.loads(message.content)
-
-    assert (await invoke("read", {"action": "read"}))["active"] is False
-    assert (
-        await invoke(
-            "start",
-            {
-                "action": "start",
-                "expected_revision": 0,
-                "goal": "Mechanisms",
-                "mode": "ideas",
-            },
-        )
-    )["revision"] == 1
-    await invoke(
-        "propose",
-        {
-            "action": "propose",
-            "expected_revision": 1,
-            "candidates": [candidate("Heat flux"), candidate("Advection")],
-        },
-    )
-    await invoke(
-        "branch",
-        {
-            "action": "propose",
-            "expected_revision": 2,
-            "node_id": "idea_2",
-            "candidates": [candidate("Upstream warm-water transport")],
-        },
-    )
-    branch = await invoke("read_branch", {"action": "read", "node_id": "idea_3"})
-    assert [n["node_id"] for n in branch["path"]] == ["idea_2", "idea_3"]
-    assert (await invoke("pause", {"action": "pause", "expected_revision": 3}))["active"] is False
-    with pytest.raises(ValueError, match="not applicable"):
-        await invoke("invalid", {"action": "read", "mode": "ideas"})
-
-
-def test_migrate_existing_database_with_backup(tmp_path):
-    path = tmp_path / "existing.sqlite3"
-    old = RequestStore(path)
-    old.create_research_task(workspace_id="ws", task_id="task", title="Preserved")
-    old._connection.execute("DROP TABLE research_exploration_trees")
-    old._connection.execute("DELETE FROM schema_migrations WHERE version=47")
-    old.close()
-    upgraded = RequestStore(path)
-    try:
-        assert call(upgraded, "read")["revision"] == 0
-        assert list((tmp_path / "backups").glob("workspace-before-v47-*.sqlite3"))
-    finally:
-        upgraded.close()
-
-
-def prepare_branches(store, budget=8):
-    call(
-        store,
-        "start",
-        expected_revision=0,
-        goal="Root question",
-        mode="iterative",
-        node_budget=budget,
-    )
-    call(store, "propose", expected_revision=1, candidates=[candidate("A"), candidate("B")])
-
-
-def record_branch(store, key, status="open", outcome="supported", gain=0.5):
-    revision = call(store, "read")["revision"]
-    return call(
-        store,
-        "record",
-        expected_revision=revision,
-        node_id=key,
-        feedback={
-            "outcome": outcome,
-            "summary": "Coordinator assessed evidence and feasible continuation",
-            "evidence_ids": [] if outcome == "deferred" else [observation(store)],
-            "information_gain": gain,
-            "branch_status": status,
-        },
-    )
-
-
-def test_supported_branches_expand_instead_of_finishing(store):
-    prepare_branches(store)
-    record_branch(store, "idea_1")
-    result = record_branch(store, "idea_2", gain=0.1)
-    assert result["recommendation"] == {"action": "expand", "node_id": "idea_1"}
-    call(
-        store,
-        "propose",
-        expected_revision=result["revision"],
-        node_id="idea_1",
-        candidates=[candidate("A refined")],
-    )
-    assert call(store, "read", node_id="idea_3")["path"][-1]["idea"] == "A refined"
-    # Even an early pause must retain the unfulfilled next step, not claim completion.
-    state = call(store, "read")
-    paused = call(store, "pause", expected_revision=state["revision"])
-    assert paused["stop_decision"]["reason"] == "interrupted"
-    assert not paused["stop_decision"]["question_resolved"]
-    assert paused["stop_decision"]["pending_recommendation"]
-
-
-def test_one_solved_main_branch_finishes_with_other_branches_open(store):
-    prepare_branches(store)
-    result = record_branch(store, "idea_1", status="solved")
-    assert result["recommendation"] == {
-        "action": "stop",
-        "reason": "question_resolved",
-        "node_id": "idea_1",
-    }
-    paused = call(store, "pause", expected_revision=result["revision"])
-    assert paused["stop_decision"]["reason"] == "question_resolved"
-    assert "[solved]" in paused["tree_text"]
-
-
-def test_closed_branch_selects_another_and_all_closed_remain_unresolved(store):
-    prepare_branches(store)
-    first = record_branch(store, "idea_1", status="exhausted", outcome="contradicted")
-    assert first["recommendation"] == {"action": "test", "node_id": "idea_2"}
-    result = record_branch(store, "idea_2", status="blocked", outcome="deferred", gain=0)
-    assert result["recommendation"]["reason"] == "all_branches_exhausted"
-    assert result["recommendation"]["blocked_nodes"] == ["idea_2"]
-    assert not result["recommendation"]["question_resolved"]
-    assert call(store, "read")["children"][1]["outcome"] == "deferred"
-
-
-def test_budget_exhaustion_is_interruption_not_completed_research(store):
-    prepare_branches(store, budget=2)
-    record_branch(store, "idea_1")
-    result = record_branch(store, "idea_2")
-    assert result["recommendation"] == {
-        "action": "pause",
-        "reason": "node_budget_exhausted",
-        "question_resolved": False,
-    }
-
-
-def test_local_child_support_cannot_resolve_whole_question(store):
-    prepare_branches(store)
-    call(
-        store, "propose", expected_revision=2, node_id="idea_1", candidates=[candidate("A detail")]
-    )
-    with pytest.raises(ValueError, match="main hypothesis"):
-        record_branch(store, "idea_3", status="solved")
-    assert call(store, "read")["revision"] == 3
-
-
-def test_unexpandable_parent_does_not_hide_open_child(store):
-    prepare_branches(store, budget=3)
-    record_branch(store, "idea_1")
-    state = record_branch(store, "idea_2", status="blocked", outcome="deferred", gain=0)
-    call(
-        store,
-        "propose",
-        expected_revision=state["revision"],
-        node_id="idea_1",
-        candidates=[candidate("A detail")],
-    )
-    state = call(store, "read")
-    call(
-        store,
-        "record",
-        expected_revision=state["revision"],
-        node_id="idea_1",
-        feedback={
-            "outcome": "supported",
-            "summary": "No further siblings needed; child still needs testing",
-            "evidence_ids": [observation(store)],
-            "expandable": False,
-        },
-    )
-    assert call(store, "read")["recommendation"] == {"action": "test", "node_id": "idea_3"}

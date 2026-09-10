@@ -1,9 +1,39 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 
-import {MessageMarkdown, safeExternalHref} from './message-markdown.js';
+import {deduplicateResultLinks, MessageMarkdown, referencedResultKeys, safeExternalHref} from './message-markdown.js';
 
 describe('MessageMarkdown', () => {
+  const result = {
+    keys: ['task/view@v1', 'analysis.nc'], label: 'Analysis', kind: 'interactive_view' as const,
+    features: [{id: 'a', label: 'Region A'}, {id: 'b', label: 'Region B'}], onOpen: () => {},
+  };
+
+  it('uses registered object labels and never falls back for a missing fragment', () => {
+    const markup = renderToStaticMarkup(<MessageMarkdown content={'[[output:analysis.nc#a|Invented label]] [[result:task/view@v1#missing]] [[result:task/view@v1#a#extra]]'} resultLinks={[result]} />);
+    expect(markup).toContain('aria-label="Open Region A"');
+    expect(markup).not.toContain('Invented label');
+    expect(markup).toContain('Result object unavailable: missing');
+    expect(markup.match(/<button/g)).toHaveLength(1);
+    expect(referencedResultKeys('[[result:task/view@v1#a]]')).toEqual(new Set(['task/view@v1']));
+  });
+
+  it('deduplicates adjacent aliases but preserves separate objects and narrative', () => {
+    const content = '[[output:analysis.nc|First]]\n\n- [[result:task/view@v1|Second]]\n\n[[result:task/view@v1#a]]\n[[result:task/view@v1#b]]';
+    const normalized = deduplicateResultLinks(content, [result]);
+    expect(normalized).not.toContain('Second');
+    expect(normalized).toContain('#a');
+    expect(normalized).toContain('#b');
+    const code = '```\n[[output:analysis.nc]]\n[[output:analysis.nc]]\n```';
+    expect(deduplicateResultLinks(code, [result])).toBe(code);
+    expect(renderToStaticMarkup(<MessageMarkdown content={code} resultLinks={[result]} />)).not.toContain('<button');
+  });
+
+  it('rejects ambiguous output aliases instead of opening whichever result was last', () => {
+    const markup = renderToStaticMarkup(<MessageMarkdown content={'[[output:analysis.nc#a]]'} resultLinks={[result, {...result, keys: ['task/other@v1', 'analysis.nc']}]} />);
+    expect(markup).toContain('Result object unavailable');
+    expect(markup).not.toContain('<button');
+  });
   it('renders research Markdown into structured, safe reading content', () => {
     const markup = renderToStaticMarkup(
       <MessageMarkdown content={'## Research note\n\n- **Verified** coordinate metadata\n- Compared two monthly means\n\n| Check | State |\n| --- | --- |\n| Units | ready |\n\n```python\nmean_sst = sst.mean("time")\n```\n\n$T = T_0 + T\'$,\n\n<script>alert("not rendered")</script>'} />,

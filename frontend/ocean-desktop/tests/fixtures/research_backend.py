@@ -156,6 +156,50 @@ class ScriptedEngine:
             answer = f"Conclusion for {title}: fixture evidence reviewed."
             if papers:
                 answer += " Selected papers: " + ", ".join(selected["selected_paper_ids"])
+            if "OBJECTS" in text:
+                from oceanx.expert_deliverables import hydrate_ocean_view_netcdf
+                from oceanx.scientific_view import ScientificFigure
+
+                is_map = "MAP" in text
+                dense = is_map and "DENSE" in text
+                figure = ScientificFigure(plot_kind="spatial_map" if is_map else "scatter", title="Object binding fixture")
+                if dense:
+                    import numpy as np
+
+                    x, y = np.linspace(110, 130, 80), np.linspace(15, 40, 110)
+                    xx, yy = np.meshgrid(x, y)
+                    valid = ((xx - 120) / 9) ** 2 + ((yy - 27.5) / 14) ** 2 < 1
+                    values = np.where(valid, 2 + 7 * np.exp(-((xx - 119 - np.sin(yy)) / 4) ** 2), np.nan)
+                    panel = figure.panel(x=x, y=y)
+                    panel.field2d(values, variable="signal", units="units", colorbar_label="Signal (units)")
+                    for index in range(5):
+                        mask = valid & (values >= 5) & (yy >= 15 + index * 5) & (yy < 20 + index * 5)
+                        # Holes/disconnected pieces and different-width row runs reproduce real masks.
+                        mask &= ~((xx > 119) & (xx < 120) & (yy > 27) & (yy < 29))
+                        feature_id = ("first", "second")[index] if index < 2 else f"region_{index + 1}"
+                        figure.add_feature(id=feature_id, label=f"Region {index + 1}: selected cells (peak signal >= 5 units; evidence coverage and full interpretation remain available in the selected object details)", mask=mask)
+                else:
+                    panel = figure.panel(x=[120, 121, 122], y=[20, 21, 22], x_label="X", y_label="Y")
+                    if is_map:
+                        panel.field2d([[1, 1, 2], [1, 2, 2], [2, 2, 2]], units="1", field_kind="categorical", category_labels={1: "Group A", 2: "Group B"})
+                    else:
+                        panel.scatter()
+                    figure.add_feature(id="first", label="First object", bounds=(119.8, 19.8, 120.4, 20.4))
+                    figure.add_feature(id="second", label="Second object", point=(122, 22))
+                output = figure.save(self.workspace / "object-fixture.nc")
+                payload = hydrate_ocean_view_netcdf(output)
+                result = self.host.task_results.put(
+                    workspace_id=self.services.workspace_id, task_id=task_id, kind="interactive_view",
+                    title=figure.title, origin_request_id=request_id,
+                    content={"data_file": "data.nc", "dataset_file": "data.nc", "render_status": "interactive", "view_kind": figure.plot_kind,
+                             "output_path": "outputs/object-fixture.nc", "features": [{"id": f["id"], "label": f["label"]} for f in payload["features"]]},
+                    files={"data.nc": output},
+                )
+                key = f"{result.ref.task_id}/{result.ref.result_id}@v{result.ref.version}"
+                answer += f"\n\n[[result:{key}#first|Wrong name]]\n\n[[result:{key}#second]]\n\n[[result:{key}#missing]]"
+                self.host.store.record_coordinator_result(
+                    request_id=request_id, result=CoordinatorResult(answer_markdown=answer, decision=CoordinatorDecision.ANSWERED, result_refs=(result.ref,)),
+                )
             if "RESULT" in text:
                 notebook = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": []}
                 path = self.host.task_workspace_projector.write_supplementary_notebook(

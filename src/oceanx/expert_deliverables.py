@@ -23,6 +23,10 @@ class ExpertDeliverableError(RuntimeError):
     """An Expert result cannot be safely materialized as a user-facing deliverable."""
 
 
+class InvalidResultObjectsError(ExpertDeliverableError):
+    """A declared object must not disappear through legacy rendering fallback."""
+
+
 def interactive_view_cache(
     *,
     record: TaskResultRecord,
@@ -104,6 +108,32 @@ def interactive_view_cache(
     return cache_path, raw
 
 
+def _validate_feature_contract(payload: dict[str, Any], *, spatial: bool = False) -> None:
+    from oceanx.scientific_view import validate_result_features
+
+    try:
+        features = validate_result_features(payload.get("features", []))
+        panels = {panel.get("id") for panel in payload.get("panels", []) if isinstance(panel, dict)}
+        for feature in features:
+            if not spatial and feature.get("panel_id") not in panels:
+                raise ValueError("Feature must identify an existing panel")
+            if spatial:
+
+                def check_position(value: Any) -> None:
+                    if len(value) == 2 and isinstance(value[0], (int, float)):
+                        if not (-180 <= value[0] <= 180 and -90 <= value[1] <= 90):
+                            raise ValueError(
+                                "Map features require longitude [-180,180] and latitude [-90,90]"
+                            )
+                    else:
+                        for child in value:
+                            check_position(child)
+
+                check_position(feature["geometry"]["coordinates"])
+    except (ValueError, TypeError) as exc:
+        raise InvalidResultObjectsError(f"Invalid result objects: {exc}") from exc
+
+
 def hydrate_scientific_manifest(payload: Any, dataset_path: Path) -> dict[str, Any]:
     """Resolve one small figure manifest against its immutable NetCDF arrays.
 
@@ -118,6 +148,7 @@ def hydrate_scientific_manifest(payload: Any, dataset_path: Path) -> dict[str, A
         "ocean-scientific-figure/v4",
     }:
         raise ExpertDeliverableError("Scientific figure manifest is incompatible")
+    _validate_feature_contract(payload)
     descriptors = payload.get("data")
     if not isinstance(descriptors, dict) or not descriptors:
         raise ExpertDeliverableError("Scientific figure manifest requires NetCDF variables")
@@ -237,7 +268,10 @@ def hydrate_scientific_manifest(payload: Any, dataset_path: Path) -> dict[str, A
                     if label:
                         path["label"] = str(label)
                     paths.append(path)
-                layers.append({key: value for key, value in layer.items() if key != "path_data"} | {"paths": paths})
+                layers.append(
+                    {key: value for key, value in layer.items() if key != "path_data"}
+                    | {"paths": paths}
+                )
             panels.append({**panel, "layers": layers})
         hydrated["panels"] = panels
         return hydrated
@@ -253,6 +287,7 @@ def hydrate_spatial_manifest(payload: Any, dataset_path: Path) -> dict[str, Any]
         or payload.get("schema_version") != "ocean-interactive-spatial/v2"
     ):
         raise ExpertDeliverableError("Spatial view manifest is incompatible")
+    _validate_feature_contract(payload, spatial=True)
     variable_name = payload.get("variable")
     longitude_name = payload.get("longitude_coordinate")
     latitude_name = payload.get("latitude_coordinate")
@@ -382,6 +417,8 @@ class ExpertDeliverableService:
         # NetCDF instead of generating a JSON manifest and a second NetCDF.
         try:
             hydrated_payload = hydrate_ocean_view_netcdf(field_path)
+        except InvalidResultObjectsError:
+            raise
         except ExpertDeliverableError:
             hydrated_payload = None
         if hydrated_payload is not None:
@@ -397,6 +434,10 @@ class ExpertDeliverableService:
                 content={
                     "view_kind": "spatial_map",
                     "output_path": f"outputs/{field_output}",
+                    "features": [
+                        {"id": f["id"], "label": f["label"]}
+                        for f in hydrated_payload.get("features", [])
+                    ],
                     "data_file": "data.nc",
                     "dataset_file": "data.nc",
                     "preview_file": None,
@@ -558,9 +599,7 @@ class ExpertDeliverableService:
         if data_path.suffix.lower() == ".nc":
             try:
                 hydrated_payload = hydrate_ocean_view_netcdf(data_path)
-                metadata = self._validate_structured_data(
-                    hydrated_payload, expected_kind=view_kind
-                )
+                metadata = self._validate_structured_data(hydrated_payload, expected_kind=view_kind)
                 metadata["renderer_schema"] = hydrated_payload["schema_version"]
                 dataset_path = data_path
             except ExpertDeliverableError as exc:
@@ -596,6 +635,8 @@ class ExpertDeliverableService:
                 else:
                     metadata = self._validate_structured_data(payload, expected_kind=view_kind)
                     hydrated_payload = payload
+            except InvalidResultObjectsError:
+                raise
             except (OSError, json.JSONDecodeError, ExpertDeliverableError) as exc:
                 render_error = str(exc) or "Structured interactive view is not renderable"
 
@@ -659,6 +700,10 @@ class ExpertDeliverableService:
             content={
                 "view_kind": view_kind,
                 "output_path": f"outputs/{data_output}",
+                "features": [
+                    {"id": f["id"], "label": f["label"]}
+                    for f in (hydrated_payload or {}).get("features", [])
+                ],
                 "data_file": data_file,
                 "dataset_file": "data.nc" if dataset_path is not None else None,
                 "preview_file": "preview.png" if preview_path is not None else None,
@@ -1098,6 +1143,7 @@ class ExpertDeliverableService:
     ) -> dict[str, Any]:
         if not isinstance(payload, dict):
             raise ExpertDeliverableError("Structured interactive-view data must be an object")
+        _validate_feature_contract(payload)
         if payload.get("plot_kind") != expected_kind:
             raise ExpertDeliverableError(
                 "Interactive view kind does not match its structured data payload"

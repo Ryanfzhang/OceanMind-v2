@@ -1801,8 +1801,9 @@ def test_code_runtime_preserves_intermediate_state_for_one_logical_expert(tmp_pa
     asyncio.run(scenario())
 
 
+@pytest.mark.parametrize("review", [False, True])
 def test_default_expert_runtime_uses_the_ocean_model_profile_response_ceiling(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, review
 ) -> None:
     import oceanx.agent as agent_module
     from oceanx.agent_tools import ToolRegistry
@@ -1824,10 +1825,9 @@ def test_default_expert_runtime_uses_the_ocean_model_profile_response_ceiling(
             system_prompt="fixture expert prompt",
         )
 
-    monkeypatch.setattr(
-        agent_module,
-        "load_model_profile",
-        lambda *_args, **_kwargs: OceanModelProfile(
+    def load_profile(role):
+        captured["model_role"] = role
+        return OceanModelProfile(
             name="fixture",
             label="Fixture",
             provider="openai",
@@ -1836,8 +1836,9 @@ def test_default_expert_runtime_uses_the_ocean_model_profile_response_ceiling(
             credential_slot="fixture",
             api_key="fixture-key",
             max_tokens=65_536,
-        ),
-    )
+        )
+
+    monkeypatch.setattr(agent_module, "load_model_profile", load_profile)
     monkeypatch.setattr(
         agent_module,
         "build_ocean_expert_runtime",
@@ -1853,6 +1854,9 @@ def test_default_expert_runtime_uses_the_ocean_model_profile_response_ceiling(
                 work_order_id="work_fixture",
                 expert_child_id=None,
                 agent_thread_id="expert:fixture",
+                store=SimpleNamespace(
+                    get_team_work=lambda _id: SimpleNamespace(work_order=SimpleNamespace(review=review))
+                ),
             ),
             tmp_path,
             OceanAgentBudget(),
@@ -1864,6 +1868,7 @@ def test_default_expert_runtime_uses_the_ocean_model_profile_response_ceiling(
 
     assert captured["profile"].max_tokens == 65_536
     assert captured["thread_id"] == "expert:fixture"
+    assert captured["model_role"] == ("coordinator" if review else "expert")
 
 
 def test_shared_team_usage_counts_only_measured_terminal_results() -> None:
@@ -2609,8 +2614,9 @@ def test_normal_child_final_answer_completes_an_expert_round(tmp_path) -> None:
     asyncio.run(scenario())
 
 
+@pytest.mark.parametrize("checkpoint_resume", [False, True])
 def test_transport_failure_retries_same_work_order_before_coordinator_sees_it(
-    tmp_path,
+    tmp_path, monkeypatch, checkpoint_resume,
 ) -> None:
     """A transient provider failure resumes the same Expert conversation."""
 
@@ -2619,12 +2625,27 @@ def test_transport_failure_retries_same_work_order_before_coordinator_sees_it(
 
     runtime_calls = 0
     loaded_message_counts: list[int] = []
+    resumes = 0
+    async def sleep(delay):
+        pass
+    monkeypatch.setattr("oceanx.model_recovery.asyncio.sleep", sleep)
 
     class RecoveringEngine:
         def __init__(self, attempt: int) -> None:
             self.attempt = attempt
             self._messages: list[ConversationMessage] = []
             self._compaction_generation = 0
+            if not checkpoint_resume:
+                self.resume_message = None
+
+        async def resume_message(self, *, request_id=None):
+            nonlocal resumes
+            resumes += 1
+            self.attempt = 2
+            yield AssistantTurnComplete(
+                message=ConversationMessage(role="assistant", content=[TextBlock(text="Recovered Expert answer.")]),
+                usage=UsageSnapshot(input_tokens=12, output_tokens=4),
+            )
 
         @property
         def messages(self) -> list[ConversationMessage]:
@@ -2711,7 +2732,8 @@ def test_transport_failure_retries_same_work_order_before_coordinator_sees_it(
 
             assert result.status is WorkStatus.COMPLETED
             assert result.text == "Recovered Expert answer."
-            assert runtime_calls == 2
+            assert runtime_calls == (1 if checkpoint_resume else 2)
+            assert resumes == (1 if checkpoint_resume else 0)
             # The first provider call produced no complete assistant turn, so
             # its lone user prompt is not restored and duplicated. The retry
             # remains the same logical Expert but starts from the last safe
@@ -2719,7 +2741,7 @@ def test_transport_failure_retries_same_work_order_before_coordinator_sees_it(
             assert loaded_message_counts == []
             record = host.store.get_team_work(order.work_order_id)
             assert record is not None
-            assert record.resume_count == 1
+            assert record.resume_count == (0 if checkpoint_resume else 1)
             # Recovery retained the original Coordinator assignment identity.
             assert record.work_order.work_order_id == order.work_order_id
             assert record.work_order.session_round == order.session_round
@@ -2757,6 +2779,8 @@ def test_only_transient_transport_failures_are_automatically_continued() -> None
         result(WorkFailureCode.CONTRACT_FAILURE)
     )
     assert not OceanTeamOrchestrator._should_continue_workstream(result(WorkFailureCode.UNKNOWN))
+    # A stream already exhausted its retry allowance; do not multiply it in the outer loop.
+    assert not OceanTeamOrchestrator._should_continue_workstream(result(WorkFailureCode.PROVIDER_UNAVAILABLE))
 
 
 def test_literature_expert_starts_without_python_but_code_still_fails_closed(tmp_path, monkeypatch) -> None:
@@ -4076,6 +4100,65 @@ def test_cancelled_expert_keeps_valid_result_from_failed_execution(tmp_path) -> 
     assert result.evidence_refs == (EvidenceRef(kind="code_execution", ref=execution.execution_id),)
 
 
+def test_expert_receives_dataset_context_before_first_model_turn(tmp_path, monkeypatch) -> None:
+    from oceanx.backend.host import OceanBackendHost
+
+    async def scenario() -> None:
+        host = OceanBackendHost(tmp_path / "state", write_frame=lambda _frame: None)
+        try:
+            await _open_test_workspace(host, workspace_id="ws_context", path=tmp_path)
+            task_id = "task_prepared_context"
+            host.store.create_research_task(
+                workspace_id="ws_context", task_id=task_id, title="Context test"
+            )
+            context = {
+                "sources": [{
+                    "handle": "source_1", "path": "/data/chlorophyll.nc",
+                    "inspection": "ready", "dimensions": {"time": 365},
+                    "data_variables": [{"name": "chlorophyll", "attrs": {"units": "mg m-3"}}],
+                }],
+            }
+            source = SimpleNamespace(manifest=context["sources"][0])
+            events = []
+
+            async def prepare_context(**kwargs):
+                assert kwargs["sources"] == (source,)
+                assert kwargs["task_id"] == task_id
+                events.append("prepared")
+                return context
+
+            async def participant(binding):
+                assert events == ["prepared"]
+                assert binding.analysis_context == context
+                # Exercise the real prompt builder, not just the binding.
+                spec = host.team._participant_spec(binding)
+                assert "/data/chlorophyll.nc" in spec.prompt
+                assert "chlorophyll" in spec.prompt and "mg m-3" in spec.prompt
+                assert "OCEAN_INPUT_MANIFEST" in spec.prompt
+                assert "first code execution prepares" not in spec.prompt
+                events.append("started")
+                return _ParticipantRunResult(
+                    child_id=binding.child_id, state=_ParticipantState.COMPLETED,
+                    last_assistant_text="Dataset metadata received without discovery calls.",
+                )
+
+            monkeypatch.setattr(host.expert_code_execution, "resolve_work_order_sources", lambda **kw: (source,))
+            monkeypatch.setattr(host.expert_code_execution, "get_task_dataset_context", prepare_context)
+            monkeypatch.setattr(host.team, "_run_participant", participant)
+            order = _order("work_prepared_context").model_copy(update={"workspace_revision": 1})
+            result = await host.team.delegate(
+                workspace_id="ws_context", workspace_path=tmp_path,
+                provider_id="provider_fixture", task_id=task_id, work_order=order,
+            )
+            assert result.status is WorkStatus.COMPLETED
+            assert events == ["prepared", "started"]
+            assert host.store.list_code_executions(order.work_order_id) == ()
+        finally:
+            await host.close()
+
+    asyncio.run(scenario())
+
+
 def test_participant_dataset_context_keeps_schema_but_drops_bulky_attrs() -> None:
     context = {
         "schema_version": "ocean-analysis-context/v1",
@@ -4584,6 +4667,137 @@ def test_sibling_expert_reuses_task_result_without_inheriting_private_memory(
             await host.close()
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("partial", [False, True])
+def test_independent_review_forwards_full_result_and_reads_only_assigned_evidence(tmp_path, partial):
+    from oceanx.backend.host import OceanBackendHost
+    from oceanx.expert_execution import ExpertCodeExecutionError
+
+    async def scenario():
+        host = OceanBackendHost(tmp_path / "state", write_frame=lambda _frame: None)
+        try:
+            await _open_test_workspace(host, workspace_id="ws_review", path=tmp_path)
+            task = host.store.create_research_task(workspace_id="ws_review", title="Review")
+            service = host.expert_code_execution
+            producer = _order("work_author", "ocean_process_expert").model_copy(update={
+                "task_id": task.task_id, "job_key": "job_author", "expert_key": "author",
+                "workspace_revision": host.store.workspace_snapshot("ws_review").revision,
+            })
+            host.store.create_team_work_order(workspace_id="ws_review", work_order=producer)
+            host.store.mark_team_work_running(producer.work_order_id)
+            result = ExpertResult(
+                work_order_id=producer.work_order_id,
+                status=WorkStatus.INCOMPLETE if partial else WorkStatus.COMPLETED,
+                # Long text must not silently lose its final caveat in a capsule.
+                text="Evidence paragraph. " * 350 + "Unresolved flux attribution.",
+                outputs=(ExpertOutput(
+                    item_id="result_review_fixture", execution_id="codeexec_review_fixture",
+                    output_name="evidence.nc", size_bytes=10, sha256="a" * 64,
+                    title="Original evidence", summary="Candidate, not yet independently verified",
+                ),),
+                error="Model service unavailable" if partial else None,
+                result_origin=(ExpertResultOrigin.BACKEND_RECOVERED if partial
+                               else ExpertResultOrigin.AGENT_SUBMITTED),
+            )
+            root = service.task_workspaces.expert_session_root(task.task_id, producer.job_key)
+            code = root / "executions" / "codeexec_review_fixture" / "code" / "analysis.py"
+            code.parent.mkdir(parents=True, exist_ok=True)
+            code.write_text("weighted_mean = sum(values * weights) / sum(weights)\n")
+            private = root / "private-transcript.json"
+            private.write_text("private reasoning must not be inherited")
+            rawlog = code.parent.parent / "logs" / "stdout.txt"
+            rawlog.parent.mkdir()
+            rawlog.write_text("large private log content is not injected")
+            now = datetime.now(timezone.utc).isoformat()
+            host.store.start_code_execution(
+                execution_id="codeexec_review_fixture", workspace_id="ws_review",
+                task_id=task.task_id, work_order_id=producer.work_order_id,
+                child_id=producer.work_order_id, request={"purpose": "calculation"}, started_at=now,
+            )
+            host.store.finish_code_execution(
+                execution_id="codeexec_review_fixture", state="succeeded",
+                result={"work_root": str(root), "stdout": rawlog.read_text()}, ended_at=now,
+            )
+            host.store.complete_team_work(result)
+            foreign_task = host.store.create_research_task(workspace_id="ws_review", title="Other task")
+            foreign = producer.model_copy(update={
+                "work_order_id": "work_other_task", "task_id": foreign_task.task_id,
+                "job_key": "job_other_task",
+            })
+            host.store.create_team_work_order(workspace_id="ws_review", work_order=foreign)
+            host.store.complete_team_work(ExpertResult(
+                work_order_id=foreign.work_order_id, status=WorkStatus.COMPLETED,
+                text="Other task must not replace the declared dependency",
+            ))
+            reviewer = _order("work_review", "ocean_process_expert").model_copy(update={
+                "task_id": task.task_id, "job_key": "job_review", "expert_key": "physical_review",
+                "review": True, "depends_on": (producer.todo_id,),
+                "workspace_revision": producer.workspace_revision,
+            })
+            host.store.create_team_work_order(workspace_id="ws_review", work_order=reviewer)
+            evidence = service.review_evidence(reviewer.work_order_id)
+            assert evidence[0]["result"] == result.coordinator_payload()
+            assert evidence[0]["interruption"] == result.error
+            assert evidence[0]["round_state"] == result.status.value
+            binding = _ParticipantBinding(
+                workspace_id="ws_review", workspace_path=tmp_path, provider_id="fixture",
+                task_id=task.task_id, work_order=reviewer,
+            )
+            spec = host.team._participant_spec(binding)
+            assert result.text in spec.prompt
+            assert "private reasoning" not in spec.prompt
+            assert code.read_text() == service.read_expert_file(
+                workspace_id="ws_review", task_id=task.task_id,
+                work_order_id=reviewer.work_order_id, path=str(code),
+            )["content"]
+            assert "private reasoning" not in json.dumps(evidence)
+            assert "Other task" not in json.dumps(evidence)
+            assert "large private log content" not in json.dumps(evidence)
+            for forbidden in (private, tmp_path / "outside.txt"):
+                with pytest.raises(ExpertCodeExecutionError, match="outside"):
+                    service.read_expert_file(
+                        workspace_id="ws_review", task_id=task.task_id,
+                        work_order_id=reviewer.work_order_id, path=str(forbidden),
+                    )
+            # Ordinary dependents still cannot read another Expert's private code.
+            ordinary = reviewer.model_copy(update={"work_order_id": "work_ordinary", "review": False})
+            host.store.create_team_work_order(workspace_id="ws_review", work_order=ordinary)
+            assert service.review_evidence(ordinary.work_order_id) == []
+            with pytest.raises(ExpertCodeExecutionError, match="outside"):
+                service.read_expert_file(
+                    workspace_id="ws_review", task_id=task.task_id,
+                    work_order_id=ordinary.work_order_id, path=str(code),
+                )
+            assert host.team._expert_session_key(
+                workspace_id="ws_review", task_id=task.task_id, work_order=reviewer,
+            ) != host.team._expert_session_key(
+                workspace_id="ws_review", task_id=task.task_id, work_order=producer,
+            )
+            assert host.store.get_team_work(producer.work_order_id).result == result
+            # A pending newer round must not silently fall back to old completion.
+            pending = producer.model_copy(update={"work_order_id": "work_author_followup", "session_round": 2})
+            host.store.create_team_work_order(workspace_id="ws_review", work_order=pending)
+            assert service.review_evidence(reviewer.work_order_id)[0]["result"] is None
+        finally:
+            await host.close()
+
+    asyncio.run(scenario())
+
+
+def test_review_assignment_requires_explicit_dependencies_and_identity():
+    todo = dict(
+        todo_id="review", question="Check the numerical evidence", why_this_expert="Physical review",
+        profile_id="ocean_process_expert", expected_outputs=("answer",), done_when="Report checks",
+        review=True,
+    )
+    with pytest.raises(ValidationError, match="review requires"):
+        OceanTodoInput(**todo)
+    parsed = OceanTodoInput(**todo, depends_on=("analysis",), expert_key="physical_review")
+    assert parsed.review is True
+    order = _order("work_review_schema").model_dump()
+    order.update(review=True, depends_on=("analysis",), expert_key="physical_review")
+    assert WorkOrder.model_validate(order).review is True
 
 
 def test_identical_stdout_retry_reuses_saved_execution_without_losing_evidence(

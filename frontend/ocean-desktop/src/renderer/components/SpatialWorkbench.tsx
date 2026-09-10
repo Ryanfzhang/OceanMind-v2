@@ -4,6 +4,7 @@ import type {FeatureCollection, Geometry, GeoJsonProperties} from 'geojson';
 import maplibregl, {type Map as MapLibreMap, type StyleSpecification} from 'maplibre-gl';
 
 import type {ResultDocument} from '../types.js';
+import {FEATURE_COLORS, categoryColor, featureAnchor, featureBounds, prepareResultFeature, resultFeatureMapLayers, resultFeatures} from './result-features.js';
 import {
   isSpatial,
   isStructured,
@@ -60,6 +61,7 @@ type DisplayContext = {
 };
 
 type ResultWorkbenchProps = {
+  featureId?: string;
   document?: ResultDocument | null;
   loading?: boolean;
   data?: unknown;
@@ -82,6 +84,13 @@ const SPATIAL_PALETTES: Record<string, string[]> = {
 };
 
 type GridPosition = {lower: number; upper: number; ratio: number};
+
+export function spatialCategories(payload: SpatialPayload) {
+  if (payload.rendering?.kind !== 'categorical') return [];
+  const labels = new Map(payload.categories?.map(entry => [entry.value, entry.label]));
+  return [...new Set(payload.values.flat().filter(finiteValue))].sort((a, b) => a-b)
+    .map((value, index) => ({value, label: labels.get(value) ?? `Class ${value}`, color: categoryColor(index)}));
+}
 
 function finiteValue(value: number | null | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
@@ -215,6 +224,7 @@ function spatialRasterCanvas(payload: SpatialPayload): HTMLCanvasElement | null 
   const latitudeAscending = payload.latitude.at(-1)! >= payload.latitude[0]!;
   const [minimum, maximum] = spatialDomain(payload);
   const palette = spatialPalette(payload);
+  const categoryColors = new Map(spatialCategories(payload).map(entry => [entry.value, parseHex(entry.color)]));
   for (let displayRow = 0; displayRow < sourceHeight; displayRow += 1) {
     const dataRow = latitudeAscending ? sourceHeight - displayRow - 1 : displayRow;
     for (let displayColumn = 0; displayColumn < sourceWidth; displayColumn += 1) {
@@ -222,7 +232,7 @@ function spatialRasterCanvas(payload: SpatialPayload): HTMLCanvasElement | null 
       const value = payload.values[dataRow]?.[dataColumn];
       const offset = (displayRow * sourceWidth + displayColumn) * 4;
       if (!finiteValue(value)) continue;
-      const [red, green, blue] = spatialColor(palette, (value - minimum) / (maximum - minimum));
+      const [red, green, blue] = categoryColors.get(value) ?? spatialColor(palette, (value - minimum) / (maximum - minimum));
       sourceImage.data[offset] = red;
       sourceImage.data[offset + 1] = green;
       sourceImage.data[offset + 2] = blue;
@@ -413,6 +423,7 @@ function extentLabel(context: SpatialContext | null): string | null {
 }
 
 export function ResultWorkbench({
+  featureId,
   document = null,
   loading = false,
   data = null,
@@ -431,8 +442,19 @@ export function ResultWorkbench({
   const [hover, setHover] = useState<HoverValue | null>(null);
   const [chartExpanded, setChartExpanded] = useState(false);
   const [mapShare, setMapShare] = useState(36);
+  const [selectedFeature, setSelectedFeature] = useState<string | undefined>(featureId);
+  useEffect(() => setSelectedFeature(featureId), [featureId, document?.key]);
+  const features = useMemo(() => resultFeatures(data), [data]);
+  const mapFeatures = useMemo(() => features.map(prepareResultFeature), [features]);
+  const selected = features.find(f => f.id === selectedFeature);
+  const featureError = selectedFeature && !loading && !selected ? `Result object unavailable: ${selectedFeature}` : null;
   const spatial = isSpatial(data) ? data : null;
   const spatialCanvas = useMemo(() => spatial ? spatialRasterCanvas(spatial) : null, [spatial]);
+  const fieldCategories = useMemo(() => spatial ? spatialCategories(spatial) : [], [spatial]);
+  const fieldScale = useMemo(() => spatial ? {
+    domain: spatialDomain(spatial),
+    gradient: `linear-gradient(to right, ${spatialPalette(spatial).join(', ')})`,
+  } : null, [spatial]);
   const structured = isStructured(data) ? data : null;
   const context = useMemo(() => contextFor(data), [data]);
   const displayContext = useMemo(() => displayContextFor(context), [context]);
@@ -499,12 +521,14 @@ export function ResultWorkbench({
         type: 'raster',
         source: OVERLAY_SOURCE,
         paint: {
-          'raster-opacity': .84,
+          // Missing cells are already transparent. Keep valid values faithful
+          // to the color scale instead of tinting them with the basemap.
+          'raster-opacity': 1,
           'raster-resampling': spatial.rendering?.interpolation ?? (
             spatial.rendering?.kind === 'categorical' ? 'nearest' : 'linear'
           ),
         },
-      });
+      }, map.getLayer('ocean-feature-fill') ? 'ocean-feature-fill' : undefined);
     }
     if (displayContext) addContextLayers(map, displayContext.collection);
 
@@ -519,6 +543,62 @@ export function ResultWorkbench({
   }, [context, displayContext, previewUrl, ready, spatial, spatialCanvas]);
 
   useEffect(() => setChartExpanded(false), [document?.key]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !spatial || !features.length) return;
+    const source = 'ocean-result-features';
+    const layers = resultFeatureMapLayers(source, Boolean(selectedFeature));
+    const collection: FeatureCollection = {type: 'FeatureCollection', features: mapFeatures.map((f, i) => ({
+      type: 'Feature', id: f.id, geometry: f.geometry,
+      properties: {id: f.id, color: FEATURE_COLORS[i % FEATURE_COLORS.length], selected: f.id === selectedFeature},
+    }))};
+    map.addSource(source, {type: 'geojson', data: collection});
+    const chooseObject = (event: maplibregl.MapLayerMouseEvent) => {
+      const id = event.features?.[0]?.properties?.id;
+      if (typeof id === 'string') setSelectedFeature(id);
+    };
+    const pointer = () => {map.getCanvas().style.cursor = 'pointer';};
+    const clearPointer = () => {map.getCanvas().style.cursor = '';};
+    layers.forEach(layer => {
+      map.addLayer(layer);
+      map.on('click', layer.id, chooseObject);
+      map.on('mouseenter', layer.id, pointer);
+      map.on('mouseleave', layer.id, clearPointer);
+    });
+    const markers = features.flatMap((feature, i) => {
+      const anchor = featureAnchor(feature);
+      if (!anchor) return [];
+      const button = window.document.createElement('button');
+      button.className = 'result-feature-marker';
+      button.textContent = String(i + 1);
+      button.title = feature.label;
+      button.setAttribute('aria-label', feature.label);
+      button.style.setProperty('--feature-color', FEATURE_COLORS[i % FEATURE_COLORS.length]!);
+      button.setAttribute('aria-pressed', String(feature.id === selectedFeature));
+      button.onclick = () => setSelectedFeature(feature.id);
+      return [new maplibregl.Marker({element: button}).setLngLat(anchor).addTo(map)];
+    });
+    const focused = selected && featureBounds(selected);
+    if (focused) {
+      const [w, s, e, n] = focused;
+      map.fitBounds([[w-.05, s-.05], [e+.05, n+.05]], {padding: 65, maxZoom: 9, duration: 350});
+    } else if (!selectedFeature) {
+      const [w, s, e, n] = spatial.bounds;
+      map.fitBounds([[w, s], [e, n]], {padding: 45, duration: 350});
+    }
+    return () => {
+      markers.forEach(marker => marker.remove());
+      layers.forEach(layer => {
+        map.off('click', layer.id, chooseObject);
+        map.off('mouseenter', layer.id, pointer);
+        map.off('mouseleave', layer.id, clearPointer);
+        if (map.getLayer(layer.id)) map.removeLayer(layer.id);
+      });
+      clearPointer();
+      if (map.getSource(source)) map.removeSource(source);
+    };
+  }, [ready, spatial, features, mapFeatures, selectedFeature, selected]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => mapRef.current?.resize());
@@ -538,8 +618,24 @@ export function ResultWorkbench({
     };
   }, [ready, spatial]);
 
-  return <aside className="spatial-workbench" aria-label="Result Workbench">
+  return <aside className={`spatial-workbench${features.length ? ' with-objects' : ''}`} aria-label="Result Workbench">
+    {features.length ? <nav className="result-feature-legend" aria-label="Result objects">
+      <div className="result-object-toolbar">
+        <Layers3 size={15} aria-hidden="true" />
+        <span>Objects</span>
+        <select aria-label="Focus object" value={selectedFeature ?? ''} onChange={event => setSelectedFeature(event.target.value || undefined)}>
+          <option value="">All objects ({features.length})</option>
+          {features.map((feature, index) => <option key={feature.id} value={feature.id}>{index + 1} · {feature.label}</option>)}
+        </select>
+        {selectedFeature ? <button type="button" aria-label="Clear object selection" onClick={() => setSelectedFeature(undefined)}><X size={15} /></button> : null}
+      </div>
+      {selected ? <div className="result-object-detail" role="region" aria-label="Selected object details">
+        <span className="result-object-number" style={{backgroundColor: FEATURE_COLORS[features.indexOf(selected) % FEATURE_COLORS.length]}}>{features.indexOf(selected) + 1}</span>
+        <p>{selected.label}</p>
+      </div> : null}
+    </nav> : null}
     <div ref={bodyRef} style={{'--spatial-map-share': `${chartExpanded ? 18 : mapShare}%`} as CSSProperties} className={`spatial-workbench-body${structured ? ' with-figure' : ''}${figureOnly ? ' figure-only' : ''}${chartExpanded ? ' figure-focused' : ''}`}>
+      {featureError ? <div role="alert" className="workbench-map-error">{featureError}</div> : null}
       {document ? <button className="workbench-close" onClick={onClose} title="Close Result" aria-label="Close Result"><X size={17} /></button> : null}
       <div className="spatial-map-stage">
         <div className="spatial-map-canvas" ref={containerRef} />
@@ -549,13 +645,21 @@ export function ResultWorkbench({
         {loading ? <div className="workbench-map-status"><LoaderCircle className="spin" size={22} />Loading result…</div> : null}
         {error ? <div className="workbench-map-error"><strong>View unavailable</strong><span>{error}</span></div> : null}
         {document && !loading && !error && !spatial && !structured && !fallback ? <div className="workbench-map-error"><strong>Result unavailable</strong><span>No interactive, preview, or downloadable presentation is available.</span></div> : null}
-        {spatial && hover ? <output className="map-value-readout"><strong>{spatial.variable}</strong><span>{hover.longitude.toFixed(3)}° · {hover.latitude.toFixed(3)}°</span><b>{hover.value === null ? 'No data' : `${formatValue(hover.value)} ${spatial.units}`}</b></output> : null}
-        {spatial ? <div className="map-result-caption"><strong>{spatial.variable}</strong><span>{spatial.units}</span></div> : null}
+        {spatial && hover ? <output className="map-value-readout"><strong>{spatial.variable}</strong><span>{hover.longitude.toFixed(3)}° · {hover.latitude.toFixed(3)}°</span><b>{hover.value === null ? 'No data' : fieldCategories.find(entry => entry.value === hover.value)?.label ?? `${formatValue(hover.value)} ${spatial.units}`}</b></output> : null}
         {displayContext?.legend.length ? <aside className="map-region-legend" aria-label="Analysis regions">
           <strong>Study area</strong>
           {displayContext.legend.map((entry, index) => <span key={`${entry.label}-${index}`}><i style={{backgroundColor: entry.color}} />{entry.label}</span>)}
         </aside> : null}
-        {contextLabel && !displayContext?.legend.length ? <aside className="map-context-summary" aria-label="Analysis extent">
+        {spatial && fieldCategories.length ? <aside className="map-category-legend" aria-label="Field categories">
+          <strong>{spatial.variable}</strong>
+          {fieldCategories.map(entry => <span key={entry.value}><i style={{backgroundColor: entry.color}} />{entry.value}: {entry.label}</span>)}
+        </aside> : null}
+        {spatial && fieldScale && spatial.rendering?.kind !== 'categorical' ? <aside className="map-field-colorbar" aria-label="Field color scale">
+          <span>{spatial.variable} · {spatial.units}</span>
+          <i style={{background: fieldScale.gradient}} />
+          <div><span>{formatValue(fieldScale.domain[0])}</span><span>{formatValue(fieldScale.domain[1])}</span></div>
+        </aside> : null}
+        {contextLabel && !features.length && !displayContext?.legend.length ? <aside className="map-context-summary" aria-label="Analysis extent">
           <strong>Analysis extent</strong><span>{contextLabel}</span><small>Camera bounds; valid ocean cells remain masked.</small>
         </aside> : null}
       </div>
@@ -594,7 +698,7 @@ export function ResultWorkbench({
             {chartExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
         </header> : null}
-        <div className="result-chart-body"><ResultRenderBoundary key={document?.key ?? structured.plot_kind} resetKey={document?.key ?? structured.plot_kind}><StructuredView payload={structured as StructuredPayload} compactHeader={hasSpatialContext} /></ResultRenderBoundary></div>
+        <div className="result-chart-body"><ResultRenderBoundary key={document?.key ?? structured.plot_kind} resetKey={document?.key ?? structured.plot_kind}><StructuredView payload={structured as StructuredPayload} compactHeader={hasSpatialContext} featureId={selectedFeature} /></ResultRenderBoundary></div>
       </section> : null}
       {fallback ? <section className="result-fallback-surface" aria-label="Result fallback">
         <header><div>{previewUrl ? <Image size={16} /> : <Download size={16} />}<span><strong>{document?.title}</strong><small>{renderStatus === 'preview' ? 'Static preview' : 'Result file'}</small></span></div></header>

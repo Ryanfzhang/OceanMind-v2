@@ -31,6 +31,7 @@ from oceanx.agent import (
 from oceanx.agent_contract import (
     AssistantTurnComplete,
     ErrorEvent,
+    StatusEvent,
     ToolExecutionCompleted,
     ToolExecutionStarted,
 )
@@ -39,6 +40,7 @@ from oceanx.artifacts.service import ArtifactService
 from oceanx.backend.store import RequestStore, RequestStoreError
 from oceanx.expert_deliverables import ExpertDeliverableService
 from oceanx.expert_execution import ExpertCodeExecutionService
+from oceanx.model_recovery import RETRY_DELAYS, model_events
 from oceanx.protocol.v2.models import EventEnvelope
 from oceanx.skills import (
     JINA_READER_CAPABILITY,
@@ -129,8 +131,8 @@ class OceanTeamSettings:
     max_jobs_per_request: int = 12
     # Only transient provider/transport failures consume this allowance. A
     # budget, contract, method, or permission failure is immediately returned
-    # to the Coordinator. Two retries means at most three provider calls.
-    max_transient_retries: int = 2
+    # to the Coordinator. This is shared across one model-delivery stream.
+    max_transient_retries: int = 4
 
     def __post_init__(self) -> None:
         if not 1 <= self.max_active_experts <= 4:
@@ -148,7 +150,7 @@ class OceanTeamSettings:
             "yes",
             "on",
         }
-        max_transient_retries = int(os.getenv("OCEAN_TEAM_MAX_TRANSIENT_RETRIES", "2"))
+        max_transient_retries = int(os.getenv("OCEAN_TEAM_MAX_TRANSIENT_RETRIES", "4"))
         return cls(enabled=enabled, max_transient_retries=max_transient_retries)
 
 
@@ -275,6 +277,9 @@ class OceanTeamOrchestrator:
                     # continue, change provider, or stop. Do not raise a second
                     # foreground error after useful partial work was persisted.
                     return result
+                # Fallback for custom engines without checkpoint-resume support. Production
+                # streams exhaust their allowance inside model_events and do not reach here.
+                await asyncio.sleep(RETRY_DELAYS[min(retry_index, len(RETRY_DELAYS) - 1)])
         raise AssertionError("unreachable Expert delegation state")
 
     @staticmethod
@@ -400,12 +405,23 @@ class OceanTeamOrchestrator:
             if self.expert_code_execution is None:
                 raise OceanTeamError("Expert code capability is unavailable")
             try:
-                # Source identity is checked without executing Python. Dataset inspection and
-                # sandbox availability are checked by the code tool only when actually used.
-                self.expert_code_execution.resolve_work_order_sources(
+                sources = self.expert_code_execution.resolve_work_order_sources(
                     workspace_id=workspace_id,
                     work_order_id=work_order.work_order_id,
                 )
+                # Prepare the shared metadata before the model's first turn, not
+                # inside its first analysis call. Text-only jobs need no Python.
+                if sources:
+                    context_task_id = work_order.task_id or task_id
+                    if context_task_id is not None:
+                        analysis_context = await self.expert_code_execution.get_task_dataset_context(
+                            workspace_id=workspace_id,
+                            task_id=context_task_id,
+                            work_order_id=work_order.work_order_id,
+                            sources=sources,
+                        )
+                    else:
+                        analysis_context = {"sources": [source.manifest for source in sources]}
             except (RequestStoreError, RuntimeError, ValueError) as exc:
                 terminal = ExpertResult(
                     work_order_id=work_order.work_order_id,
@@ -629,6 +645,7 @@ class OceanTeamOrchestrator:
             mode="json",
             include={
                 "work_order_id",
+                "review",
                 "task_goal",
                 "profile_id",
                 "semantic_role",
@@ -644,10 +661,15 @@ class OceanTeamOrchestrator:
         )
         payload["workstream_checkpoint"] = self._checkpoint_contract(binding)
         payload["analysis_context"] = self._participant_analysis_context(binding.analysis_context)
+        if order.review and self.expert_code_execution is not None:
+            payload["review_evidence"] = self.expert_code_execution.review_evidence(order.work_order_id)
         prompt = (
             "Own this bounded scientific question. Python is required only if you choose to run code. "
-            "An empty analysis_context means no dataset probe has run yet, not that data are absent. "
-            "Your first code execution prepares the shared DatasetContext in its input manifest. "
+            "Assigned source paths and available metadata are supplied below before your first turn. "
+            "Do not run code merely to locate an input manifest or inspect the environment. "
+            "Inside Python, read the full manifest directly with "
+            "json.load(open(os.environ['OCEAN_INPUT_MANIFEST'])) after importing json and os; "
+            "never guess its directory or search for inputs.json. "
             "When present, analysis_context is the server-prepared, "
             "task-scoped DatasetContext shared by all queries and Experts. It is the authoritative "
             "description of input paths, dimensions, coordinates, variables, and "
@@ -670,7 +692,7 @@ class OceanTeamOrchestrator:
             "supported by each saved view in that API's conclusions argument. Reuse preserved "
             "executions, working data, and shared accepted results instead of recomputing them. Use "
             "another code call only for "
-            "a concrete execution error or a scientifically necessary correction. When finished, "
+            "a concrete execution error, an assigned independent spot-check, or a scientifically necessary correction. When finished, "
             "return one ordinary concise answer to the Coordinator. That final answer ends this "
             "round; the runtime attaches saved outputs and evidence automatically. If evidence is "
             "insufficient, say exactly what remains unsupported.\n\n"
@@ -838,9 +860,16 @@ class OceanTeamOrchestrator:
 
         # The prompt gets a compact view; full stdout/stderr and generated files
         # remain directly readable without starting another code execution.
-        for record in job_executions[-3:]:
+        recent_executions = list(job_executions[-3:])
+        latest_failure = next(
+            (record for record in reversed(job_executions)
+             if record.result is not None and record.state not in {"running", "succeeded"}), None,
+        )
+        if latest_failure is not None and latest_failure not in recent_executions:
+            recent_executions.insert(0, latest_failure)
+        for record in recent_executions:
             saved_names = validated_output_names(record)
-            if record.result is None or (record.state != "succeeded" and not saved_names):
+            if record.result is None:
                 continue
             origin = self.store.get_team_work(record.work_order_id)
             ready = (
@@ -874,8 +903,13 @@ class OceanTeamOrchestrator:
                     "result_bundle_path": record.result.get("result_bundle_path"),
                     "result_fingerprint": record.result.get("result_fingerprint"),
                     "stdout_excerpt": stdout,
-                    "logs": record.result.get("logs")
-                    or {
+                    "stderr_excerpt": str(record.result.get("stderr", ""))[-1_500:],
+                    "returncode": record.result.get("returncode"),
+                    "saved_code_path": str(
+                        Path(str(record.result["work_root"])) / "executions"
+                        / record.execution_id / "code" / "analysis.py"
+                    ) if record.result.get("work_root") else None,
+                    "logs": record.result.get("logs") or ({
                         stream: str(
                             Path(str(record.result["work_root"]))
                             / "executions"
@@ -884,9 +918,7 @@ class OceanTeamOrchestrator:
                             / f"{stream}.txt"
                         )
                         for stream in ("stdout", "stderr")
-                    }
-                    if record.result.get("work_root")
-                    else {},
+                    } if record.result.get("work_root") else {}),
                     "duration_seconds": record.result.get("duration_seconds"),
                 }
             )
@@ -946,7 +978,7 @@ class OceanTeamOrchestrator:
         if binding is None:
             raise OceanTeamError(f"Missing participant binding: {spec.child_id}")
         order = binding.work_order
-        participant_provider_id = configured_provider_id("expert")
+        participant_provider_id = configured_provider_id("coordinator" if order.review else "expert")
         services = OceanToolServices(
             workspace_id=binding.workspace_id,
             provider_id=participant_provider_id,
@@ -1012,7 +1044,7 @@ class OceanTeamOrchestrator:
         )
         if runtime.provider_id != participant_provider_id:
             await runtime.close()
-            raise OceanTeamError("Participant runtime differs from the configured Expert API")
+            raise OceanTeamError("Participant runtime differs from its assigned model-role API")
         return runtime
 
     async def _run_participant(self, binding: _ParticipantBinding) -> _ParticipantRunResult:
@@ -1028,9 +1060,11 @@ class OceanTeamOrchestrator:
         try:
             runtime = await self._build_participant_runtime(spec)
             async with asyncio.timeout(binding.work_order.budget.max_wall_seconds):
-                async for event in runtime.engine.submit_message(
+                async for event in model_events(
+                    runtime.engine,
                     spec.prompt,
-                    request_id=binding.work_order.parent_request_id,
+                    binding.work_order.parent_request_id,
+                    max_retries=self.settings.max_transient_retries,
                 ):
                     event_name = type(event).__name__
                     if (
@@ -1047,6 +1081,7 @@ class OceanTeamOrchestrator:
                         or event_name == "ToolExecutionStarted"
                     ):
                         tool_calls += 1
+                        final_text = ""
                     elif (
                         isinstance(event, ToolExecutionCompleted)
                         or event_name == "ToolExecutionCompleted"
@@ -1054,12 +1089,15 @@ class OceanTeamOrchestrator:
                         await self._notify_progress(binding.progress_sink)
                     elif isinstance(event, ErrorEvent) or event_name == "ErrorEvent":
                         error = event.message
-                        failure_code = {
+                        failure_code = WorkFailureCode.PROVIDER_UNAVAILABLE if getattr(event, "retries_exhausted", False) else {
                             "network_failure": WorkFailureCode.NETWORK_FAILURE,
                             "provider_timeout": WorkFailureCode.PROVIDER_TIMEOUT,
                             "provider_rate_limit": WorkFailureCode.PROVIDER_RATE_LIMIT,
                         }.get(event.code, WorkFailureCode.UNKNOWN)
-            state = _ParticipantState.COMPLETED if final_text else _ParticipantState.FAILED
+                    elif isinstance(event, StatusEvent):
+                        log.info("Expert %s: %s", binding.work_order.work_order_id, event.message)
+                        await self._notify_progress(binding.progress_sink)
+            state = _ParticipantState.COMPLETED if final_text and error is None else _ParticipantState.FAILED
             if state is _ParticipantState.FAILED and error is None:
                 error = "Participant ended without a final answer"
         except TimeoutError:

@@ -16,11 +16,39 @@ export type MarkdownResultLink = {
   label: string;
   summary?: string;
   kind: 'interactive_view' | 'report' | 'file' | 'table';
-  onOpen: () => void;
+  features?: Array<{id: string; label: string}>;
+  onOpen: (featureId?: string) => void;
 };
 
 const RESULT_MARKER_RE = /\[\[(?:result|output):([^\]|\r\n]+)(?:\|([^\]\r\n]+))?\]\]/g;
 const LABELED_RESULT_ITEM_RE = /^\s*\[\[(?:result|output):([^\]\r\n]+)\]\]\s*[（(]([^）)\r\n]+)[）)]\s*[。.]*\s*$/;
+
+function resultLookup(items: MarkdownResultLink[]): Map<string, MarkdownResultLink | null> {
+  const lookup = new Map<string, MarkdownResultLink | null>();
+  for (const item of items) for (const key of item.keys) {
+    lookup.set(key, lookup.has(key) && lookup.get(key) !== item ? null : item);
+  }
+  return lookup;
+}
+
+/** Collapse only adjacent standalone aliases for the same result/object, never narrative or code. */
+export function deduplicateResultLinks(content: string, items: MarkdownResultLink[]): string {
+  const lookup = resultLookup(items);
+  return content.split(/(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)/).map((part, index) => {
+    if (index % 2) return part;
+    let last: string | undefined;
+    return part.split(/(?<=\n)/).filter(line => {
+      const marker = line.match(/^\s*(?:[-*]\s+)?\[\[(?:result|output):([^|\]\r\n]+)(?:\|[^\]\r\n]+)?\]\]\s*$/);
+      if (!marker) {if (line.trim()) last = undefined; return true;}
+      const [base, ...fragment] = marker[1]!.trim().split('#');
+      const result = lookup.get(base!);
+      const key = result ? `${items.indexOf(result)}#${fragment.join('#')}` : marker[1];
+      if (key === last) return false;
+      last = key;
+      return true;
+    }).join('');
+  }).join('');
+}
 
 /** Keep previously saved, dot-separated result references readable in the compact list layout. */
 export function normalizeLabeledResultLists(content: string): string {
@@ -38,7 +66,7 @@ export function normalizeLabeledResultLists(content: string): string {
 }
 
 export function referencedResultKeys(content: string): Set<string> {
-  return new Set(Array.from(content.matchAll(RESULT_MARKER_RE), (match) => match[1].trim()));
+  return new Set(Array.from(content.matchAll(RESULT_MARKER_RE), (match) => match[1].trim().split('#')[0]!));
 }
 
 export function safeExternalHref(value: string | undefined): string | null {
@@ -92,10 +120,11 @@ export function MessageMarkdown({
   resultLinks?: MarkdownResultLink[];
 }) {
   const links = new Map(artifactLinks.flatMap((item) => artifactKeys(item.ref).map((key) => [key, item] as const)));
-  const results = new Map(resultLinks.flatMap((item) => item.keys.map((key) => [key, item] as const)));
+  const results = resultLookup(resultLinks);
   const markerTokens = new Map<string, {key: string; label?: string}>();
   let markerIndex = 0;
-  const renderedContent = normalizeLabeledResultLists(content).replace(
+  const renderedContent = deduplicateResultLinks(normalizeLabeledResultLists(content), resultLinks)
+    .split(/(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)/).map((part, index) => index % 2 ? part : part.replace(
     RESULT_MARKER_RE,
     (_match, key: string, label?: string) => {
       const token = `ocean-result-${markerIndex}`;
@@ -103,23 +132,29 @@ export function MessageMarkdown({
       markerTokens.set(token, {key: key.trim(), label: label?.trim() || undefined});
       return `\`${token}\``;
     },
-  );
+  )).join('');
   const components: Components = {
     ...baseComponents,
     code: ({className, children}) => {
       const value = String(children).trim();
       const marker = markerTokens.get(value);
-      const result = marker ? results.get(marker.key) : undefined;
+      const [baseKey, ...fragment] = marker?.key.split('#') ?? [];
+      const featureId = fragment.length ? fragment.join('#') : undefined;
+      const result = baseKey ? results.get(baseKey) : undefined;
+      const feature = featureId ? result?.features?.find(item => item.id === featureId) : undefined;
+      if (featureId !== undefined && !feature) {
+        return <span className="markdown-result-unavailable" role="status" title={`Unknown result object: ${featureId}`}>Result object unavailable: {featureId || '(empty)'}</span>;
+      }
       if (result) {
         return (
           <button
-            aria-label={`Open ${result.label}`}
+            aria-label={`Open ${feature?.label ?? result.label}`}
             className="markdown-result-link"
             type="button"
-            onClick={result.onOpen}
+            onClick={() => result.onOpen(featureId)}
             title={result.summary ? `${result.label} — ${result.summary}` : result.label}
           >
-            {marker?.label ?? result.label}
+            {feature?.label ?? marker?.label ?? result.label}
           </button>
         );
       }

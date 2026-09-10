@@ -26,6 +26,13 @@ Keep dataset identity, materialization level, coordinate summary, units, and a b
 ## process_checkpoints
 Separate metadata inspection from numerical analysis. Flag uncertainty rather than guessing a CF convention.
 
+Establish product identity from file attributes, source-variable and source-file records, and
+available processing provenance, not the directory name or a label in the query. Distinguish
+reanalysis, analysis/forecast, and observations; distinguish native resolution from the delivered
+grid after interpolation, regridding, or temporal averaging. If metadata conflicts with the query,
+report the discrepancy and its implications for the planned diagnostic. If lineage is incomplete,
+keep identity unresolved rather than assigning a familiar product name.
+
 ## expected_artifacts
 DatasetArtifact and DatasetDiagnosisArtifact.
 

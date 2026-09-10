@@ -115,3 +115,28 @@ python -m pytest benchmarking/tests
 离线测试验证目录、清单闭合、任务/评分哈希、原始数据裁剪保真、重跑和失败状态，不代表已在服务器完整下载。CMEMS/ERA5 需本地账号实测；公共入口也受网络和提供方服务状态影响。
 
 本轮在线检查：NOAA 原始 OISST 文件返回 HTTP 200 / NetCDF；2023-08-01 的一度范围 SST/海冰裁剪及重复运行跳过均通过。该低纬度样本的海冰变量为缺测，原样保留，不把缺测伪造为零或用它误删有效 SST。此小样本不代表全部年份已下载。
+# Parallel CMEMS / ERA5 downloads
+
+Service downloads now default to two concurrent monthly chunks. For example:
+
+```bash
+python -u benchmarking/download/download_all.py services \
+  --output /import/home4/share/mafzhang --execute --workers 2
+```
+
+`--workers 1` restores serial execution; a larger positive value explicitly requests
+more concurrency. The standalone `download_services.py` supports the same option.
+Only service chunks are parallelized: groups, public downloads and offline verification
+retain their ordering. CDS still controls when queued requests actually execute;
+additional local workers do not bypass provider quotas or guarantee a speedup.
+
+Workers use separate processes for provider/NetCDF isolation. Only the parent writes
+the group progress report; per-file receipts and hashes keep their existing format.
+Verified existing files are skipped, corrupt/unmanaged files are not overwritten,
+and individual failures are recorded while other chunks continue. Progress is a count
+of completed/verified files, not a position in month order. A group is complete only
+when all files succeed. Re-run the same command to verify existing files and download
+the remaining ones. Interrupted, incomplete chunks may need restarting.
+
+Do not launch two downloaders against the same archive; the archive lock remains in
+place. Updating local scripts does not change an already running server process.

@@ -26,6 +26,7 @@ class OceanAgentBudget:
 
     max_turns: int = 200
     max_tool_calls: int = 256
+    # Ceiling for one Expert assignment, NOT cumulative Coordinator API time.
     max_wall_seconds: float = 1_800.0
     max_input_tokens: int = 1_000_000
     max_output_tokens: int = 200_000
@@ -127,6 +128,7 @@ async def build_default_ocean_agent_runtime(
         composition=composition,
         thread_fallback=f"coordinator:{scope}",
         model_role="coordinator",
+        token_budget_wind_down=True,
     )
 
 
@@ -138,6 +140,7 @@ async def build_default_ocean_expert_runtime(
 ) -> OceanAgentRuntime:
     composition = await build_ocean_expert_runtime(services=services)
     scope = services.work_order_id or services.expert_child_id or services.workspace_id
+    work = services.store.get_team_work(services.work_order_id) if services.work_order_id else None
     return await _build_runtime(
         services=services,
         workspace_path=workspace_path,
@@ -145,7 +148,7 @@ async def build_default_ocean_expert_runtime(
         operation_id_factory=operation_id_factory,
         composition=composition,
         thread_fallback=f"expert:{scope}",
-        model_role="expert",
+        model_role="coordinator" if work is not None and work.work_order.review else "expert",
         token_budget_wind_down=True,
     )
 

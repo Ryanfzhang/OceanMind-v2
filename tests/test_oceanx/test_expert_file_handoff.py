@@ -26,6 +26,7 @@ def session(tmp_path):
             work_order=SimpleNamespace(
                 task_id="task",
                 job_key="job",
+                review=False,
             ),
         )
         for name in ("round1", "round2")
@@ -77,6 +78,10 @@ def test_truncated_code_result_exposes_readable_full_log(session, tmp_path):
     logs.mkdir(parents=True)
     content = "start\n" + "x" * 3_000 + "IMPORTANT METRIC=42" + "y" * 3_000
     (logs / "stdout.txt").write_text(content)
+    snapshot = logs.parent / "code" / "analysis.py"
+    snapshot.parent.mkdir()
+    snapshot.write_text("print('original execution')")
+    (root / "analysis.py").write_text("print('newer editable code')")
     result = ExpertCodeExecutionResult(
         execution_id="codeexec_test",
         state="succeeded",
@@ -131,6 +136,12 @@ def test_truncated_code_result_exposes_readable_full_log(session, tmp_path):
         limit=12_000,
     )
     assert recovered["content"] == content
+    assert payload["saved_code_path"] == str(snapshot)
+    saved_code = service.read_expert_file(
+        workspace_id="ws", task_id="task", work_order_id="round2",
+        path=payload["saved_code_path"],
+    )
+    assert saved_code["content"] == "print('original execution')"
 
 
 @pytest.mark.parametrize("kind", ["outside", "symlink", "binary", "missing", "wrong_task"])

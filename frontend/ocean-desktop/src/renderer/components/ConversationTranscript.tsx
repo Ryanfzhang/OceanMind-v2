@@ -254,7 +254,7 @@ export function ConversationTranscript({
   onInteractionAnswer?: (answer: string) => void;
   onInteractionSubmit?: (answer?: string) => void;
   onOpenResult: (output: TaskOutput) => void;
-  onOpenTaskResult: (result: TaskResultRecord) => void;
+  onOpenTaskResult: (result: TaskResultRecord, featureId?: string) => void;
   onOpenTaskResultFile?: (result: TaskResultRecord, file: TaskResultRecord['files'][number]) => void;
 }): React.JSX.Element {
   const {text: uiText} = useUiLanguage();
@@ -297,7 +297,8 @@ export function ConversationTranscript({
         label: result.title,
         summary: result.summary,
         kind: result.kind,
-        onOpen: () => onOpenTaskResult(result),
+        features: Array.isArray(result.content.features) ? result.content.features as Array<{id: string; label: string}> : [],
+        onOpen: (featureId) => onOpenTaskResult(result, featureId),
       }));
       const unreferencedResults = directResults.filter((result) =>
         !taskResultKeys(result).some((key) => referencedKeys.has(key)),

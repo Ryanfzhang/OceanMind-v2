@@ -149,6 +149,60 @@ def fetch_service(chunk, destination):
         staged.replace(destination)
 
 
+def positive_workers(value):
+    value = int(value)
+    if value < 1:
+        raise argparse.ArgumentTypeError("workers must be at least 1")
+    return value
+
+
+def _transfer_service(job):
+    chunk, root = job
+    try:
+        return transfer(chunk, root,
+                        runner=lambda url, destination, timeout: fetch_service(chunk, destination),
+                        verifier=verify_service_file)
+    except Exception as exc:  # noqa: BLE001 - isolate provider failures and redact exception details.
+        # Provider exceptions may contain credentials; return only their type.
+        return {"path": str(root / chunk["relative_path"]), "error_type": type(exc).__name__}
+
+
+def execute_chunks(chunks, root, workers=2):
+    """Bound in-flight monthly requests; emit results to one parent report writer.
+
+    Separate spawned processes keep NetCDF/HDF5 and provider-client state isolated.
+    Existing file receipts are still verified by transfer before any API submission.
+    """
+    from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
+    from itertools import islice
+    from multiprocessing import get_context
+
+    from download_data import ensure_collection, safe_destination
+
+    if workers < 1:
+        raise ValueError("workers must be at least 1")
+    paths = [chunk["relative_path"] for chunk in chunks]
+    if len(paths) != len(set(paths)):
+        raise DownloadError("Duplicate destinations in service plan")
+    if workers == 1 or len(chunks) < 2:
+        for chunk in chunks:
+            yield _transfer_service((chunk, root))
+        return
+    # Shared collection descriptors must exist before concurrent workers start.
+    for chunk in chunks:
+        ensure_collection(safe_destination(root, chunk["relative_path"]), chunk)
+    jobs = iter((chunk, root) for chunk in chunks)
+    with ProcessPoolExecutor(max_workers=workers, mp_context=get_context("spawn")) as pool:
+        pending = {pool.submit(_transfer_service, job) for job in islice(jobs, workers)}
+        while pending:
+            done, pending = wait(pending, return_when=FIRST_COMPLETED)
+            for future in done:
+                yield future.result()
+                job = next(jobs, None)
+                if job is not None:
+                    pending.add(pool.submit(_transfer_service, job))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", choices=["cmems", "era5"], required=True)
@@ -161,6 +215,8 @@ def main(argv=None):
     parser.add_argument("--dataset-version")
     parser.add_argument("--depth", nargs=2, type=float, help="CMEMS min/max depth; omit to retain full depth")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--workers", type=positive_workers, default=2,
+                        help="Concurrent service chunks (default: 2; use 1 for serial)")
     args = parser.parse_args(argv)
     chunks = build_plan(args.source, args.variables, args.years, args.months, args.bbox,
                         args.dataset_id, args.dataset_version, args.depth)
@@ -178,21 +234,22 @@ def main(argv=None):
             write_json(run / "plan.json", chunks)
         report = {"mode": "execute" if args.execute else "offline_preview", "complete": False,
                   "scope": "requested service fields only, not all benchmark inputs", "files": []}
-        for chunk in chunks:
-            print(chunk["relative_path"], flush=True)
-            if args.execute:
-                try:
-                    record = transfer(chunk, root, runner=lambda url, destination, timeout: fetch_service(chunk, destination), verifier=verify_service_file)
-                    report["files"].append(record)
-                    write_json(run / "report.json", report)
-                except Exception as exc:
-                    # Do not persist provider exception strings that might contain credential-bearing URLs.
-                    report["error"] = {"type": type(exc).__name__, "file": chunk["relative_path"]}
-                    write_json(run / "report.json", report)
-                    raise DownloadError(f"Provider download/validation failed ({type(exc).__name__}); inspect local credentials, product/version and coverage. Report: {run}") from None
-        report["complete"] = bool(args.execute)
+        report["workers"] = args.workers
+        report["errors"] = []
+        if args.execute:
+            for record in execute_chunks(chunks, root, args.workers):
+                report["errors" if "error_type" in record else "files"].append(record)
+                state = record.get("error_type", record.get("state", "completed"))
+                print(f"{len(report['files'])}/{len(chunks)} {state}: {record['path']}", flush=True)
+                write_json(run / "report.json", report)
+        else:
+            for chunk in chunks:
+                print(chunk["relative_path"], flush=True)
+        report["complete"] = bool(args.execute) and not report["errors"]
         write_json(run / "report.json", report)
         print(f"Plan/report: {run}. Preview does not verify remote availability. No averaging or flux conversion.")
+        if report["errors"]:
+            raise DownloadError(f"Some service chunks failed; verified files retained. Report: {run}")
     return 0
 
 

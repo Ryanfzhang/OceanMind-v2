@@ -117,9 +117,11 @@ def test_two_phases_accumulate_coverage_and_verify_detects_missing(tmp_path, mon
     monkeypatch.setattr(all_data, "load_manifest", lambda: m)
     monkeypatch.setattr(all_data, "group_plan", lambda g: [{"relative_path": g["data_type"] + "/fixture.nc"}])
     monkeypatch.setattr(down, "transfer", lambda chunk, root, **kw: {"path": str(root / chunk["relative_path"])})
+    monkeypatch.setattr(all_data.services, "transfer", down.transfer)
     assert all_data.main(["public", "--output", str(tmp_path), "--execute"]) == 0
     path = tmp_path / "_download_all/coverage.json"
     assert not json.loads(path.read_text())["all_numerical_inputs_complete"]
+
     assert all_data.main(["services", "--output", str(tmp_path), "--execute"]) == 0
     assert json.loads(path.read_text())["all_numerical_inputs_complete"]
     def missing(chunks, root):
@@ -127,3 +129,31 @@ def test_two_phases_accumulate_coverage_and_verify_detects_missing(tmp_path, mon
     monkeypatch.setattr(all_data, "verify_existing", missing)
     assert all_data.main(["verify", "--output", str(tmp_path)]) == 1
     assert not json.loads(path.read_text())["all_numerical_inputs_complete"]
+
+
+def test_parallel_service_resume_and_failure_preserve_other_files(tmp_path):
+    chunks = all_data.group_plan(all_data.load_manifest()["groups"]["P_ERA5"])[:3]
+    for chunk in chunks:
+        final = down.safe_destination(tmp_path, chunk["relative_path"])
+        down.ensure_collection(final, chunk)
+        final.parent.mkdir(parents=True, exist_ok=True)
+        final.write_bytes(b"preserved verified download fixture")
+        down.write_json(final.with_suffix(".receipt.json"), {
+            "request_sha256": chunk["request_sha256"], "sha256": down.file_hash(final),
+        })
+    records = list(all_data.services.execute_chunks(chunks, tmp_path, workers=2))
+    assert len(records) == 3
+    assert all(item["state"] == "verified_existing" for item in records)
+    damaged = tmp_path / chunks[0]["relative_path"]
+    damaged.write_bytes(b"corrupt")
+    records = list(all_data.services.execute_chunks(chunks, tmp_path, workers=2))
+    assert sum("error_type" in item for item in records) == 1
+    assert sum(item.get("state") == "verified_existing" for item in records) == 2
+    assert damaged.read_bytes() == b"corrupt"  # No replacement or network redownload.
+
+
+def test_service_workers_and_duplicate_destinations_are_validated(tmp_path):
+    with pytest.raises(SystemExit):
+        all_data.main(["services", "--output", str(tmp_path), "--workers", "0"])
+    with pytest.raises(down.DownloadError, match="Duplicate"):
+        list(all_data.services.execute_chunks([{"relative_path": "same.nc"}] * 2, tmp_path))

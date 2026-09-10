@@ -1,0 +1,13 @@
+{
+  "scope": "Synthetic selection probes, not a scientific performance benchmark",
+  "official_reference": "PW k=1 alpha=.5 C=1 (explicit paper-family strategy, NOT current CLI default)",
+  "first_probe": {
+    "official_selected_parent": "B",
+    "oceanx_recommendation": {
+      "action": "expand",
+      "node_id": "A"
+    }
+  },
+  "official_root_widening_at_N9": "root",
+  "shared_evidence_two_feedback_nodes_root_attempts": 2
+}

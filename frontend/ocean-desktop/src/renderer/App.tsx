@@ -114,6 +114,7 @@ export function App(): React.JSX.Element {
   const [resultLoading, setResultLoading] = useState(false);
   const [resultError, setResultError] = useState<string | null>(null);
   const [resultData, setResultData] = useState<unknown>(null);
+  const [resultFeatureId, setResultFeatureId] = useState<string | undefined>();
   const [resultPreviewUrl, setResultPreviewUrl] = useState<string | null>(null);
   const [resultFileUrl, setResultFileUrl] = useState<string | null>(null);
   const [reportMarkdown, setReportMarkdown] = useState('');
@@ -332,7 +333,12 @@ export function App(): React.JSX.Element {
     }
     if (event.type === 'request.failed' || event.type === 'request.cancelled' || event.type === 'system.error') {
       const error = asRecord(payload.error);
-      const message = typeof error.message === 'string' ? error.message : typeof payload.reason === 'string' ? payload.reason : 'Request did not complete.';
+      const recoveryState = asRecord(error.details).recovery_state;
+      const message = recoveryState === 'awaiting_user_retry'
+        ? text('Research paused after model retries. Progress is saved; send “continue” to resume.', '模型重试后仍未恢复，研究已暂停，进度已保存。发送“继续”可恢复。')
+        : recoveryState === 'configuration_required'
+          ? text('Model API configuration needs attention. Check the API key, permissions and account balance before continuing.', '模型 API 配置需要处理，请检查密钥、权限和账户余额后继续。')
+          : typeof error.message === 'string' ? error.message : typeof payload.reason === 'string' ? payload.reason : 'Request did not complete.';
       const errorHandler = event.request_id ? errorHandlers.current.get(event.request_id) : undefined;
       if (event.request_id) {handlers.current.delete(event.request_id); errorHandlers.current.delete(event.request_id);}
       errorHandler?.(message);
@@ -638,7 +644,8 @@ export function App(): React.JSX.Element {
       setInlineStatus(error instanceof Error ? error.message : 'Report resource is unavailable.');
     });
   };
-  const openTaskResult = (result: TaskResultRecord) => {
+  const openTaskResult = (result: TaskResultRecord, featureId?: string) => {
+    setResultFeatureId(featureId);
     if (result.kind !== 'interactive_view' && result.kind !== 'report') return;
     const kind = result.kind;
     const resultKey = taskResultRefKey(result.result_ref);
@@ -736,6 +743,7 @@ export function App(): React.JSX.Element {
       });
   };
   const openResult = (output: TaskOutput) => {
+    setResultFeatureId(undefined);
     setResultLoading(true); setResultError(null); setResultData(null); setResultPreviewUrl(null); setResultFileUrl(null); setReportMarkdown(''); setReportResources([]);
     request('artifact.get', {ref: output.artifact.ref}, (result) => {
       const artifact = result.artifact as ArtifactVersion | undefined;
@@ -823,7 +831,8 @@ export function App(): React.JSX.Element {
 
   const reportResultLinks = taskResults.filter((result) => result.kind === 'interactive_view').map((result) => ({
     keys: taskResultKeys(result), label: result.title, summary: result.summary, kind: result.kind,
-    onOpen: () => openTaskResult(result),
+    features: Array.isArray(result.content.features) ? result.content.features as Array<{id: string; label: string}> : [],
+    onOpen: (featureId?: string) => openTaskResult(result, featureId),
   }));
   const projectName = projectNameFromPath(workspace?.path ?? workspacePath);
   const activeArchived = activeTask?.status === 'archived';
@@ -867,7 +876,7 @@ export function App(): React.JSX.Element {
         </div>
       </div> : null}
     </section>
-    {resultSurface?.kind === 'report' ? <ReportWorkbench document={resultSurface.document} loading={resultLoading} markdown={reportMarkdown} resources={reportResources} resultLinks={reportResultLinks} error={resultError} onOpenResource={openReportResource} onClose={closeResult} /> : <ResultWorkbench document={resultSurface?.kind === 'interactive_view' ? resultSurface.document : null} loading={resultLoading} data={resultData} previewUrl={resultPreviewUrl} downloadUrl={resultFileUrl} error={resultError} onClose={closeResult} />}
+    {resultSurface?.kind === 'report' ? <ReportWorkbench document={resultSurface.document} loading={resultLoading} markdown={reportMarkdown} resources={reportResources} resultLinks={reportResultLinks} error={resultError} onOpenResource={openReportResource} onClose={closeResult} /> : <ResultWorkbench document={resultSurface?.kind === 'interactive_view' ? resultSurface.document : null} loading={resultLoading} data={resultData} featureId={resultFeatureId} previewUrl={resultPreviewUrl} downloadUrl={resultFileUrl} error={resultError} onClose={closeResult} />}
     <DesktopSettingsDialog open={settingsOpen} status={status} projectName={projectName} runtime={runtime} modelProvider={modelProvider} modelProviderSaving={modelSaving} displayDensity={density} onDisplayDensity={setDensity} appearanceTheme={appearanceTheme} onAppearanceTheme={setAppearanceTheme} onConfigureModelProvider={configureModel} update={update} onCheckForUpdate={() => void window.oceanDesktop.checkForUpdate().then(setUpdate)} onInstallUpdate={() => void window.oceanDesktop.installPreparedUpdate().then(setUpdate)} onClose={() => setSettingsOpen(false)} />
     <TaskDeleteDialog task={deleteCandidate?.task ?? null} onCancel={() => setDeleteCandidate(null)} onConfirm={deleteTask} />
     <ProjectRemoveDialog project={projectRemoveCandidate} onCancel={() => setProjectRemoveCandidate(null)} onConfirm={() => void removeProject()} />

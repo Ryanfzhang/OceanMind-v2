@@ -43,7 +43,7 @@ def _documented_signature(owner: type[Any], method: str | None = None) -> str:
     parameters = [
         parameter
         for name, parameter in signature.parameters.items()
-        if name not in {"self", "figure", "panel_id"}
+        if name not in {"self", "figure"} and (name != "panel_id" or method in {"add_feature", "panel"})
     ]
     signature = signature.replace(parameters=parameters, return_annotation=inspect.Signature.empty)
     name = owner.__name__ if method is None else f"{owner.__name__}.{method}"
@@ -72,7 +72,17 @@ SCIENTIFIC_VIEW_API_CONTRACT = {
         )
     },
     "save": _documented_signature(ScientificFigure, "save"),
+    "add_feature": _documented_signature(ScientificFigure, "add_feature"),
     "examples": {
+        "object_binding": (
+            "# Optional: name actual plotted objects that the answer discusses, before save.\n"
+            "fig.add_feature(id='region_a', label='Region A', mask=region_mask)\n"
+            "# Or point=(x, y), bounds=(xmin, ymin, xmax, ymax), or layer_id='series_a'\n"
+            "# for a line/scatter declared with layer_id='series_a'. Select panel_id for multi-panel figures.\n"
+            "fig.save('analysis.nc')\n"
+            "# Cite [[output:analysis.nc#region_a|Region A]]; use only IDs actually saved.\n"
+            "# Date-axis coordinates may be ISO dates. Categorical field2d accepts category_labels."
+        ),
         "ts_scatter": (
             "fig = ScientificFigure(\n"
             "    plot_kind='ts_diagram',\n"
@@ -343,6 +353,88 @@ class ExpertCodeExecutionService:
 
         return self._runtime_error
 
+    def review_evidence(self, work_order_id: str) -> list[dict[str, object]]:
+        """Forward declared dependencies, not private conversations or inferred verdicts.
+
+        Full result text is sent once per assigned review round. Scripts, arrays and
+        logs are locations only and remain in place for selective read-only checks.
+        """
+        work = self.store.get_team_work(work_order_id)
+        if work is None or not work.work_order.review or not work.work_order.task_id:
+            return []
+        order = work.work_order
+        latest = {}
+        for record in self.store.list_task_team_work(
+            workspace_id=work.workspace_id, task_id=order.task_id
+        ):
+            if record.work_order.todo_id in order.depends_on:
+                latest[record.work_order.todo_id] = record
+        evidence: list[dict[str, object]] = []
+        for todo_id in order.depends_on:
+            origin = latest.get(todo_id)
+            if origin is None:
+                evidence.append(
+                    {"todo_id": todo_id, "result": None, "availability": "not_returned"}
+                )
+                continue
+            source = origin.work_order
+            if (source.profile_id, source.expert_key) == (order.profile_id, order.expert_key):
+                raise ExpertCodeExecutionError(
+                    "Independent review requires a different Expert instance"
+                )
+            root = self.task_workspaces.expert_session_root(
+                order.task_id, source.job_key or source.work_order_id
+            ).resolve()
+            paths: list[str] = []
+
+            def retain(path: Path, root: Path = root, paths: list[str] = paths) -> None:
+                resolved = path.resolve()
+                if resolved.is_relative_to(root) and resolved.exists():
+                    paths.append(str(resolved))
+
+            retain(root / "workspace")
+            executions = []
+            for execution in self._agent_job_executions(source.work_order_id):
+                if execution.result is None:
+                    continue
+                base = root / "executions" / execution.execution_id
+                locations = {}
+                for name, path in {
+                    "code": base / "code" / "analysis.py",
+                    "inputs": base / "inputs.json",
+                    "outputs": base / "outputs",
+                    "stdout": base / "logs" / "stdout.txt",
+                    "stderr": base / "logs" / "stderr.txt",
+                }.items():
+                    before = len(paths)
+                    retain(path)
+                    if len(paths) > before:
+                        locations[name] = paths[-1]
+                executions.append(
+                    {
+                        "execution_id": execution.execution_id,
+                        "state": execution.state,
+                        "locations": locations,
+                    }
+                )
+            evidence.append(
+                {
+                    "todo_id": todo_id,
+                    "work_order_id": source.work_order_id,
+                    "profile_id": source.profile_id,
+                    "expert_key": source.expert_key,
+                    "question": source.task_goal,
+                    "round_state": origin.state.value,
+                    "result": origin.result.coordinator_payload()
+                    if origin.result is not None
+                    else None,
+                    "interruption": origin.result.error if origin.result is not None else None,
+                    "executions": executions,
+                    "read_only_paths": list(dict.fromkeys(paths)),
+                }
+            )
+        return evidence
+
     def read_expert_file(
         self,
         *,
@@ -371,7 +463,14 @@ class ExpertCodeExecutionService:
         ).resolve()
         target = Path(path)
         target = (target if target.is_absolute() else root / target).resolve()
-        if not target.is_relative_to(root):
+        review_paths = [
+            Path(p)
+            for item in self.review_evidence(work_order_id)
+            for p in item.get("read_only_paths", [])
+        ]
+        if not target.is_relative_to(root) and not any(
+            target == p or (p.is_dir() and target.is_relative_to(p)) for p in review_paths
+        ):
             raise ExpertCodeExecutionError("File is outside this Expert's session")
         if not target.is_file():
             raise ExpertCodeExecutionError("Saved text file does not exist")
@@ -442,6 +541,7 @@ class ExpertCodeExecutionService:
         task_root: Path,
         read_only_roots: list[Path],
         include_private_logs: bool,
+        include_log_excerpts: bool = True,
         formal_outputs_only: bool = False,
     ) -> dict[str, object] | None:
         """Project one immutable execution into an Expert-readable result contract.
@@ -531,15 +631,18 @@ class ExpertCodeExecutionService:
                     logs[name.removesuffix(".txt")] = str(candidate)
             if logs:
                 read_only_roots.append(prior_logs_root)
-            entry.update(
-                {
-                    "stdout_excerpt": self._bounded_evidence_text(record.result.get("stdout", "")),
-                    "stderr_excerpt": self._bounded_evidence_text(
-                        record.result.get("stderr", ""), limit=2_000
-                    ),
-                    "logs": logs,
-                }
-            )
+            entry["logs"] = logs
+            if include_log_excerpts:
+                entry.update(
+                    {
+                        "stdout_excerpt": self._bounded_evidence_text(
+                            record.result.get("stdout", ""), limit=1_500
+                        ),
+                        "stderr_excerpt": self._bounded_evidence_text(
+                            record.result.get("stderr", ""), limit=1_500
+                        ),
+                    }
+                )
         return entry
 
     async def get_task_dataset_context(
@@ -838,17 +941,22 @@ class ExpertCodeExecutionService:
         job_executions = self._agent_job_executions(work_order_id)
         job_execution_ids = {record.execution_id for record in job_executions}
         prior_executions: list[dict[str, object]] = []
+        recent_execution_ids = {prior.execution_id for prior in job_executions[-3:]}
         for prior in job_executions:
             entry = self._execution_manifest_entry(
                 prior,
                 task_root=task_root,
                 read_only_roots=read_only_roots,
                 include_private_logs=True,
+                include_log_excerpts=prior.execution_id in recent_execution_ids,
             )
             if entry is not None:
                 prior_executions.append(entry)
 
         order = work_record.work_order
+        review_evidence = self.review_evidence(work_order_id)
+        for item in review_evidence:
+            read_only_roots.extend(Path(p) for p in item.get("read_only_paths", []))
         shared_results: list[dict[str, object]] = []
         for sibling in self.store.list_request_code_executions(
             workspace_id=workspace_id,
@@ -874,6 +982,7 @@ class ExpertCodeExecutionService:
             if entry is not None:
                 shared_results.append(entry)
         manifest_payload = {
+            "review_evidence": review_evidence,
             "work_order_id": work_order_id,
             "assignment": {
                 "todo_id": order.todo_id,

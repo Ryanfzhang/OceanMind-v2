@@ -113,6 +113,7 @@ class WorkFailureCode(str, Enum):
     PROVIDER_TIMEOUT = "provider_timeout"
     PROVIDER_RATE_LIMIT = "provider_rate_limit"
     NETWORK_FAILURE = "network_failure"
+    PROVIDER_UNAVAILABLE = "provider_unavailable"
     PARTICIPANT_TIMEOUT = "participant_timeout"
     BUDGET_EXHAUSTED = "budget_exhausted"
     CONTRACT_FAILURE = "contract_failure"
@@ -486,10 +487,13 @@ class CoordinatorTodo(FrozenModel):
     # task-scoped participant of that type.  Omitting it preserves the default
     # singleton participant used by older plans.
     expert_key: Identifier | None = None
+    review: bool = False
     expected_outputs: tuple[Identifier, ...] = ("answer",)
 
     @model_validator(mode="after")
     def validate_structure(self) -> CoordinatorTodo:
+        if self.review and (not self.depends_on or not self.expert_key):
+            raise ValueError("review requires depends_on and a distinct expert_key")
         if len(self.depends_on) != len(set(self.depends_on)):
             raise ValueError("depends_on must not contain duplicates")
         if self.todo_id in self.depends_on:
@@ -514,6 +518,7 @@ class WorkOrder(FrozenModel):
     # Several Experts may share one profile when their expert_key values differ.
     # Reusing the same value continues the same participant session.
     expert_key: Identifier | None = None
+    review: bool = False
     # Each incremental Coordinator question is a new round.  Receiving a
     # ExpertResult ends this round, not the logical session identified by job_key.
     session_round: int = Field(default=1, ge=1)
@@ -539,6 +544,10 @@ class WorkOrder(FrozenModel):
 
     @model_validator(mode="after")
     def validate_sets_and_authority(self) -> WorkOrder:
+        if self.review and (
+            not self.depends_on or not self.expert_key or self.authority is not ChildAuthority.EXPERT
+        ):
+            raise ValueError("review requires an Expert, depends_on and a distinct expert_key")
         for field_name in (
             "allowed_capabilities",
             "outcome_intents",
@@ -726,13 +735,22 @@ class ExpertResult(FrozenModel):
     def coordinator_payload(self) -> dict[str, Any]:
         """Return the two-field scientific handoff consumed by the Coordinator.
 
-        Work status, budgets and failures remain in backend-owned work records.
+        Work status and budgets remain in backend-owned work records. A technical
+        interruption is disclosed in prose so saved partial evidence cannot be
+        mistaken for a newly completed Expert answer.
         The semantic result itself contains only prose and fully described
         outputs, avoiding duplicated conclusions and cumulative execution state.
         """
 
+        text = self.text
+        if self.result_origin is ExpertResultOrigin.BACKEND_RECOVERED and self.error:
+            text = (
+                "Execution notice (not a scientific verdict): " + self.error[:1000]
+                + "\nSaved partial evidence follows; reuse it without assuming this round completed.\n"
+                + text
+            )
         return {
-            "text": self.text,
+            "text": text,
             "outputs": [output.coordinator_payload() for output in self.outputs],
         }
 

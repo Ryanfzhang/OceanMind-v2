@@ -30,7 +30,7 @@ python benchmarking/server/prepare_queries.py \
   --output "$HOME/oceanx-bench-inputs/autoresearch.jsonl"
 
 # 正式启动 OceanX；此步骤会调用已配置的模型并消耗 API
-ocean batch --queries "$HOME/oceanx-bench-inputs/autoresearch.jsonl" \
+python benchmarking/server/run_oceanx.py --queries "$HOME/oceanx-bench-inputs/autoresearch.jsonl" \
   --output "$HOME/oceanx-bench-runs/autoresearch-r1"
 ```
 

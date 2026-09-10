@@ -146,6 +146,8 @@ class ErrorEvent:
     recoverable: bool = True
     code: str = "unknown"
     retryable: bool | None = None
+    retry_after_seconds: float | None = None
+    retries_exhausted: bool = False
 
 
 @dataclass(frozen=True)
