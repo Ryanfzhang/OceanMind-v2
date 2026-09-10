@@ -135,15 +135,16 @@ def verify_service_file(path, chunk):
 
 
 def fetch_service(chunk, destination):
+    if chunk["service"] == "era5":
+        from era5_google import fetch
+        fetch(chunk, destination)
+        return
     # Keep credentials in provider-managed files/environment, never in the plan.
     with tempfile.TemporaryDirectory(prefix="ocean-download-", dir=destination.parent) as staging:
         staged = Path(staging) / "payload.nc"
         if chunk["service"] == "cmems":
             import copernicusmarine
             copernicusmarine.subset(**chunk["request"], output_directory=staging, output_filename=staged.name)
-        else:
-            import cdsapi
-            cdsapi.Client().retrieve(chunk["dataset"], chunk["request"], str(staged))
         if not staged.is_file():
             raise DownloadError("Provider did not produce the requested NetCDF file")
         staged.replace(destination)
@@ -159,9 +160,11 @@ def positive_workers(value):
 def _transfer_service(job):
     chunk, root = job
     try:
+        from era5_google import provenance
         return transfer(chunk, root,
                         runner=lambda url, destination, timeout: fetch_service(chunk, destination),
-                        verifier=verify_service_file)
+                        verifier=verify_service_file,
+                        provenance=provenance if chunk.get("service") == "era5" else None)
     except Exception as exc:  # noqa: BLE001 - isolate provider failures and redact exception details.
         # Provider exceptions may contain credentials; return only their type.
         return {"path": str(root / chunk["relative_path"]), "error_type": type(exc).__name__}

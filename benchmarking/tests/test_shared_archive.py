@@ -64,20 +64,20 @@ class ServiceTests(unittest.TestCase):
                 destination = Path(directory) / "request.nc.part"
                 sdk = Mock()
                 if source == "era5":
-                    def retrieve(dataset, request, target):
+                    def retrieve(chunk, target):
                         Path(target).write_bytes(b"test SDK response")
-                    sdk.Client.return_value.retrieve.side_effect = retrieve
+                    sdk.fetch.side_effect = retrieve
                 else:
                     def subset(**kwargs):
                         (Path(kwargs["output_directory"]) / kwargs["output_filename"]).write_bytes(b"test SDK response")
                     sdk.subset.side_effect = subset
-                module = "cdsapi" if source == "era5" else "copernicusmarine"
+                module = "era5_google" if source == "era5" else "copernicusmarine"
                 with patch.dict(sys.modules, {module: sdk}):
                     services.fetch_service(c, destination)
                 self.assertEqual(destination.read_bytes(), b"test SDK response")
                 self.assertEqual(list(Path(directory).iterdir()), [destination])
                 if source == "era5":
-                    self.assertEqual(sdk.Client.return_value.retrieve.call_args.args[:2], (c["dataset"], c["request"]))
+                    self.assertEqual(sdk.fetch.call_args.args, (c, destination))
                 else:
                     for key, value in c["request"].items():
                         self.assertEqual(sdk.subset.call_args.kwargs[key], value)

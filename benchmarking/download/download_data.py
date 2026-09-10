@@ -273,7 +273,7 @@ def verify_netcdf(path, chunk):
     return counts  # Zero-valid ocean-colour cells are recorded, not filled or mistaken for network failure.
 
 
-def transfer(chunk, output, timeout=600, runner=curl, verifier=verify_netcdf):
+def transfer(chunk, output, timeout=600, runner=curl, verifier=verify_netcdf, provenance=None):
     final = safe_destination(output, chunk["relative_path"])
     ensure_collection(final, chunk)
     receipt = final.with_suffix(".receipt.json")
@@ -303,6 +303,8 @@ def transfer(chunk, output, timeout=600, runner=curl, verifier=verify_netcdf):
     saved = {"request_sha256": chunk["request_sha256"], "sha256": file_hash(partial),
              "bytes": partial.stat().st_size, "valid_counts": counts, "source_url": chunk["url"],
              "completed_utc": dt.datetime.now(dt.timezone.utc).isoformat()}
+    if provenance is not None:
+        saved.update(provenance(partial))
     # Receipt first: a crash before rename remains safely retryable; final only appears after validation.
     write_json(receipt, saved)
     partial.replace(final)

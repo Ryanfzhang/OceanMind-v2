@@ -10,10 +10,10 @@
 python -m pip install -r benchmarking/download/requirements.txt
 ```
 
-服务器需已有 `curl`，不需要 sudo。CMEMS/ERA5 是公开可申请的数据服务，但需你自己的账号：
+服务器需已有 `curl`，不需要 sudo。CMEMS 需要账号，ERA5 改用 Google 公共镜像匿名下载：
 
 - 运行 `copernicusmarine login`，本地保存 Copernicus Marine 凭据。
-- 按 [CDS 官方说明](https://cds.climate.copernicus.eu/how-to-api)配置 `.cdsapirc`，并在网页接受 ERA5 数据集许可。
+- ERA5 无需 `.cdsapirc` 或 Google 账号，直接读取 [Google ARCO-ERA5](https://github.com/google-research/arco-era5) 的 HTTPS 数据块。
 - 不把凭据放进数据目录、仓库或聊天。无需 Earthdata 账号，也不需要作者给原始 glider 文件。
 
 账号未配置、网络不通或提供方服务异常不能靠脚本绕过；会报错并保留已验证的文件，重跑即可继续。
@@ -112,7 +112,15 @@ GLORYS 固定 `202311` 版本，依据[官方服务状态表](https://marine.cop
 python -m pytest benchmarking/tests
 ```
 
-离线测试验证目录、清单闭合、任务/评分哈希、原始数据裁剪保真、重跑和失败状态，不代表已在服务器完整下载。CMEMS/ERA5 需本地账号实测；公共入口也受网络和提供方服务状态影响。
+离线测试验证目录、清单闭合、任务/评分哈希、原始数据裁剪保真、重跑和失败状态，不代表已在服务器完整下载。CMEMS 需账号；公共入口也受网络和提供方服务状态影响。
+
+## ERA5 Google 镜像与旧下载续接
+
+命令、变量、时间范围、路径及请求指纹保持兼容。已有 CDS 文件和回执通过 SHA256 校验后直接跳过；仅缺失文件使用 Google 镜像。计划中的 `era5:reanalysis-era5-single-levels` 是保留的逻辑产品标识，实际传输来源写入新 NetCDF 和下载回执的 `source_url`、`download_provider`、`source_metadata`。
+
+Google 数据保持每小时、0.25°、J/m²，不做插值、平均或符号转换；只取正式 ERA5 覆盖，不取 ERA5T。镜像与 CDS 可有微小编码差异，并非保证逐位一致。
+
+每次读取一个全球小时块（实测约 3 MB），仅把区域子集保存到磁盘，传输量大于最终文件。每个变量/月在 `.nc.part.google` 中记录已完成小时，网络错误重试，重跑继续未完成小时；每天打印进度。完整月份验证后才生成正式文件和 SHA256 回执。不要删除 checkpoint 或新建数据根目录来重跑。CMEMS 并行逻辑不变。
 
 本轮在线检查：NOAA 原始 OISST 文件返回 HTTP 200 / NetCDF；2023-08-01 的一度范围 SST/海冰裁剪及重复运行跳过均通过。该低纬度样本的海冰变量为缺测，原样保留，不把缺测伪造为零或用它误删有效 SST。此小样本不代表全部年份已下载。
 # Parallel CMEMS / ERA5 downloads
@@ -127,8 +135,8 @@ python -u benchmarking/download/download_all.py services \
 `--workers 1` restores serial execution; a larger positive value explicitly requests
 more concurrency. The standalone `download_services.py` supports the same option.
 Only service chunks are parallelized: groups, public downloads and offline verification
-retain their ordering. CDS still controls when queued requests actually execute;
-additional local workers do not bypass provider quotas or guarantee a speedup.
+retain their ordering. ERA5 reads Google objects directly without the CDS queue;
+additional workers still depend on bandwidth and provider throttling.
 
 Workers use separate processes for provider/NetCDF isolation. Only the parent writes
 the group progress report; per-file receipts and hashes keep their existing format.
@@ -136,7 +144,7 @@ Verified existing files are skipped, corrupt/unmanaged files are not overwritten
 and individual failures are recorded while other chunks continue. Progress is a count
 of completed/verified files, not a position in month order. A group is complete only
 when all files succeed. Re-run the same command to verify existing files and download
-the remaining ones. Interrupted, incomplete chunks may need restarting.
+the remaining ones. ERA5 resumes saved hourly checkpoints; other interrupted service chunks may need restarting.
 
 Do not launch two downloaders against the same archive; the archive lock remains in
 place. Updating local scripts does not change an already running server process.
