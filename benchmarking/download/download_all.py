@@ -2,6 +2,7 @@
 """Two-phase, fixed-manifest acquisition of ALL non-CMOMS numerical benchmark inputs."""
 import argparse
 import copy
+from contextlib import contextmanager, ExitStack
 import json
 from pathlib import Path
 
@@ -76,6 +77,43 @@ def bindings(manifest):
             for task, groups in manifest["tasks"].items()}
 
 
+@contextmanager
+def phase_lock(root, phase):
+    """Different download phases share the archive; verify/legacy tools exclude both."""
+    import fcntl
+    with ExitStack() as stack:
+        archive = stack.enter_context((root / ".download.lock").open("a"))
+        try:
+            mode = fcntl.LOCK_EX if phase == "verify" else fcntl.LOCK_SH
+            fcntl.flock(archive, mode | fcntl.LOCK_NB)
+            if phase != "verify":
+                lock = stack.enter_context((root / f".download.{phase}.lock").open("a"))
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise erddap.DownloadError(
+                f"Download lock busy for {phase}: same phase, verification, or a legacy downloader is running. "
+                "Restart legacy downloads with the updated script before running public and services together."
+            ) from exc
+        yield
+
+
+def refresh_summary(control, manifest):
+    """Serialize shared outputs and rebuild from current reports, never a stale snapshot."""
+    import fcntl
+    with (control / ".summary.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        reports = {}
+        for key in manifest["groups"]:
+            path = control / f"{key}.report.json"
+            if path.exists():
+                reports[key] = json.loads(path.read_text())
+        result = coverage(manifest, reports)
+        erddap.write_json(control / "coverage.json", result)
+        erddap.write_json(control / "data_bindings.json", bindings(manifest))
+        erddap.write_json(control / "masks.json", manifest["masks"])
+        return result
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["public", "services", "verify"])
@@ -95,25 +133,17 @@ def main(argv=None):
         print("Offline preview only. Add --execute. No data or credentials checked.")
         return 0
     root.mkdir(parents=True, exist_ok=True)
-    import fcntl
-    with (root / ".download.lock").open("a") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    with phase_lock(root, args.phase):
         control = erddap.safe_destination(root, "_download_all")
         control.mkdir(exist_ok=True)
-        reports = {}
-        for key in manifest["groups"]:
-            path = control / f"{key}.report.json"
-            if path.exists():
-                reports[key] = json.loads(path.read_text())
         failed = False
         for key, group in selected.items():
             report = {"group_sha256": erddap.fingerprint(group), "complete": False, "completed_files": 0,
                       "workers": args.workers if args.phase == "services" else 1, "failed_files": []}
-            reports[key] = report
             report_path = control / f"{key}.report.json"
             plan_path = control / f"{key}.plan.json"
             erddap.write_json(report_path, report)
-            erddap.write_json(control / "coverage.json", coverage(manifest, reports))
+            refresh_summary(control, manifest)
             print(f"{key}: checking/downloading ...", flush=True)
             try:
                 if args.phase == "verify":
@@ -158,11 +188,8 @@ def main(argv=None):
                 print(f"{key}: FAILED ({type(exc).__name__}). Check connectivity/account/product availability and rerun; verified files are retained.", flush=True)
                 failed = True
             erddap.write_json(report_path, report)
-            erddap.write_json(control / "coverage.json", coverage(manifest, reports))
-        result = coverage(manifest, reports)
-        erddap.write_json(control / "coverage.json", result)
-        erddap.write_json(control / "data_bindings.json", bindings(manifest))
-        erddap.write_json(control / "masks.json", manifest["masks"])
+            refresh_summary(control, manifest)
+        result = refresh_summary(control, manifest)
         count = sum(t["numerical_inputs_complete"] for t in result["tasks"].values())
         print(f"Numerical input coverage: {count}/15 tasks. Report: {control / 'coverage.json'}")
         return 1 if failed else 0

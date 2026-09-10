@@ -7,6 +7,16 @@ import netCDF4
 import numpy as np
 import pytest
 
+
+def _refresh_in_process(control, manifest, key):
+    import download_all as module
+    import download_data as data
+    data.write_json(control / f"{key}.report.json", {
+        "complete": True, "group_sha256": data.fingerprint(manifest["groups"][key]),
+    })
+    for _ in range(10):
+        module.refresh_summary(control, manifest)
+
 import download_all as all_data
 import download_data as down
 import ncei_oisst as ncei
@@ -157,3 +167,46 @@ def test_service_workers_and_duplicate_destinations_are_validated(tmp_path):
         all_data.main(["services", "--output", str(tmp_path), "--workers", "0"])
     with pytest.raises(down.DownloadError, match="Duplicate"):
         list(all_data.services.execute_chunks([{"relative_path": "same.nc"}] * 2, tmp_path))
+
+
+def test_phase_locks_allow_different_phases_but_exclude_duplicates_and_verify(tmp_path):
+    import fcntl
+    with all_data.phase_lock(tmp_path, "public"):
+        with all_data.phase_lock(tmp_path, "services"):
+            for phase in ["public", "services", "verify"]:
+                with pytest.raises(down.DownloadError, match="lock busy"):
+                    with all_data.phase_lock(tmp_path, phase):
+                        pytest.fail("conflicting phase admitted")
+            with (tmp_path / '.download.lock').open('a') as old:
+                with pytest.raises(BlockingIOError):
+                    fcntl.flock(old, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    with all_data.phase_lock(tmp_path, "verify"):
+        with pytest.raises(down.DownloadError):
+            with all_data.phase_lock(tmp_path, "public"):
+                pytest.fail("download during verification")
+    with (tmp_path / '.download.lock').open('a') as old:
+        fcntl.flock(old, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        with pytest.raises(down.DownloadError):
+            with all_data.phase_lock(tmp_path, "services"):
+                pytest.fail("download during legacy writer")
+
+
+def test_concurrent_summary_writers_retain_both_phase_results(tmp_path):
+    from multiprocessing import get_context
+    manifest = all_data.load_manifest()
+    keys = ['P_MODIS', 'P_GULF']
+    ctx = get_context('spawn')
+    processes = [ctx.Process(target=_refresh_in_process, args=(tmp_path, manifest, key)) for key in keys]
+    for process in processes:
+        process.start()
+    for process in processes:
+        process.join(20)
+        if process.is_alive():
+            process.terminate()
+            process.join()
+            pytest.fail('summary writers hung')
+        assert process.exitcode == 0
+    result = json.loads((tmp_path / 'coverage.json').read_text())
+    assert result['tasks']['Q19']['numerical_inputs_complete']
+    assert result['tasks']['Q13']['numerical_inputs_complete']
+    assert not result['tasks']['Q24']['numerical_inputs_complete']

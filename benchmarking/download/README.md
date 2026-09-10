@@ -146,5 +146,18 @@ of completed/verified files, not a position in month order. A group is complete 
 when all files succeed. Re-run the same command to verify existing files and download
 the remaining ones. ERA5 resumes saved hourly checkpoints; other interrupted service chunks may need restarting.
 
-Do not launch two downloaders against the same archive; the archive lock remains in
-place. Updating local scripts does not change an already running server process.
+The updated unified downloader allows one `public` and one `services` process at
+the same time against the same archive. Run the two commands in separate terminals.
+Each phase has its own lock; shared coverage/bindings/masks are refreshed under a
+short lock from the latest reports. Duplicate runs of the same phase are rejected.
+`verify` and standalone/legacy downloaders retain exclusive archive access.
+
+同步新版 `download_all.py` 后，需要先停止并重启正在运行的旧版 ERA5 进程一次，
+它仍持有旧的独占锁。不要删除锁文件。然后分别在两个终端执行：
+
+```bash
+python -u benchmarking/download/download_all.py services --output /import/home4/share/mafzhang --execute --workers 2
+python -u benchmarking/download/download_all.py public --output /import/home4/share/mafzhang --execute
+```
+
+已完成文件仍校验跳过；ERA5 从小时 checkpoint 续传。并行下载会共享网络带宽。
