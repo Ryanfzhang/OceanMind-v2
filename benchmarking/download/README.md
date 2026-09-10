@@ -4,11 +4,7 @@
 
 ## 首次安装与账号准备（只做一次）
 
-在服务器的 Python 3.11 环境、仓库根目录中：
-
-```bash
-python -m pip install -r benchmarking/download/requirements.txt
-```
+统一环境安装见 [benchmark 教程](../INSTALL.md)。下载与测评都在 `oceanx-bench` 中运行。
 
 服务器需已有 `curl`，不需要 sudo。CMEMS 需要账号，ERA5 改用 Google 公共镜像匿名下载：
 

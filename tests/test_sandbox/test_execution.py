@@ -262,10 +262,10 @@ def test_python_runtime_fails_closed_when_explicit_interpreter_is_stale(
         current_python_executable()
 
 
-def test_python_runtime_defaults_to_named_ocean_conda_environment(
+def test_python_runtime_defaults_to_named_oceanx_conda_environment(
     tmp_path: Path, monkeypatch
 ) -> None:
-    prefix = tmp_path / "envs" / "ocean"
+    prefix = tmp_path / "envs" / "oceanx"
     launcher = prefix / "bin" / "python"
     launcher.parent.mkdir(parents=True)
     launcher.symlink_to(Path(sys.executable).resolve())

@@ -1,0 +1,12 @@
+# Environment: oceanx-bench (Python 3.11). Includes OceanX and all benchmark/download tools.
+-r ../requirements.txt
+copernicusmarine>=2.0,<3
+requests>=2.31,<3
+urllib3>=1.26.20,<3
+numcodecs>=0.12,<0.16
+httpx>=0.27,<1
+nbformat>=5.10,<6
+nbclient>=0.10,<1
+ipykernel>=6.29,<8
+EMD-signal>=1.6,<2
+pytest>=8,<10

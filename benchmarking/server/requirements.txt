@@ -1,9 +1,0 @@
-# Python 3.11 in a dedicated Conda environment. Install OceanX separately from repo root.
--r ../../requirements.txt
--r ../download/requirements.txt
-httpx>=0.27,<1
-nbformat>=5.10,<6
-nbclient>=0.10,<1
-ipykernel>=6.29,<8
-EMD-signal>=1.6,<2
-pytest>=8,<10

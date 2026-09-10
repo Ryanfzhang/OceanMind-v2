@@ -2,13 +2,8 @@
 
 ## Benchmark file delivery (opt-in)
 
-Both `--query` and `--queries` run every OceanX model role with **deepseek-v4-pro**
-using the configured Coordinator API endpoint and credential. This override is
-process-local: saved settings and frontend role models are untouched. Configure
-a Coordinator endpoint that serves this model before running; no fallback to Flash
-is intended. Each attempt records `model_protocol.json`. Curator remains disabled.
-For Claude comparisons explicitly pass `--model deepseek-v4-pro`; check actual
-reported model usage for auxiliary calls as well as the main model.
+Model routing now comes exclusively from the root `benchmark.yaml` for both agents.
+See [the installation and running tutorial](../INSTALL.md). No hardcoded model or inherited shell credentials are used.
 
 For science comparisons that should not depend on Desktop interactive-view publication,
 use the separate runner:
@@ -98,31 +93,9 @@ scores; use the separate evaluation workflow to judge the selected evidence.
 
 This is the execution guide. [Download setup](../download/README.md), [data/paper correspondence](../preparation/DATA_PREPARATION.md), and [export/judging](../evaluation/README.md) each have one separate home.
 
-## 1. One-time environment and model checks
+## 1. Installation and API setup
 
-From the repository root, with a normal account (no sudo required for Python):
-
-```bash
-conda create -n oceanx-bench python=3.11
-conda activate oceanx-bench
-python -m pip install -r benchmarking/server/requirements.txt
-python -m pip install -e .
-export OCEAN_SANDBOX_PYTHON="$CONDA_PREFIX/bin/python"
-ocean doctor
-ocean sandbox-self-check
-```
-
-The Linux host also needs bubblewrap, libseccomp and working unprivileged namespaces.
-If the self-check fails because of administrator policy, downloads alone do not
-make the benchmark runnable; ask the administrator to permit the required
-execution environment. Do not disable isolation. See the [headless runtime
-contract](../../docs/evals/headless-benchmark.md).
-
-Existing OceanX model profiles on this server can be reused. Otherwise run
-`ocean configure-models < /absolute/private/role-config.json` with the supported
-role profiles (`coordinator`, `expert`, `skill_curator`). Keep keys outside the
-shared data/archive/repository. The server configuration is separate from cc-switch.
-The batch runner disables Curator for the primary comparison.
+Follow [benchmarking/INSTALL.md](../INSTALL.md). Use only `oceanx-bench` and the root YAML.
 
 ## 2. The data root is exactly the downloader's --output
 
@@ -234,12 +207,10 @@ are separate. All current per-query references remain draft: independently compu
 and validate references on the frozen downloaded data before official grading.
 Do not change `draft` to `validated` just to bypass the evaluator.
 
-## 6. Claude Code + DeepSeek: run the same JSONL and keep results
+## 6. Claude Code: run the same YAML model and JSONL
 
-`run_claude.py` runs the installed **Claude Code**, not Claude Science. It inherits
-your existing direct DeepSeek API configuration/environment. No cc-switch or new
-API configuration is required. Activate the same scientific Python environment;
-make sure `claude --version` and your existing CLI API connection work there.
+`run_claude.py` runs the installed **Claude Code**, not Claude Science. It reads the root `benchmark.yaml` Anthropic endpoint and common model.
+Activate `oceanx-bench` and ensure `claude --version` works.
 
 ```bash
 python benchmarking/server/run_claude.py \
@@ -269,7 +240,7 @@ context, not handled by an OceanX protocol adapter.
 
 Options:
 - `--claude /absolute/path/to/claude` if the executable is not on PATH.
-- `--model MODEL_ID` only if you want to override the existing CLI model selection.
+- Change `model` in `benchmark.yaml` for both agents. `--model` cannot override it.
 - `--model-label LABEL` records an experiment label without changing API routing.
 - Add `--resume` with the same arguments to skip completed cases and create new
   attempts for others. Never overwrites an earlier attempt. Inputs, tool approvals,

@@ -376,14 +376,10 @@ class TaskWorkspaceProjector:
 
     @staticmethod
     def _write_requirements(root: Path) -> None:
-        source = Path(__file__).resolve().parents[2] / "requirements.txt"
-        content = (
-            source.read_text(encoding="utf-8")
-            if source.is_file()
-            else resource_files("oceanx")
-            .joinpath("resources/runtime/requirements.txt")
-            .read_text(encoding="utf-8")
-        )
+        dependencies = json.loads(resource_files("oceanx")
+                                  .joinpath("resources/runtime/dependencies.json")
+                                  .read_text(encoding="utf-8"))
+        content = "\n".join(dependencies) + "\n"
         TaskWorkspaceProjector._atomic_text(root / "analysis" / "requirements.txt", content)
 
     def _write_summary(self, root: Path, task: ResearchTaskRecord) -> None:

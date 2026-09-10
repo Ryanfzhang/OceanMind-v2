@@ -42,7 +42,7 @@ from oceanx.sandbox.windows_broker import (
 
 _MACOS_SYSTEM_PROFILE: Final = Path("/System/Library/Sandbox/Profiles/system.sb")
 _SAFE_PATH: Final = "/usr/bin:/bin"
-_DEFAULT_CONDA_ENV_NAME: Final = "ocean"
+_DEFAULT_CONDA_ENV_NAME: Final = "oceanx"
 _CONDA_ENV_NAME_VARIABLE: Final = "OCEAN_CONDA_ENV"
 _PYTHON_OVERRIDE_VARIABLE: Final = "OCEAN_SANDBOX_PYTHON"
 _RESOURCE_LIMIT_NAMES: Final = (
@@ -434,7 +434,7 @@ def _validate_python_launcher(candidate: Path) -> Path:
 
 
 def current_python_executable() -> Path:
-    """Return the Python launcher for the configured ``ocean`` Conda runtime.
+    """Return the Python launcher for the configured ``oceanx`` Conda runtime.
 
     OceanMind intentionally does not fall back to the backend virtualenv. Set
     ``OCEAN_SANDBOX_PYTHON`` only for an explicit packaged/test override, or

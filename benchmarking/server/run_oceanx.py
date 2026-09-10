@@ -1,7 +1,7 @@
 """Run OceanX with a benchmark-only file delivery adapter.
 
 The query, research policy and execution sandbox are unchanged. All model roles
-use DeepSeek V4 Pro through the configured Coordinator API in this process only.
+use the root benchmark.yaml API configuration in this process only.
 """
 from __future__ import annotations
 
@@ -83,7 +83,14 @@ def main():
     parser.add_argument("--timeout", type=float, default=3600)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--config", type=Path, help="Root benchmark.yaml by default")
     args = parser.parse_args()
+    from benchmark_config import DEFAULT_CONFIG, load_config, preflight
+    config_path = (args.config or DEFAULT_CONFIG).expanduser().resolve()
+    config = load_config(config_path)
+    config.endpoint(config.oceanx_api)
+    os.environ["OCEAN_BENCH_CONFIG"] = str(config_path)
+    preflight(require_sandbox=True)
     if args.queries and args.dataset:
         parser.error("Use --dataset with --query; JSONL cases contain their own datasets")
     cases = batch.load_queries(args.queries) if args.queries else [

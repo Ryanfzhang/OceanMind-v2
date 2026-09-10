@@ -1,23 +1,25 @@
-"""Process-local model policy for benchmarks; never writes Desktop settings."""
-from __future__ import annotations
-
-BENCHMARK_MODEL = "deepseek-v4-pro"
+"""Use the root YAML for every benchmark role; leave production settings untouched."""
+from benchmark_config import load_config
 
 
-def install_oceanx_models():
+def install_oceanx_models(config=None):
     from oceanx import model_config
+    config = config or load_config()
+    endpoint = config.endpoint(config.oceanx_api)
+    slot = 'benchmark-yaml'
+    original_key = model_config._stored_api_key
 
-    original = model_config._profile_payload
+    def profile(settings, *, role='coordinator'):
+        return slot, {'provider': config.oceanx_api, 'last_model': config.model,
+                      'base_url': endpoint.url, 'credential_slot': slot}
 
-    def benchmark_profile(settings, *, role="coordinator"):
-        # Use the Coordinator's configured endpoint/credential for every role.
-        # Override at profile resolution so existing imported loader aliases and
-        # auxiliary model calls get exactly the same policy.
-        name, raw = original(settings, role="coordinator")
-        return name, {**raw, "last_model": BENCHMARK_MODEL,
-                      "default_model": BENCHMARK_MODEL,
-                      "skill_reviewer_model": BENCHMARK_MODEL}
+    def key(*, provider, slot):
+        if slot == 'benchmark-yaml':
+            return endpoint.api_key
+        return original_key(provider=provider, slot=slot)
 
-    model_config._profile_payload = benchmark_profile
-    return {"model": BENCHMARK_MODEL, "roles": ["coordinator", "expert", "skill_curator"],
-            "api_profile": "coordinator", "scope": "benchmark_process_only"}
+    model_config._profile_payload = profile
+    model_config._stored_api_key = key
+    model_config._load_settings_payload = lambda: {'max_tokens': config.max_tokens}
+    return {**config.public(), 'roles': ['coordinator', 'expert', 'skill_curator'],
+            'api_profile': 'benchmark.yaml', 'scope': 'benchmark_process_only'}

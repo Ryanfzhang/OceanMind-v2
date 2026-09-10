@@ -12,7 +12,11 @@ import run_claude as runner
 
 
 @pytest.fixture
-def setup(tmp_path):
+def setup(tmp_path, monkeypatch):
+    import benchmark_config
+    monkeypatch.setattr(benchmark_config, "preflight", lambda **kw: None)
+    config_file = tmp_path / "benchmark.yaml"
+    config_file.write_text("model: test-deepseek\noceanx_api: anthropic\nanthropic:\n  url: https://example.invalid\n  api_key: test-key\n")
     executable = tmp_path / "fake-claude"
     executable.write_text(f"#!{sys.executable}\n" + '''
 import json, os, pathlib, subprocess, sys, time
@@ -49,7 +53,7 @@ sys.exit(4 if "NONZERO" in prompt else 0)
         queries.write_text("\n".join(json.dumps({"id": f"Q{i:02}", "query": q,
             "datasets": ["data"], "timeout_seconds": timeout})
             for i, (q, timeout) in enumerate(items, 1)))
-        return ["--queries", str(queries), "--output", str(output), "--claude", str(executable), *extra]
+        return ["--config", str(config_file), "--queries", str(queries), "--output", str(output), "--claude", str(executable), *extra]
     return tmp_path, output, invoke
 
 
@@ -71,12 +75,12 @@ def test_success_files_model_config_and_resume(setup):
     assert (root / "data/input.nc").read_bytes() == b"input unchanged"
     assert not list(output.rglob("*.nc"))
     command = json.loads((attempt / "command.json").read_text())
-    assert "--model" not in command
+    assert command[command.index("--model") + 1] == "test-deepseek"
     assert "--dangerously-skip-permissions" not in command
     assert "--no-session-persistence" in command
     assert runner.main([*args, "--resume"]) == 0
     assert len(results(output)) == 1
-    with pytest.raises(ValueError, match="Resume inputs"):
+    with pytest.raises(ValueError, match="Model differs"):
         runner.main([*args, "--resume", "--model", "changed-model"])
 
 
@@ -103,7 +107,10 @@ def test_timeout_kills_children_retains_outputs(setup):
 def test_sigterm_records_cancelled_and_stops_batch(setup):
     _, output, invoke = setup
     args = invoke([("CANCEL", 20), ("SHOULD NOT START", 5)])
-    process = subprocess.Popen([sys.executable, str(Path(runner.__file__)), *args],
+    bootstrap = ("import sys; sys.path.insert(0, " + repr(str(Path(runner.__file__).parent)) + "); "
+                 "import benchmark_config; benchmark_config.preflight=lambda **kw: None; "
+                 "import run_claude; sys.exit(run_claude.main())")
+    process = subprocess.Popen([sys.executable, "-c", bootstrap, *args],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         deadline = time.monotonic() + 10

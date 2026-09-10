@@ -81,3 +81,6 @@ react_tui_smoke.txt
 .DS_Store
 Thumbs.db
 uv.lock
+
+# Private benchmark API configuration
+/benchmark.yaml

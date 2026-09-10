@@ -1,0 +1,11 @@
+# Copy to benchmark.yaml (git-ignored). Both endpoints must serve this same model.
+model: REPLACE_WITH_MODEL_ID
+# OceanX can use either protocol. Claude Code always uses the anthropic entry.
+oceanx_api: openai
+max_tokens: 32768
+openai:
+  url: ""
+  api_key: ""
+anthropic:
+  url: ""
+  api_key: ""

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sequential Claude Code baseline recorder; no grading, uploads or data copies.
 
-Uses the existing OceanX JSONL schema and the user's installed Claude CLI/config.
+Uses the OceanX JSONL schema, installed Claude CLI and root benchmark.yaml.
 This is a process supervisor, NOT a filesystem/network security sandbox.
 """
 from __future__ import annotations
@@ -62,7 +62,8 @@ def prompt_for(case):
 
 def command_for(executable, case, args):
     command = [executable, "-p", "--output-format", "stream-json", "--verbose",
-               "--no-session-persistence", "--permission-mode", "default"]
+               "--no-session-persistence", "--permission-mode", "default",
+               "--setting-sources", ""]
     if args.model:
         command += ["--model", args.model]
     if args.allow_tools:
@@ -91,14 +92,14 @@ def stop_group(process):
     process.wait()
 
 
-def supervise(command, workspace, prompt_path, directory, timeout, cancelled):
+def supervise(command, workspace, prompt_path, directory, timeout, cancelled, env=None):
     started = time.monotonic()
     reason = None
     with prompt_path.open("rb") as stdin, (directory / "events.jsonl").open("xb") as out, \
             (directory / "stderr.log").open("xb") as err, selectors.DefaultSelector() as poll:
         process = subprocess.Popen(command, cwd=workspace, stdin=stdin,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   start_new_session=True)
+                                   start_new_session=True, env=env)
         counts = {"stdout": 0, "stderr": 0}
         for pipe, name, stream in ((process.stdout, "stdout", out), (process.stderr, "stderr", err)):
             os.set_blocking(pipe.fileno(), False)
@@ -253,7 +254,7 @@ def inventory(workspace):
     return {"files": files, "excluded": excluded, "truncated": False}
 
 
-def run_case(case, directory, command, cancelled):
+def run_case(case, directory, command, cancelled, env=None):
     directory.mkdir(parents=True)
     workspace = directory / "workspace"
     workspace.mkdir()
@@ -266,7 +267,7 @@ def run_case(case, directory, command, cancelled):
     code, reason, error = None, None, None
     try:
         code, reason = supervise(command, workspace, prompt_path, directory,
-                                 case.timeout_seconds, cancelled)
+                                 case.timeout_seconds, cancelled, env=env)
     except OSError as exc:
         reason, error = "launch_or_io_error", str(exc)
     events = directory / "events.jsonl"
@@ -330,12 +331,20 @@ def main(argv=None):
     parser.add_argument("--queries", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--claude", default="claude", help="Executable path/name, not a shell command")
-    parser.add_argument("--model", help="Optional CLI model override; omit to retain existing Claude/DeepSeek API configuration")
+    parser.add_argument("--config", type=Path, help="Root benchmark.yaml by default")
+    parser.add_argument("--model", help="Compatibility option; must match benchmark.yaml")
     parser.add_argument("--model-label", default="configured", help="Experiment label, not an API override")
     parser.add_argument("--allow-tools", nargs="+", default=[],
                         help="Explicit tool approvals, e.g. Read Glob Grep Bash Write Edit NotebookEdit")
     parser.add_argument("--resume", action="store_true", help="Skip completed; new attempts for other tasks")
     args = parser.parse_args(argv)
+    from benchmark_config import load_config, preflight, claude_environment
+    config = load_config(args.config)
+    if args.model and args.model != config.model:
+        raise ValueError("Model differs from benchmark.yaml; change the YAML for both agents")
+    args.model = config.model
+    preflight()
+    environment = claude_environment(config)
     if os.name != "posix":
         raise ValueError("This runner requires Linux/macOS process groups")
     cases = load_queries(args.queries)
@@ -353,6 +362,7 @@ def main(argv=None):
         "schema_version": 1, "agent": "claude-code", "claude": executable,
         "cases": [c.model_dump(mode="json") for c in cases],
         "model": args.model, "model_label": args.model_label, "allow_tools": args.allow_tools,
+        "model_protocol": config.public(),
         "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
     if args.resume:
@@ -368,7 +378,7 @@ def main(argv=None):
             version = subprocess.run([executable, "--version"], capture_output=True, text=True, timeout=15)
             write_json(output / "manifest.json", {
                 "identity": identity, "cli_version": version.stdout.strip()[:1000],
-                "note": "Existing user/managed CLI config and environment are inherited, not snapshotted; keep fixed across runs. No OS sandbox is added.",
+                "note": "API routing and model come from benchmark.yaml; credentials are omitted. No OS sandbox is added.",
             })
         stopped = [False]
         previous = {sig: signal.signal(sig, lambda *_: stopped.__setitem__(0, True))
@@ -384,7 +394,7 @@ def main(argv=None):
                     continue
                 directory = output / case.id / f"attempt-{time.time_ns()}-{uuid4().hex[:8]}"
                 print(f"[{case.id}] running", flush=True)
-                result = run_case(case, directory, command_for(executable, case, args), lambda: stopped[0])
+                result = run_case(case, directory, command_for(executable, case, args), lambda: stopped[0], env=environment)
                 with (output / "results.jsonl").open("a", encoding="utf-8") as stream:
                     stream.write(json.dumps(result, ensure_ascii=False) + "\n")
                 print(f"[{case.id}] {result['status']}", flush=True)

@@ -1,3 +1,5 @@
+安装与环境配置见 [INSTALL.md](INSTALL.md)；测评见 [benchmarking/INSTALL.md](benchmarking/INSTALL.md)。
+
 # OceanMind
 
 OceanMind is a local-first multi-agent workbench for ocean-science research. It supports
@@ -81,8 +83,9 @@ New projects use:
 ## Development
 
 ```bash
-python -m venv .venv
-.venv/bin/pip install -e ".[dev,ocean-runtime]"
+conda activate oceanx
+python -m pip install -r requirements.txt
+python -m pip install -e ".[dev]"
 
 cd frontend/ocean-desktop
 npm ci
@@ -93,7 +96,7 @@ npm run build
 Run the OceanMind backend tests:
 
 ```bash
-.venv/bin/python -m pytest -q tests/test_oceanx
+python -m pytest -q tests/test_oceanx
 ```
 
 The macOS scientific sandbox starts a nested Seatbelt process. When tests are themselves running
@@ -102,8 +105,8 @@ inside another restrictive sandbox, run the trusted-execution tests from a norma
 Build and inspect the Python wheel:
 
 ```bash
-.venv/bin/python -m hatchling build -t wheel
-.venv/bin/python scripts/check_ocean_wheel_contents.py
+python -m hatchling build -t wheel
+python scripts/check_ocean_wheel_contents.py
 ```
 
 The wheel contains only `oceanx`; the former agent-runtime package is not shipped.
