@@ -82,7 +82,9 @@ def phase_lock(root, phase):
     """Different download phases share the archive; verify/legacy tools exclude both."""
     import fcntl
     with ExitStack() as stack:
-        archive = stack.enter_context((root / ".download.lock").open("a"))
+        # Network filesystems may implement flock via POSIX byte-range locks:
+        # shared locks need a readable descriptor; exclusive locks need writable.
+        archive = stack.enter_context((root / ".download.lock").open("a+"))
         try:
             mode = fcntl.LOCK_EX if phase == "verify" else fcntl.LOCK_SH
             fcntl.flock(archive, mode | fcntl.LOCK_NB)

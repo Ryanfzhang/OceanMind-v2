@@ -191,6 +191,20 @@ def test_phase_locks_allow_different_phases_but_exclude_duplicates_and_verify(tm
                 pytest.fail("download during legacy writer")
 
 
+def test_shared_archive_lock_uses_read_write_descriptor(tmp_path, monkeypatch):
+    import fcntl
+    import os
+    original = fcntl.flock
+    def network_flock(file, operation):
+        if operation & fcntl.LOCK_SH:
+            mode = fcntl.fcntl(file.fileno(), fcntl.F_GETFL) & os.O_ACCMODE
+            assert mode == os.O_RDWR  # Required for shared/exclusive locking on NFS.
+        return original(file, operation)
+    monkeypatch.setattr(fcntl, 'flock', network_flock)
+    with all_data.phase_lock(tmp_path, 'public'):
+        pass
+
+
 def test_concurrent_summary_writers_retain_both_phase_results(tmp_path):
     from multiprocessing import get_context
     manifest = all_data.load_manifest()
