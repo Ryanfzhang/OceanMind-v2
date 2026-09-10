@@ -43,24 +43,31 @@ def load_config(path=None):
         raise ValueError(f'Missing {path}; copy benchmark.example.yaml to benchmark.yaml and fill it')
     try:
         raw = yaml.safe_load(path.read_text())
-        model = raw['model']
-        protocol = raw['oceanx_api']
-        tokens = raw.get('max_tokens', 32768)
-        if not isinstance(model, str) or not model.strip() or model.startswith('REPLACE_'):
-            raise ValueError()
-        if protocol not in ('openai', 'anthropic') or type(tokens) is not int or tokens < 1:
-            raise ValueError()
-        endpoints = {}
-        for name in ('openai', 'anthropic'):
-            item = raw.get(name, {})
-            url, key = item.get('url', ''), item.get('api_key', '')
-            if not isinstance(url, str) or not isinstance(key, str):
-                raise ValueError()
-            endpoints[name] = Endpoint(url.strip(), key.strip())
-        return Config(model.strip(), protocol, endpoints, tokens)
-    except (yaml.YAMLError, KeyError, TypeError, AttributeError, ValueError):
-        # YAML parser exceptions can include literal secret-containing lines.
-        raise ValueError('Invalid benchmark.yaml; use the structure in benchmark.example.yaml') from None
+    except yaml.YAMLError as exc:
+        mark = getattr(exc, 'problem_mark', None)
+        location = f' at line {mark.line + 1}, column {mark.column + 1}' if mark else ''
+        raise ValueError('Invalid benchmark.yaml syntax' + location) from None
+    if not isinstance(raw, dict):
+        raise ValueError('benchmark.yaml must contain a mapping of configuration fields')
+    model = raw.get('model')
+    if not isinstance(model, str) or not model.strip() or model.strip().startswith('REPLACE_'):
+        raise ValueError('benchmark.yaml: replace model placeholder with the actual provider model ID')
+    protocol = raw.get('oceanx_api')
+    if protocol not in ('openai', 'anthropic'):
+        raise ValueError('benchmark.yaml: oceanx_api must be openai or anthropic')
+    tokens = raw.get('max_tokens', 32768)
+    if type(tokens) is not int or tokens < 1:
+        raise ValueError('benchmark.yaml: max_tokens must be a positive integer')
+    endpoints = {}
+    for name in ('openai', 'anthropic'):
+        item = raw.get(name, {})
+        if not isinstance(item, dict):
+            raise ValueError(f'benchmark.yaml: {name} must contain url and api_key fields')
+        url, key = item.get('url', ''), item.get('api_key', '')
+        if not isinstance(url, str) or not isinstance(key, str):
+            raise ValueError(f'benchmark.yaml: {name}.url and {name}.api_key must be strings')
+        endpoints[name] = Endpoint(url.strip(), key.strip())
+    return Config(model.strip(), protocol, endpoints, tokens)
 
 
 def configure_runtime():

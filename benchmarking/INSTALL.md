@@ -11,7 +11,14 @@ python -m pip install -r benchmarking/requirements.txt
 ```
 
 已包含 OceanX 主程序和科学依赖，无需另建 `ocean`，无需再执行 `pip install -e .`。
-Linux 上还需系统提供 bubblewrap/libseccomp 和用户命名空间，安装方法见[OceanX 教程](../INSTALL.md#linux-系统组件)。
+Linux 无 sudo 时，在当前 `oceanx-bench` 环境执行：
+
+```bash
+conda install -c conda-forge bubblewrap libseccomp -y
+command -v bwrap
+```
+
+宿主机需允许用户命名空间；详见[OceanX 教程](../INSTALL.md#linux-系统组件)。
 Claude Code 是外部 CLI，需预先安装并能执行 `claude --version`；它的科学计算同样使用本环境。
 
 ## 2. 只修改一份 YAML 切换模型

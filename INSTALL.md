@@ -17,8 +17,15 @@ unset OCEAN_SANDBOX_PYTHON OCEAN_CONDA_ENV
 
 ## Linux 系统组件
 
-代码执行需要 bubblewrap、libseccomp 和可用的用户命名空间。这是系统组件，不是第三个 Conda 环境。
-Debian/Ubuntu 上由有权限的管理员执行：
+代码执行需要 bubblewrap、libseccomp 和可用的用户命名空间。无 sudo 时，先在当前环境安装 Conda 包，无需第三个环境：
+
+```bash
+conda install -c conda-forge bubblewrap libseccomp -y
+command -v bwrap
+```
+
+Conda 包来源：https://github.com/conda-forge/bubblewrap-feedstock 。宿主机仍需允许用户命名空间。
+若选择系统包，Debian/Ubuntu 上可由管理员执行：
 
 ```bash
 sudo apt-get install bubblewrap libseccomp2
