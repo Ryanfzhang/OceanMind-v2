@@ -278,6 +278,24 @@ def test_python_runtime_defaults_to_named_oceanx_conda_environment(
     assert current_python_executable() == launcher.absolute()
 
 
+def test_python_launcher_resolves_parent_alias_without_leaving_environment(tmp_path, monkeypatch):
+    from oceanx.sandbox.execution import _normalize_command
+
+    real_home = tmp_path / "real-home"
+    launcher = real_home / "env" / "bin" / "python"
+    launcher.parent.mkdir(parents=True)
+    launcher.symlink_to(Path(sys.executable).resolve())
+    alias_home = tmp_path / "alias-home"
+    alias_home.symlink_to(real_home, target_is_directory=True)
+    alias_launcher = alias_home / "env" / "bin" / "python"
+    monkeypatch.setenv("OCEAN_SANDBOX_PYTHON", str(alias_launcher))
+
+    expected = launcher.parent.resolve() / "python"
+    assert current_python_executable() == expected
+    assert _normalize_command((str(alias_launcher), "-V")) == (str(expected), "-V")
+    assert expected != launcher.resolve()
+
+
 def test_macos_runtime_roots_include_homebrew_native_library_trees(tmp_path: Path) -> None:
     prefix = tmp_path / "homebrew"
     cellar = prefix / "Cellar"

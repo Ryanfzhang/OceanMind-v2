@@ -31,7 +31,7 @@ _REQUIRED_SCIENTIFIC_MODULES = ("zarr", "netCDF4", "gsw")
 
 def _probe_command() -> tuple[str, ...]:
     executable = str(current_python_executable())
-    return executable, str(Path(__file__).with_name("sandbox_probe_entry.py"))
+    return executable, str(Path(__file__).resolve().with_name("sandbox_probe_entry.py"))
 
 
 def _probe_environment() -> dict[str, str]:

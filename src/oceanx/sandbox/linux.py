@@ -11,6 +11,7 @@ from __future__ import annotations
 import ctypes
 import ctypes.util
 import errno
+import shutil
 import tempfile
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
@@ -131,5 +132,12 @@ def build_bubblewrap_command(
         if root == Path("/") or root == Path("/proc") or root == Path("/dev"):
             raise SandboxUnavailableError(f"Unsafe Linux sandbox mount: {root}")
         argv.extend(("--bind" if writable else "--ro-bind", str(root), str(root)))
-    argv.extend(("--chdir", str(cwd), "--seccomp", str(seccomp_fd), "--", *command))
+    # Applying RLIMIT_NPROC before bwrap counts the host user's other tasks and
+    # can prevent namespace creation. Apply the same hard limit only after entry.
+    limiter = shutil.which("prlimit", path="/usr/bin:/bin")
+    if limiter is None:
+        raise SandboxUnavailableError("Linux execution requires prlimit from util-linux")
+    count = policy.limits.process_count
+    argv.extend(("--chdir", str(cwd), "--seccomp", str(seccomp_fd), "--",
+                 limiter, f"--nproc={count}:{count}", "--", *command))
     return tuple(argv)

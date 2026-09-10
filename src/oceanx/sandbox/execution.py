@@ -430,7 +430,7 @@ def _validate_python_launcher(candidate: Path) -> Path:
         raise SandboxUnavailableError(f"Python interpreter {launcher} is not executable")
     # Preserve the Conda launcher path. Resolving its symlink would make Python
     # discover the base installation instead of the selected environment.
-    return launcher
+    return launcher.parent.resolve(strict=True) / launcher.name
 
 
 def current_python_executable() -> Path:
@@ -693,7 +693,10 @@ async def run_sandboxed_command(
                 env=env,
                 start_new_session=True,
                 pass_fds=descriptors,
-                preexec_fn=_build_limit_preexec(policy.limits),
+                preexec_fn=_build_limit_preexec(
+                    policy.limits,
+                    defer_process_limit=capabilities.backend == "linux-bubblewrap-seccomp-v1",
+                ),
             )
     except (OSError, subprocess.SubprocessError) as exc:
         raise SandboxUnavailableError(f"Failed to start sandboxed command: {exc}") from exc
@@ -1169,7 +1172,9 @@ def _validate_resource_limits(limits: ResourceLimits) -> None:
             )
 
 
-def _build_limit_preexec(limits: ResourceLimits) -> Callable[[], None]:
+def _build_limit_preexec(
+    limits: ResourceLimits, *, defer_process_limit: bool = False
+) -> Callable[[], None]:
     if resource is None:  # Defensive: capabilities were checked before spawn.
         raise SandboxUnavailableError("Python resource limits are unavailable on this interpreter")
 
@@ -1182,6 +1187,8 @@ def _build_limit_preexec(limits: ResourceLimits) -> Callable[[], None]:
 
     def apply_limits() -> None:
         for resource_id, value in resource_limits:
+            if defer_process_limit and resource_id == resource.RLIMIT_NPROC:
+                continue
             resource.setrlimit(resource_id, (value, value))
 
     return apply_limits
@@ -1201,6 +1208,9 @@ def _normalize_command(command: Sequence[str]) -> tuple[str, ...]:
     # ``bin/python`` symlink before exec makes CPython discover the base prefix
     # instead of the intended environment and silently drops scientific extras.
     # The resolved target is still covered by ``runtime_read_roots``.
+    # Parent aliases (e.g. /home/user -> /import/home2/user on clusters)
+    # are not present in the sandbox, whose mount roots are canonical paths.
+    executable = executable.parent.resolve(strict=True) / executable.name
     return (str(executable), *map(str, command[1:]))
 
 

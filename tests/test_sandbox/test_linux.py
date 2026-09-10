@@ -32,7 +32,8 @@ def policy_for(tmp_path):
     )
 
 
-def test_linux_mounts_are_explicit_readonly_and_network_unshared(tmp_path):
+def test_linux_mounts_are_explicit_readonly_and_network_unshared(tmp_path, monkeypatch):
+    monkeypatch.setattr("oceanx.sandbox.linux.shutil.which", lambda *a, **kw: "/usr/bin/prlimit")
     policy = policy_for(tmp_path)
     args = build_bubblewrap_command("/usr/bin/bwrap", [sys.executable, "-c", "pass"],
                                     policy=policy, cwd=tmp_path / "input", seccomp_fd=8)
@@ -53,7 +54,8 @@ def test_linux_missing_bwrap_fails_closed(monkeypatch):
     assert "bubblewrap" in capabilities.reason
 
 
-def test_networked_linux_keeps_source_mounts_readonly(tmp_path):
+def test_networked_linux_keeps_source_mounts_readonly(tmp_path, monkeypatch):
+    monkeypatch.setattr("oceanx.sandbox.linux.shutil.which", lambda *a, **kw: "/usr/bin/prlimit")
     policy = replace(policy_for(tmp_path), allow_network=True)
     args = build_bubblewrap_command(
         "/usr/bin/bwrap", [sys.executable, "-c", "pass"],
@@ -161,3 +163,21 @@ plt.close(fig)
     assert result.status == SandboxExecutionStatus.SUCCEEDED, result.stderr.decode()
     assert (policy.output_root / "analysis.nc").is_file()
     assert (policy.output_root / "figure.png").is_file()
+
+
+def test_linux_process_limit_applied_after_namespace_entry(tmp_path, monkeypatch):
+    import resource
+    from oceanx.sandbox.execution import _build_limit_preexec
+    monkeypatch.setattr("oceanx.sandbox.linux.shutil.which", lambda *a, **kw: "/usr/bin/prlimit")
+    policy = policy_for(tmp_path)
+    argv = build_bubblewrap_command("bwrap", ["/usr/bin/true"], policy=policy,
+                                    cwd=tmp_path / "input", seccomp_fd=8)
+    assert argv[argv.index("--") + 1:] == ("/usr/bin/prlimit", "--nproc=64:64", "--", "/usr/bin/true")
+    calls = []
+    monkeypatch.setattr(resource, "setrlimit", lambda k, v: calls.append((k, v)))
+    _build_limit_preexec(policy.limits, defer_process_limit=True)()
+    assert resource.RLIMIT_NPROC not in [k for k, _ in calls]
+    assert resource.RLIMIT_CPU in [k for k, _ in calls]
+    calls.clear()
+    _build_limit_preexec(policy.limits)()
+    assert (resource.RLIMIT_NPROC, (64, 64)) in calls
