@@ -1,73 +1,112 @@
-# ADR 0021 — Hypotheses, cross-hypothesis tests, and evidence (v2)
+# ADR 0021 — Coordinator judgments and Expert test facts
 
-## Current decision (2026-09-10)
+## Current decision (2026-09-11)
 
-The current runtime uses a hypothesis-only tree. Tests are separately registered
-operations targeting one or more hypothesis IDs, and Evidence references the
-existing task observation journal. No data or execution artifacts are duplicated.
+Scientific judgment stays with the Coordinator. The backend retains task and
+WorkOrder ownership, basic references, existing mutation revisions, execution
+budgets, cancellation and durable replay. It does not score evidence, compare
+declared scientific levels, require a review receipt, or prescribe a research
+sequence. The question, optional method suggestions and bounded Expert evidence
+report are passed through the existing assignment/result chain.
 
-Hypotheses use untested, supported, contested, refuted, established, unverifiable.
-Only the last three are terminal. Each declares alternatives (OR) or prerequisites
-(AND) for its children. Tests declare outcome labels and their target effects before
-execution. Every target must appear in the declared effects; direct established
-requires at least two distinct targets. This is a structural guard, not a guarantee
-that the proposed test actually discriminates or establishes scientific truth.
-Opposite evidence becomes contested and retains the earlier evidence in history.
+Hypotheses still use untested, supported, contested, refuted, established and
+unverifiable. A test result is a fact: recording it never applies an outcome-to-
+status effect. New live test schemas contain optional expected outcomes and
+interpretations; old v2 discriminator effects remain readable as historical
+data. The Coordinator calls adjudicate to choose a node's scientific state.
+A reason and evidence references can accompany the decision; they are not a
+new review-form gate. Explicit changes retain prior judgments and evidence in
+history. The Coordinator decides how contradictory evidence changes a claim.
 
-Every nonterminal leaf needs a feasible pending test or decomposition. Two successive
-decompositions with no feasible test mark that line unverifiable, with its missing
-test reasons retained. Root mechanism generation is not counted as decomposition.
-Tests may be declared atomically with child hypotheses, so a testable second-level
-child is not incorrectly closed. New feasible tests can reopen unverifiable lines.
+The existing necessary structural guard for direct established remains:
+the cited test must target this node and at least two distinct hypothesis
+nodes. This does not demonstrate scientific validity or independent evidence.
+It never determines whether the user's question has been answered.
 
-After ALL children are terminal, synthesis runs mechanically, children first:
+Relations to children remain alternatives or prerequisites. Parent summaries
+list descendants and their limitations without inferring OR/AND truth, closing
+a parent, or overwriting its scientific judgment. New plans cannot reopen an
+unverifiable hypothesis; deep decomposition cannot automatically make one
+unverifiable. The Coordinator can record unavailable evidence directly at the
+appropriate node, without manufacturing two levels of empty decomposition.
 
-| Relation | Decisive case | Uniform opposite case | Otherwise |
-| --- | --- | --- | --- |
-| alternatives | Any established: established | All refuted: refuted | unverifiable |
-| prerequisites | Any refuted: refuted | All established: established | unverifiable |
+## Question completion
 
-Supported or contested children prevent closure, even with a decisive sibling.
-Parent summaries embed every child summary, propagating unverifiable reasons through
-all ancestors, including established/refuted ancestors. No synthesis model call or
-repeat experiment is required. Prior states and summaries remain in history.
+pause with decision=answered or unable_to_answer records the Coordinator's
+question-level decision. For compatibility, completion_summary without a
+decision is the Coordinator's answered declaration; ideas mode records
+ideas_delivered. Supported or refuted evidence may answer a bounded question,
+and untested optional directions do not block it. No established root child,
+all-root-terminal state, pending reflection acknowledgement, review ID or
+scientific revision lock is required.
 
-Frontier tests are feasible and unexecuted. They rank by the shallowest hypothesis
-they can affect, then relative cost, then stable test ID. There is no numeric belief,
-weight, novelty, sampled reward, priority label, or historical node quota.
+Running reserved tests must still be settled before declaring final completion.
+A pause without a scientific decision or completion summary retains the existing
+budget-exhausted/interrupted outcome and unfinished execution state. Recording
+late Expert facts does not reopen the question or infer a new answer. Request
+delivery remains separate from scientific outcome. stop_request_id preserves
+the originating request, so later requests do not inherit a previous answer
+decision merely because they share a task.
 
-`ocean_assign.research_test_ids` connects the Coordinator's planned tests to a wave.
-It is stripped before Expert dispatch. Dispatch atomically reserves one attempt per
-test (default budget 20), before external work. Failed/uncertain attempts remain
-charged. Record their results, or explicitly mark a pending/running test infeasible
-with a reason; neither operation invents negative scientific evidence. Unexpected
-outcomes are stored without applying an undeclared effect. Initial data inspection
-before proposing hypotheses is uncharged. Other application/runtime limits still apply.
+Reflection remains optional Coordinator reasoning and may be recorded without a
+pending trigger or new candidates. Old reflection fields remain readable but
+do not block work. Test recommendations are advisory; available tests rank by
+target depth, cost and identity. An assess recommendation asks the Coordinator
+to consider the evidence; it does not mechanically require new hypotheses.
 
-Reflection is queued when a direct root hypothesis becomes terminal, and whenever
-executions cross the configured budget percentage (default 25%). Wait for running
-test results before reflection. Coordinator answers whether current candidates cover
-the question; incomplete coverage requires new root candidates. Acknowledged triggers
-are durable, and unchanged terminal states do not repeatedly enqueue reflection.
+## Expert tests and accounting
 
-Completion requires all root children terminal, no running tests and reflection done.
-At least one established root child gives answered; otherwise unable_to_answer.
-Final summary includes the merged root summary and unverifiable limitations. Budget
-exhaustion pauses without a completion claim. User interruption is separately retained.
-Ideation-only tasks may deliver an untested shortlist but cannot dispatch experiments.
+The Coordinator retains the full tree tool. Experts receive a separate facts-
+only interface bound by the backend to their task, WorkOrder and authorized
+nodes. They may read authorized claims, register optional plans, or record their
+own test results. They cannot propose hypotheses, change statuses, set effects,
+read other Experts' tests, or reopen nodes. Local test names are namespaced by
+WorkOrder, so parallel Experts can both use T1 without collisions. Returned
+records also carry the durable identity for Coordinator references.
 
-### Compatibility and evaluation
+A result may include its test retrospectively; no registration API must be called
+before executing an authorized analysis. Retrospective records have no fabricated
+registered_at value. Formal discrimination should explain predicted observations
+before execution in the normal plan, code or conversation. This is scientific
+practice for the agents to follow and review, not an execution gate.
 
-The existing SQLite JSON row carries schema_version=2 for new trees. Historical v1
-JSON remains untouched and readable, with legacy_read_only exposed to callers. New
-protocol research must use a new task rather than fabricate test effects or logical
-relations from old nodes. The old engine is retained as exploration_legacy.py for
-historical regression fixtures; the registered model tool accepts only v2 inputs.
-Frozen benchmark source and existing runtime instances are not modified or restarted.
+Existing task observation IDs can be attached to results. An optional execution
+reference is checked against existing task/WorkOrder ownership and provides its
+actual start time. No separate scientific evidence-qualification graph is added.
+Standalone tasks store optional test notes in the existing method observation
+journal without creating a hypothesis tree. Test notes are permitted in an
+existing ideas task too; storing facts does not authorize new execution.
 
-Verification lives in tests/test_oceanx/test_exploration.py. V1 regression cases are
-retained in test_exploration_legacy.py. These are protocol tests, not proof of improved
-scientific quality or successful live-model behavior.
+For assignments supplying research_test_ids, the router reserves the complete
+wave after binding actual WorkOrder identities and before dispatch. This research
+counter counts Expert WorkOrders: two Tests in one Expert round cost one attempt;
+two Experts contributing to one shared Test cost two. Discussion-only participants
+are excluded. Replayed or recovered WorkOrder identities retain their reservation;
+a new follow-up WorkOrder costs another attempt. A wave that exceeds the remaining
+research budget is rejected before any of its Experts start.
+
+This remains opt-in registered-research accounting, not a new rule that charges
+every inspection or code call. Waves without research_test_ids still use the
+existing WorkBudget and shared team token limits. The begin_tests helper retains
+singular execution_id and historical per-test defaults for older callers; the
+production router supplies the wave's actual Expert WorkOrder IDs. Recording,
+splitting or replaying test facts never adds another execution charge.
+
+## Compatibility and verification
+
+The existing SQLite JSON row and schema_version=2 carry the revised tree
+contract; runtime protocol identity is versioned at the application boundary.
+Historical v1 JSON remains untouched and readable with legacy_read_only.
+Old test outcome-effect data is not replayed into scientific states. No history,
+scientific code, output files, publication path or benchmark attempts are rewritten.
+
+Tests in test_exploration.py cover explicit positive/negative/insufficient
+answers, unresolved optional nodes, no automatic state changes, the retained
+established guard, running work and budgets, task/Expert scope, retrospective
+and no-tree facts, parallel local identities, replay, and request provenance.
+The v1 regression fixtures remain in test_exploration_legacy.py. These checks
+verify protocol behavior; they do not prove scientific accuracy or improved
+live-model performance.
 
 ## Historical v1 decision (superseded)
 

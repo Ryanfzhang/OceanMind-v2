@@ -6824,12 +6824,6 @@ class RequestStore:
                 raise RequestStoreError(f"Invalid team work state: {row['state']}")
             if result.status is WorkStatus.COMPLETED:
                 terminal_phase = WorkstreamPhase.COMPLETED
-            elif (
-                result.status is WorkStatus.INCOMPLETE
-                and result.expert_decision is not None
-                and result.expert_decision.value == "blocked"
-            ):
-                terminal_phase = WorkstreamPhase.BLOCKED
             elif result.status is WorkStatus.INCOMPLETE:
                 terminal_phase = WorkstreamPhase.INCOMPLETE
             else:
@@ -8760,7 +8754,9 @@ class RequestStore:
         # longer participate in delegation; keep the original journal intact
         # while excluding this retired metadata from the current WorkOrder.
         readable.pop("assigned_manuals", None)
-        return readable
+        # Normalize newly optional scientific fields for replay comparison;
+        # historical JSON remains unchanged on disk.
+        return WorkOrder.model_validate(readable).model_dump(mode="json")
 
     @staticmethod
     def _readable_expert_result_payload(payload: dict[str, Any]) -> dict[str, Any]:

@@ -1,18 +1,23 @@
 """Hypotheses, cross-hypothesis tests and evidence references (protocol v2).
 
-The backend checks declared effects, not scientific truth. Only dispatched tests
-consume the execution-count budget; history never consumes research capacity.
+The Coordinator judges scientific states and answer sufficiency. Test records
+are facts, never automatic status effects. Existing execution budgets and durable
+identities protect runtime work without prescribing a scientific workflow.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+from datetime import UTC, datetime
 from typing import Literal
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from oceanx import exploration_legacy as legacy
 from oceanx.backend.store import RequestStore, RequestStoreError
+from oceanx.research_learning import ResearchObservationDraft
 
 Status = Literal["untested", "supported", "contested", "refuted", "established", "unverifiable"]
 Relation = Literal["alternatives", "prerequisites"]
@@ -31,19 +36,26 @@ class Hypothesis(StrictModel):
 
 class Discriminator(StrictModel):
     outcome: str = Field(min_length=1, max_length=1000)
-    effects: dict[str, Literal["supported", "contested", "refuted", "established"]] = Field(
-        min_length=1
-    )
+    interpretation: str | None = Field(default=None, max_length=2000)
 
 
 class Test(StrictModel):
-    id: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_.-]{0,63}$")
-    targets: list[str] = Field(min_length=1)
+    id: str = Field(
+        default_factory=lambda: f"test_{uuid4().hex}", pattern=r"^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
+    )
+    targets: list[str] = Field(default_factory=list)
     method: str = Field(min_length=1, max_length=2000)
-    discriminates: list[Discriminator] = Field(min_length=1)
-    feasible: bool
+    discriminates: list[Discriminator] = Field(default_factory=list)
+    purpose: Literal["exploratory", "discrimination", "condition_check", "numerical_audit"] = (
+        "exploratory"
+    )
+    condition_checked: str | None = Field(default=None, max_length=1000)
+    feasible: bool = True
     cost: float = Field(
-        gt=0, allow_inf_nan=False, description="Relative cost, only breaks equal-depth ties"
+        default=1,
+        gt=0,
+        allow_inf_nan=False,
+        description="Relative cost, only breaks equal-depth ties",
     )
     infeasible_reason: str | None = Field(default=None, min_length=1, max_length=1000)
 
@@ -54,23 +66,14 @@ class Test(StrictModel):
         outcomes = [d.outcome for d in self.discriminates]
         if len(set(outcomes)) != len(outcomes):
             raise ValueError("Outcome labels must be unique")
-        affected = {key for d in self.discriminates for key in d.effects}
-        if affected != set(self.targets):
-            raise ValueError(
-                "Every target needs an effect; effects must reference this test's targets"
-            )
-        if not self.feasible and not self.infeasible_reason:
-            raise ValueError("An infeasible test requires a reason")
-        if (
-            any(s == "established" for d in self.discriminates for s in d.effects.values())
-            and len(self.targets) < 2
-        ):
-            raise ValueError("established requires at least two distinct test targets")
         return self
 
 
 class TestResult(StrictModel):
-    evidence_refs: list[str] = Field(min_length=1)
+    evidence_refs: list[str] = Field(
+        default_factory=list,
+        description="Optional existing task observation IDs; Expert code is cited with execution_id",
+    )
     outcome_observed: str = Field(min_length=1, max_length=1000)
     summary: str = Field(min_length=1, max_length=2000)
 
@@ -82,6 +85,7 @@ class ExplorationInput(StrictModel):
         "propose",
         "plan_test",
         "record",
+        "adjudicate",
         "mark_infeasible",
         "reflect",
         "pause",
@@ -91,22 +95,25 @@ class ExplorationInput(StrictModel):
     goal: str | None = Field(default=None, min_length=1, max_length=1000)
     mode: Literal["ideas", "iterative"] | None = None
     execution_budget: int | None = Field(
-        default=None, ge=1, description="Maximum dispatched test attempts; default 20"
+        default=None, ge=1, description="Maximum reserved execution attempts; default 20"
     )
     reflection_interval_percent: int | None = Field(
         default=None,
         ge=1,
         le=100,
-        description="Default 25; only test executions advance this counter",
+        description="Historical planning hint; reflection is optional and never gates execution",
     )
     node_id: str = "root"
     candidates: list[Hypothesis] | None = Field(default=None, min_length=1)
     tests: list[Test] | None = Field(default=None, min_length=1)
     test_id: str | None = None
     result: TestResult | None = None
+    status: Status | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
     coverage_complete: bool | None = None
     summary: str | None = Field(default=None, min_length=1, max_length=4000)
     completion_summary: str | None = Field(default=None, min_length=1, max_length=4000)
+    decision: Literal["answered", "unable_to_answer"] | None = None
     evidence_offset: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
@@ -118,7 +125,8 @@ class ExplorationInput(StrictModel):
             "propose": ("candidates",),
             "plan_test": ("tests",),
             "record": ("test_id", "result"),
-            "reflect": ("coverage_complete", "summary"),
+            "adjudicate": ("status",),
+            "reflect": ("summary",),
             "mark_infeasible": ("test_id", "summary"),
         }.get(self.action, ())
         if any(getattr(self, name) is None for name in required):
@@ -129,18 +137,45 @@ class ExplorationInput(StrictModel):
             "propose": {"node_id", "candidates", "tests"},
             "plan_test": {"tests"},
             "record": {"test_id", "result"},
+            "adjudicate": {"node_id", "status", "summary", "evidence_refs", "test_id"},
             "mark_infeasible": {"test_id", "summary"},
             "reflect": {"coverage_complete", "summary", "candidates", "tests"},
-            "pause": {"completion_summary"},
+            "pause": {"completion_summary", "decision"},
             "resume": {"mode", "execution_budget", "reflection_interval_percent"},
         }[self.action]
         supplied = {
             name
             for name, field in ExplorationInput.model_fields.items()
-            if name in self.model_fields_set and getattr(self, name) != field.default
+            if name in self.model_fields_set
+            and getattr(self, name) != field.get_default(call_default_factory=True)
         }
         if supplied - allowed:
             raise ValueError("Arguments are not applicable to this action")
+        return self
+
+
+class ExpertTestInput(StrictModel):
+    """Facts-only interface; the tool binds the task, WorkOrder and node scope."""
+
+    action: Literal["read", "plan_test", "record"]
+    tests: list[Test] | None = Field(default=None, min_length=1, max_length=16)
+    test_id: str | None = None
+    result: TestResult | None = None
+    execution_id: str | None = None
+
+    @model_validator(mode="after")
+    def action_contract(self):
+        if self.action == "read" and any(
+            v is not None for v in (self.tests, self.test_id, self.result, self.execution_id)
+        ):
+            raise ValueError("read accepts no test mutations")
+        if self.action == "plan_test" and (
+            not self.tests
+            or any(v is not None for v in (self.test_id, self.result, self.execution_id))
+        ):
+            raise ValueError("plan_test requires tests without a result")
+        if self.action == "record" and (not self.test_id or self.result is None):
+            raise ValueError("record requires test_id and result; include tests for a new test")
         return self
 
 
@@ -157,13 +192,7 @@ def _depth(tree, key):
 
 
 def _frontier(tree):
-    return [
-        t
-        for t in tree["tests"].values()
-        if t["feasible"]
-        and t["status"] == "todo"
-        and any(tree["hypotheses"][k]["status"] not in TERMINAL for k in t["targets"])
-    ]
+    return [t for t in tree["tests"].values() if t["feasible"] and t["status"] == "todo"]
 
 
 def _repair_needed(tree):
@@ -185,77 +214,34 @@ def _repair_needed(tree):
     ]
 
 
-def _set_status(tree, node, status, summary):
-    before = node["status"]
-    if before == status and node.get("summary") == summary:
-        return
-    node["history"].append({"status": before, "summary": node.get("summary")})
-    node["status"], node["summary"] = status, summary
-    if node["parent"] == "root" and status in TERMINAL and before != status:
-        tree["reflection_pending"].append(f"{node['id']} became {status}")
+def _set_status(tree, node, status, summary, *, evidence_refs=(), test_id=None):
+    del tree
+    before = {
+        name: node.get(name)
+        for name in ("status", "summary", "evidence_refs", "test_id", "status_source")
+    }
+    updated = {
+        "status": status,
+        "summary": summary,
+        "evidence_refs": list(evidence_refs),
+        "test_id": test_id,
+        "status_source": "coordinator",
+    }
+    if before != updated:
+        node["history"].append(before)
+        node.update(updated)
 
 
 def _synchronize(tree):
-    for node in list(tree["hypotheses"].values()):
-        if (
-            node["status"] not in TERMINAL
-            and node["decompose_depth_without_test"] >= 2
-            and not _children(tree, node["id"])
-            and not any(
-                t["feasible"] and node["id"] in t["targets"] for t in tree["tests"].values()
-            )
-        ):
-            reasons = [
-                t["infeasible_reason"]
-                for t in tree["tests"].values()
-                if not t["feasible"] and node["id"] in t["targets"]
-            ]
-            _set_status(
-                tree,
-                node,
-                "unverifiable",
-                "No feasible test after two consecutive decompositions. " + " ".join(reasons),
-            )
-    # Children first; retain every child's summary, including unknown reasons.
+    """Refresh child summaries without changing scientific status or judgment."""
     for key in sorted(tree["hypotheses"], key=lambda k: _depth(tree, k), reverse=True):
         node, children = tree["hypotheses"][key], _children(tree, key)
-        if not children:
-            continue
-        # A direct evidence conflict needs another test, not a replay of the
-        # same child synthesis. This is provenance, not another belief state.
-        if node["status"] == "contested" and node.get("status_source") == "test":
-            continue
-        states = {c["status"] for c in children}
-        if not states <= TERMINAL:
-            if node["status"] in TERMINAL:
-                _set_status(
-                    tree,
-                    node,
-                    "contested" if "contested" in states else "untested",
-                    "Awaiting nonterminal children; previous synthesis retained in history.",
-                )
-            continue
-        if node["relation_to_children"] == "alternatives":
-            status = (
-                "established"
-                if "established" in states
-                else "refuted"
-                if states == {"refuted"}
-                else "unverifiable"
+        if children:
+            node["children_summary"] = "\n".join(
+                f"{c['id']} [{c['status']}]: {c.get('summary') or ''}"
+                + ("\n" + c["children_summary"] if c.get("children_summary") else "")
+                for c in children
             )
-        else:
-            status = (
-                "refuted"
-                if "refuted" in states
-                else "established"
-                if states == {"established"}
-                else "unverifiable"
-            )
-        summary = f"{node['claim']} [{status}; {node['relation_to_children']}]\n" + "\n".join(
-            f"{c['id']} [{c['status']}]: {c['summary']}" for c in children
-        )
-        _set_status(tree, node, status, summary)
-        node["status_source"] = "children"
 
 
 def _all_terminal(tree):
@@ -273,35 +259,19 @@ def _recommend(tree):
     running = [t["id"] for t in tree["tests"].values() if t["status"] == "running"]
     if running:
         return {"action": "await_results", "test_ids": running}
-    if tree["reflection_pending"]:
-        return {"action": "reflect", "reasons": tree["reflection_pending"]}
-    if _all_terminal(tree):
-        return {
-            "action": "finish",
-            "exit": "answered"
-            if any(c["status"] == "established" for c in _children(tree, "root"))
-            else "unable_to_answer",
-        }
     if tree["executions_used"] >= tree["execution_budget"]:
-        return {
-            "action": "pause",
-            "reason": "execution_budget_exhausted",
-            "question_resolved": False,
-        }
-    missing = _repair_needed(tree)
-    if missing:
-        return {"action": "repair", "node_ids": missing}
+        return {"action": "pause", "reason": "execution_budget_exhausted"}
     tests = sorted(
         _frontier(tree),
         key=lambda t: (
-            min(_depth(tree, key) for d in t["discriminates"] for key in d["effects"]),
+            min((_depth(tree, key) for key in t["targets"]), default=0),
             t["cost"],
             t["id"],
         ),
     )
     if tests:
         return {"action": "test", "test_id": tests[0]["id"], "targets": tests[0]["targets"]}
-    return {"action": "repair", "node_ids": _repair_needed(tree)}
+    return {"action": "assess", "node_ids": _repair_needed(tree)}
 
 
 def _view(tree, node_id="root"):
@@ -338,6 +308,7 @@ def _view(tree, node_id="root"):
         "reflection_pending": tree["reflection_pending"],
         "reflections": tree["reflections"],
         "stop_decision": tree.get("stop_decision"),
+        "stop_request_id": tree.get("stop_request_id"),
         "unverifiable": [
             {"id": h["id"], "claim": h["claim"], "summary": h["summary"]}
             for h in tree["hypotheses"].values()
@@ -349,13 +320,6 @@ def _view(tree, node_id="root"):
 def _new_hypotheses(tree, parent_id, candidates):
     if parent_id not in tree["hypotheses"]:
         raise ValueError("Unknown parent")
-    parent = tree["hypotheses"][parent_id]
-    if parent_id != "root" and parent["status"] in TERMINAL:
-        raise ValueError(
-            "Do not decompose a terminal hypothesis; propose a distinct root alternative or add new feasible evidence"
-        )
-    tested = any(t["feasible"] and parent_id in t["targets"] for t in tree["tests"].values())
-    depth = 0 if parent_id == "root" or tested else parent["decompose_depth_without_test"] + 1
     existing = {" ".join(h["claim"].casefold().split()) for h in tree["hypotheses"].values()}
     for draft in candidates:
         claim_key = " ".join(draft.claim.casefold().split())
@@ -368,31 +332,35 @@ def _new_hypotheses(tree, parent_id, candidates):
             "status": "untested",
             "summary": None,
             "history": [],
-            "decompose_depth_without_test": depth,
+            "decompose_depth_without_test": 0,
         }
 
 
-def _add_tests(tree, tests):
+def _add_tests(tree, tests, *, work_order_id=None, retrospective=False):
+    added = []
     for draft in tests or []:
         if draft.id in tree["tests"]:
+            existing = tree["tests"][draft.id]
+            if (
+                work_order_id is not None
+                and existing.get("work_order_id") == work_order_id
+                and all(existing.get(key) == value for key, value in draft.model_dump().items())
+            ):
+                continue
             raise ValueError("Test identity already exists; keep executed tests immutable")
         if any(k == "root" or k not in tree["hypotheses"] for k in draft.targets):
             raise ValueError("Test must reference existing non-root hypotheses")
+        now = datetime.now(UTC).isoformat()
         tree["tests"][draft.id] = {
             **draft.model_dump(),
             "status": "todo" if draft.feasible else "infeasible",
             "result": None,
+            "work_order_id": work_order_id,
+            "recorded_at": now,
+            "registered_at": None if retrospective else now,
         }
-        if draft.feasible:
-            for key in draft.targets:
-                node = tree["hypotheses"][key]
-                if node["status"] == "unverifiable":
-                    _set_status(
-                        tree,
-                        node,
-                        "untested",
-                        "New feasible test available; prior limitation retained in history.",
-                    )
+        added.append(draft.id)
+    return added
 
 
 def _load(db, workspace_id, task_id):
@@ -417,11 +385,37 @@ def _save(db, workspace_id, task_id, tree, revision):
     )
 
 
-def begin_tests(store, workspace_id, task_id, test_ids):
-    """Reserve attempts before external execution, inside the durable assign action.
+def _validate_evidence(db, workspace_id, task_id, refs):
+    for ref in refs:
+        if (
+            db.execute(
+                "SELECT 1 FROM research_observations WHERE observation_id = ? "
+                "AND task_id = ? AND workspace_id = ?",
+                (ref, task_id, workspace_id),
+            ).fetchone()
+            is None
+        ):
+            raise ValueError("Evidence must exist in this task's observation journal")
 
-    Failed/uncertain dispatches remain charged and running until settled. Retrying
-    a completed tool receipt never enters this function again.
+
+def _record_result(db, workspace_id, task_id, test, result):
+    _validate_evidence(db, workspace_id, task_id, result.evidence_refs)
+    if test["status"] == "done":
+        if test["result"] == result.model_dump():
+            return False
+        raise ValueError("Keep a recorded result immutable; use a new test for new evidence")
+    test["result"], test["status"] = result.model_dump(), "done"
+    test["result_recorded_at"] = datetime.now(UTC).isoformat()
+    return True
+
+
+def begin_tests(store, workspace_id, task_id, test_ids, *, execution_id=None, execution_ids=None):
+    """Reserve research attempts by real Expert WorkOrder, not by Test count.
+
+    The router passes all Expert WorkOrder IDs in the selected wave. Recovered
+    WorkOrders retain their reservation; a new follow-up WorkOrder costs another
+    attempt. Runtime code/token budgets still account for the work within it.
+    The singular execution_id and implicit per-test keys support older callers.
     """
     with store._transaction() as db:
         tree, revision = _load(db, workspace_id, task_id)
@@ -431,26 +425,48 @@ def begin_tests(store, workspace_id, task_id, test_ids):
             raise ValueError("Resume iterative research before executing tests")
         if not test_ids or len(set(test_ids)) != len(test_ids):
             raise ValueError("Supply unique research_test_ids for this execution wave")
-        if tree["reflection_pending"] or _repair_needed(tree):
-            raise ValueError(
-                "Restore the invariant and complete pending reflection before dispatch"
-            )
-        if not set(test_ids) <= {t["id"] for t in _frontier(tree)}:
-            raise ValueError("Only feasible, unexecuted frontier tests can be dispatched")
-        if tree["executions_used"] + len(test_ids) > tree["execution_budget"]:
-            raise ValueError("Execution budget exhausted; pause or explicitly raise the budget")
+        if execution_id is not None and execution_ids is not None:
+            raise ValueError("Supply one execution identity form")
+        explicit = execution_id is not None or execution_ids is not None
+        keys = (
+            list(dict.fromkeys(execution_ids))
+            if execution_ids is not None
+            else [execution_id]
+            if execution_id is not None
+            else [f"test:{key}" for key in test_ids]
+        )
+        if not keys:
+            raise ValueError("An execution reservation needs an execution identity")
+        tests = []
         for key in test_ids:
-            tree["tests"][key]["status"] = "running"
-            tree["tests"][key]["attempt_charged"] = True
-        tree["executions_used"] += len(test_ids)
-        step = tree["reflection_interval_percent"]
-        bucket = tree["executions_used"] * 100 // (tree["execution_budget"] * step)
-        if bucket > tree["reflection_bucket"]:
-            tree["reflection_pending"].append(
-                f"Execution budget crossed periodic reflection interval ({step}%)"
-            )
-            tree["reflection_bucket"] = bucket
-        _save(db, workspace_id, task_id, tree, revision)
+            test = tree["tests"].get(key)
+            if test is None:
+                raise ValueError("Only feasible, unexecuted tests can be dispatched")
+            linked = set(test.get("execution_ids", ()))
+            if test.get("execution_id"):
+                linked.add(test["execution_id"])
+            replay = explicit and set(keys) <= linked
+            if not (test["feasible"] and test["status"] == "todo") and not replay:
+                raise ValueError("Only feasible, unexecuted tests can be dispatched")
+            tests.append((test, linked))
+        charged = tree.setdefault("execution_ids", [])
+        new_keys = [key for key in keys if key not in charged]
+        if tree["executions_used"] + len(new_keys) > tree["execution_budget"]:
+            raise ValueError("Execution budget exhausted; pause or explicitly raise the budget")
+        changed = bool(new_keys)
+        for test, linked in tests:
+            if test["status"] == "todo":
+                test.update(status="running", attempt_charged=True)
+                changed = True
+            if explicit and not set(keys) <= linked:
+                test["execution_ids"] = list(dict.fromkeys((*sorted(linked), *keys)))
+                if len(test["execution_ids"]) == 1:
+                    test["execution_id"] = test["execution_ids"][0]
+                changed = True
+        charged.extend(new_keys)
+        tree["executions_used"] += len(new_keys)
+        if changed:
+            _save(db, workspace_id, task_id, tree, revision)
         return _view(tree)
 
 
@@ -461,6 +477,7 @@ def exploration_action(
     args: ExplorationInput,
     *,
     belief_reward=None,
+    request_id=None,
 ):
     # Python-only compatibility. The registered tool schema exposes only v2.
     if isinstance(args, legacy.ExplorationInput):
@@ -543,27 +560,20 @@ def exploration_action(
             )
             tree["paused"] = False
             tree.pop("stop_decision", None)
+            tree.pop("stop_request_id", None)
             if args.mode:
                 tree["mode"] = args.mode
         elif args.action == "pause":
-            if args.completion_summary:
-                if tree["mode"] == "iterative" and (
-                    not _all_terminal(tree) or tree["reflection_pending"]
-                ):
-                    raise ValueError(
-                        "Complete all root hypotheses and pending reflection before final classification"
-                    )
-                answered = any(c["status"] == "established" for c in _children(tree, "root"))
+            if args.completion_summary or args.decision:
+                if any(t["status"] == "running" for t in tree["tests"].values()):
+                    raise ValueError("Settle running tests before final completion")
+                decision = (
+                    "ideas_delivered" if tree["mode"] == "ideas" else args.decision or "answered"
+                )
                 tree["stop_decision"] = {
-                    "exit": "ideas_delivered"
-                    if tree["mode"] == "ideas"
-                    else "answered"
-                    if answered
-                    else "unable_to_answer",
-                    "question_resolved": tree["mode"] == "iterative" and answered,
-                    "summary": args.completion_summary
-                    + "\n"
-                    + (tree["hypotheses"]["root"].get("summary") or ""),
+                    "exit": decision,
+                    "question_resolved": decision == "answered",
+                    "summary": args.completion_summary or "",
                 }
             else:
                 tree["stop_decision"] = {
@@ -573,6 +583,7 @@ def exploration_action(
                     "question_resolved": False,
                     "next_step": _recommend(tree),
                 }
+            tree["stop_request_id"] = request_id
             tree["paused"] = True
         else:
             if tree["paused"]:
@@ -587,12 +598,6 @@ def exploration_action(
                     raise ValueError(
                         "Record or settle the running tests before reflecting on this wave"
                     )
-                if not tree["reflection_pending"]:
-                    raise ValueError("No reflection trigger is pending")
-                if args.coverage_complete and (args.candidates or args.tests):
-                    raise ValueError("Coverage complete reflection must not manufacture branches")
-                if not args.coverage_complete and not args.candidates:
-                    raise ValueError("Incomplete coverage requires new root hypotheses")
                 tree["reflections"].append(
                     {
                         "reasons": tree["reflection_pending"],
@@ -603,7 +608,7 @@ def exploration_action(
                 tree["reflection_pending"] = []
                 if args.candidates:
                     _new_hypotheses(tree, "root", args.candidates)
-                    _add_tests(tree, args.tests)
+                _add_tests(tree, args.tests)
             elif args.action == "mark_infeasible":
                 test = tree["tests"].get(args.test_id)
                 if not test or test["status"] not in {"todo", "running"}:
@@ -612,42 +617,233 @@ def exploration_action(
                 test["infeasible_reason"] = args.summary
             elif args.action == "record":
                 test = tree["tests"].get(args.test_id)
-                if not test or test["status"] != "running":
-                    raise ValueError("Record evidence only for a dispatched, unfinished test")
-                discriminator = next(
-                    (
-                        d
-                        for d in test["discriminates"]
-                        if d["outcome"] == args.result.outcome_observed
-                    ),
-                    None,
+                if not test:
+                    raise ValueError("Unknown test; include it in plan_test first")
+                if not _record_result(db, workspace_id, task_id, test, args.result):
+                    return _view(tree)
+            elif args.action == "adjudicate":
+                node = tree["hypotheses"].get(args.node_id)
+                if node is None:
+                    raise ValueError("Unknown hypothesis")
+                test = tree["tests"].get(args.test_id) if args.test_id else None
+                if args.test_id and (not test or args.node_id not in test["targets"]):
+                    raise ValueError("Judgment test must reference this hypothesis")
+                if args.status == "established" and (not test or len(set(test["targets"])) < 2):
+                    raise ValueError("established requires targets >= 2 in its cited test")
+                _validate_evidence(db, workspace_id, task_id, args.evidence_refs)
+                _set_status(
+                    tree,
+                    node,
+                    args.status,
+                    args.summary,
+                    evidence_refs=args.evidence_refs,
+                    test_id=args.test_id,
                 )
-                for ref in args.result.evidence_refs:
-                    if (
-                        db.execute(
-                            "SELECT 1 FROM research_observations WHERE observation_id = ? AND task_id = ? AND workspace_id = ?",
-                            (ref, task_id, workspace_id),
-                        ).fetchone()
-                        is None
-                    ):
-                        raise ValueError("Evidence must exist in this task's observation journal")
-                test["result"], test["status"] = args.result.model_dump(), "done"
-                # Unexpected evidence remains immutable and consumes its attempt;
-                # no invented effect. The Coordinator must plan a new valid test.
-                for key, proposed in (discriminator["effects"] if discriminator else {}).items():
-                    node = tree["hypotheses"][key]
-                    old = node["status"]
-                    opposite = (old in {"supported", "established"} and proposed == "refuted") or (
-                        old == "refuted" and proposed in {"supported", "established"}
-                    )
-                    status = "contested" if opposite else proposed
-                    if status == "established" and len(test["targets"]) < 2:
-                        raise ValueError("established requires targets >= 2")
-                    summary = f"Test {test['id']}; evidence {', '.join(args.result.evidence_refs)}: {args.result.summary}"
-                    if opposite:
-                        summary += "\nConflicting prior evidence: " + (node.get("summary") or old)
-                    _set_status(tree, node, status, summary)
-                    node["status_source"] = "test"
             _synchronize(tree)
         _save(db, workspace_id, task_id, tree, revision)
         return _view(tree)
+
+
+def _expert_view(tree, authorized_nodes, work_order_id):
+    """Project only authorized claims and the caller's own in-scope test facts."""
+    return {
+        "active": bool(tree and not tree["paused"]),
+        "hypotheses": {
+            key: {name: node.get(name) for name in ("id", "claim", "status")}
+            for key, node in (tree["hypotheses"] if tree else {}).items()
+            if key in authorized_nodes
+        },
+        "tests": {
+            test.get("local_id", key): test
+            for key, test in (tree["tests"] if tree else {}).items()
+            if test.get("work_order_id") == work_order_id
+            and set(test["targets"]) <= authorized_nodes
+        },
+    }
+
+
+def _read_test_notes(rows):
+    """Reassemble larger facts inside the journal's existing statement limit."""
+    tests, chunks = {}, {}
+    for row in rows:
+        try:
+            payload = json.loads(row["statement"])
+        except (ValueError, TypeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("kind") == "expert_test_fact_chunk":
+            snapshot = payload.get("snapshot")
+            part, total = payload.get("part"), payload.get("total")
+            if (
+                not isinstance(snapshot, str)
+                or not isinstance(part, int)
+                or not isinstance(total, int)
+            ):
+                continue
+            if not 0 <= part < total or not isinstance(payload.get("text"), str):
+                continue
+            pieces = chunks.setdefault(snapshot, {})
+            pieces[part] = payload["text"]
+            if len(pieces) != total or set(pieces) != set(range(total)):
+                continue
+            encoded = "".join(pieces[i] for i in range(total))
+            if hashlib.sha256(encoded.encode()).hexdigest() != snapshot:
+                continue
+            payload = json.loads(encoded)
+            del chunks[snapshot]
+        if payload.get("kind") == "expert_test_fact" and isinstance(payload.get("test"), dict):
+            test = payload["test"]
+            tests[test["id"]] = test
+    return tests
+
+
+def _write_test_note(store, db, workspace_id, task_id, work_order_id, request_id, test):
+    encoded = json.dumps({"kind": "expert_test_fact", "test": test}, ensure_ascii=False)
+    statements = [encoded]
+    if len(encoded) > 8000:
+        pieces = [encoded[i : i + 3000] for i in range(0, len(encoded), 3000)]
+        snapshot = hashlib.sha256(encoded.encode()).hexdigest()
+        statements = [
+            json.dumps(
+                {
+                    "kind": "expert_test_fact_chunk",
+                    "snapshot": snapshot,
+                    "part": i,
+                    "total": len(pieces),
+                    "text": piece,
+                },
+                ensure_ascii=False,
+            )
+            for i, piece in enumerate(pieces)
+        ]
+    for statement in statements:
+        store._insert_research_observation(
+            db,
+            ResearchObservationDraft(
+                workspace_id=workspace_id,
+                task_id=task_id,
+                request_id=request_id,
+                work_order_id=work_order_id,
+                kind="method",
+                statement=statement,
+                evidence_refs=tuple((test.get("result") or {}).get("evidence_refs", [])),
+                outcome="retrieved",
+            ),
+        )
+
+
+def expert_test_action(
+    store: RequestStore,
+    workspace_id: str,
+    task_id: str,
+    work_order_id: str,
+    authorized_nodes,
+    args: ExpertTestInput,
+):
+    """Record optional test facts without changing or creating a hypothesis tree.
+
+    The tool supplies server-bound identity and node scope. A result may include
+    a new retrospective test; no pre-registration receipt is required. Ordinary
+    tasks use existing method observations, and test summaries do not charge a
+    second execution after the Expert runtime has already accounted for its work.
+    """
+    with store._transaction() as db:
+        tree, revision = _load(db, workspace_id, task_id)
+        work = db.execute(
+            "SELECT workspace_id, work_order_json, authority FROM team_work_records "
+            "WHERE work_order_id = ?",
+            (work_order_id,),
+        ).fetchone()
+        if work is None or work["workspace_id"] != workspace_id or work["authority"] != "expert":
+            raise RequestStoreError("Test facts require the bound Expert WorkOrder")
+        order = json.loads(work["work_order_json"])
+        if order.get("task_id") != task_id:
+            raise RequestStoreError("Expert WorkOrder belongs to another task")
+        scope = set(authorized_nodes)
+        if tree and tree.get("schema_version") != 2:
+            if args.action != "read":
+                raise ValueError("Historical v1 tree is read-only; use a new research task")
+            return {"active": False, "legacy_read_only": True, "hypotheses": {}, "tests": {}}
+        if any(key == "root" or not tree or key not in tree["hypotheses"] for key in scope):
+            raise ValueError("Authorized nodes must exist in the bound research tree")
+        execution = None
+        if args.execution_id:
+            execution = db.execute(
+                "SELECT task_id, workspace_id, work_order_id, started_at FROM code_executions "
+                "WHERE execution_id = ?",
+                (args.execution_id,),
+            ).fetchone()
+            if execution is None or (
+                execution["task_id"],
+                execution["workspace_id"],
+                execution["work_order_id"],
+            ) != (task_id, workspace_id, work_order_id):
+                raise ValueError("Execution must belong to this Expert WorkOrder")
+        notes = tree if tree else {"hypotheses": {}, "tests": {}, "paused": False}
+        if tree is None:
+            rows = db.execute(
+                "SELECT statement FROM research_observations WHERE workspace_id = ? "
+                "AND task_id = ? AND work_order_id = ? AND kind = 'method' "
+                "ORDER BY created_at, rowid",
+                (workspace_id, task_id, work_order_id),
+            ).fetchall()
+            notes["tests"] = _read_test_notes(rows)
+        if args.action == "read":
+            view = _expert_view(notes, scope, work_order_id)
+            view["active"] = bool(tree and not tree["paused"])
+            return view
+
+        # Late results remain facts after a pause; they never reopen the question.
+        def own_test_id(local_id):
+            existing = notes["tests"].get(local_id)
+            if existing is not None and existing.get("work_order_id") == work_order_id:
+                return local_id
+            identity = f"{work_order_id}\0{local_id}".encode()
+            return "xt_" + hashlib.sha256(identity).hexdigest()[:32]
+
+        drafts = []
+        local_ids = {}
+        for draft in args.tests or []:
+            if not set(draft.targets) <= scope:
+                raise ValueError("Test targets exceed the Expert's authorized nodes")
+            key = own_test_id(draft.id)
+            drafts.append(draft.model_copy(update={"id": key}))
+            local_ids[key] = draft.id
+        changed_ids = _add_tests(
+            notes, drafts, work_order_id=work_order_id, retrospective=args.action == "record"
+        )
+        for key in changed_ids:
+            notes["tests"][key]["local_id"] = local_ids[key]
+        if args.action == "record":
+            key = own_test_id(args.test_id)
+            test = notes["tests"].get(key)
+            if not test or test.get("work_order_id") != work_order_id:
+                raise ValueError("Experts may record only their own tests")
+            if not set(test["targets"]) <= scope:
+                raise ValueError("Test targets exceed the Expert's authorized nodes")
+            if execution is not None and test.get("execution_id") not in (None, args.execution_id):
+                raise ValueError("Keep a recorded test execution immutable")
+            if _record_result(db, workspace_id, task_id, test, args.result):
+                changed_ids.append(key)
+                if execution is not None:
+                    test["execution_id"] = args.execution_id
+                    test["executed_at"] = execution["started_at"]
+        if tree is not None:
+            if changed_ids:
+                _save(db, workspace_id, task_id, tree, revision)
+        else:
+            for key in dict.fromkeys(changed_ids):
+                test = notes["tests"][key]
+                _write_test_note(
+                    store,
+                    db,
+                    workspace_id,
+                    task_id,
+                    work_order_id,
+                    order["parent_request_id"],
+                    test,
+                )
+        view = _expert_view(notes, scope, work_order_id)
+        view["active"] = bool(tree and not tree["paused"])
+        return view

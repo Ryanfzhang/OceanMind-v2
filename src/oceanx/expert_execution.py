@@ -458,6 +458,29 @@ class ExpertCodeExecutionService:
             raise ExpertCodeExecutionError("Expert file session is unavailable")
         if offset < 0 or not 1 <= limit <= 12_000:
             raise ExpertCodeExecutionError("Invalid text offset or limit")
+        if path.startswith("expert-report:"):
+            report_work_id = path.removeprefix("expert-report:")
+            origin = self.store.get_team_work(report_work_id)
+            current_job = work.work_order.job_key or work_order_id
+            if (
+                origin is None
+                or origin.workspace_id != workspace_id
+                or origin.work_order.task_id != task_id
+                or (origin.work_order.job_key or report_work_id) != current_job
+                or origin.result is None
+            ):
+                raise ExpertCodeExecutionError("Report is outside this Expert's session or unavailable")
+            text = json.dumps({
+                "work_order_id": report_work_id,
+                "assignment": origin.work_order.scientific_assignment(),
+                "status": origin.state.value,
+                "result": origin.result.coordinator_payload(),
+            }, ensure_ascii=False, sort_keys=True, indent=2)
+            end = offset + limit
+            return {
+                "path": path, "content": text[offset:end], "offset": offset,
+                "next_offset": end if end < len(text) else None, "eof": end >= len(text),
+            }
         root = self.task_workspaces.expert_session_root(
             task_id, work.work_order.job_key or work_order_id
         ).resolve()
@@ -984,17 +1007,7 @@ class ExpertCodeExecutionService:
         manifest_payload = {
             "review_evidence": review_evidence,
             "work_order_id": work_order_id,
-            "assignment": {
-                "todo_id": order.todo_id,
-                "task_goal": order.task_goal,
-                "context_summary": order.context_summary,
-                "profile_id": order.profile_id,
-                "semantic_role": order.semantic_role,
-                "outcome_intents": list(order.outcome_intents),
-                "constraints": list(order.constraints),
-                "done_when": order.done_when,
-                "session_round": order.session_round,
-            },
+            "assignment": order.scientific_assignment(),
             "runtime": {
                 "scientific_view": {
                     "available": True,

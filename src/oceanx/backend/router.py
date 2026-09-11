@@ -76,6 +76,7 @@ from oceanx.expert_deliverables import (
     ExpertDeliverableError,
     interactive_view_cache,
 )
+from oceanx.exploration import ExplorationInput, begin_tests, exploration_action
 from oceanx.figure_reproduction import (
     FigureReproductionSource,
     build_figure_reproduction_notebook,
@@ -2357,72 +2358,140 @@ class OceanRequestRouter:
 
     @classmethod
     def _agent_session_capsule(cls, records: list[TeamWorkRecord]) -> str:
-        """Build bounded durable memory for a new round in one Expert session.
+        """Pack complete context values; full reports remain readable by virtual path."""
 
-        The child model process is disposable. Continuity lives in accepted or
-        partial round results keyed by ``job_key`` so a follow-up can reuse prior
-        evidence without replaying the previous model loop.
-        """
-
-        # Backend-recovered partial results also become durable context when an
-        # exhausted interrupted WorkOrder must be followed by a fresh bounded
-        # assignment. This preserves useful prose and outputs without replaying
-        # the failed provider transcript.
         terminal_records = [record for record in records if record.result is not None]
         rounds: list[dict[str, Any]] = []
-        # Expert continuity is a compact product history, not a replay of the
-        # prior ReAct transcript, checkpoints, methods, and diagnostics. The
-        # latter already live in durable execution records and the manifest.
-        numbered_records = list(enumerate(terminal_records, start=1))[-3:]
-        for round_number, record in reversed(numbered_records):
-            result = record.result
-            rounds.append(
-                {
-                    "round": round_number,
-                    "goal": record.work_order.task_goal,
-                    "requested_outcomes": list(record.work_order.outcome_intents),
-                    "status": record.state.value,
-                    "result": (
-                        {
-                            "text": cls._bounded_text(result.text, 6_000),
-                            "result_origin": (
-                                result.result_origin.value
-                                if result.result_origin is not None
-                                else None
-                            ),
-                            "outputs": [item.model_dump(mode="json") for item in result.outputs],
-                            "conclusions": [
-                                item.model_dump(mode="json") for item in result.conclusions
-                            ],
-                            "evidence_refs": [
-                                item.model_dump(mode="json") for item in result.evidence_refs
-                            ],
-                            "limitations": list(result.limitations),
-                            "unresolved_questions": list(result.unresolved_questions),
-                            "failure_code": (
-                                result.failure_code.value
-                                if result.failure_code is not None
-                                else None
-                            ),
-                            "error": result.error,
-                        }
-                        if result is not None
-                        else None
-                    ),
-                }
-            )
-        return cls._bounded_text(
-            json.dumps(
-                {
-                    "round_count": len(terminal_records),
-                    "ordering": "most_recent_first",
-                    "rounds": rounds,
-                },
-                ensure_ascii=False,
-                sort_keys=True,
+        omitted = {"rounds": max(0, len(terminal_records) - 3), "items": 0, "fields": 0}
+        memory = {
+            "round_count": len(terminal_records),
+            "ordering": "most_recent_first",
+            "projection": (
+                "Compact excerpts, not complete reports. Use ocean_read_file on full_report_path "
+                "with offset/limit for omitted details. An omitted issue is not resolved."
             ),
-            8_000,
-        )
+            "rounds": rounds,
+            "earlier_open_items": [],
+            "omitted_counts": omitted,
+        }
+
+        def serialized() -> str:
+            return json.dumps(memory, ensure_ascii=False, sort_keys=True)
+
+        def add_field(target: dict, key: str, value: Any, budget: int = 9_800) -> bool:
+            target[key] = value
+            if len(serialized()) <= budget:
+                return True
+            target.pop(key)
+            omitted["fields"] += 1
+            return False
+
+        def add_item(target: list, value: Any, budget: int = 9_800) -> bool:
+            target.append(value)
+            if len(serialized()) <= budget:
+                return True
+            target.pop()
+            omitted["items"] += 1
+            return False
+
+        def excerpt(target: dict, key: str, text: str, limit: int = 700) -> None:
+            if not text:
+                return
+            if len(text) <= limit:
+                add_field(target, key, text)
+            else:
+                # Only prose gets excerpts. IDs, URLs, file paths and refs stay exact.
+                add_field(target, key + "_excerpt", text[:limit])
+                omitted["fields"] += 1
+
+        def pack_items(target: dict, key: str, values: list, budget: int = 9_800) -> None:
+            if not values:
+                return
+            if not add_field(target, key, [], budget):
+                omitted["items"] += len(values)
+                return
+            for value in values:
+                if add_item(target[key], value, budget):
+                    continue
+                if isinstance(value, dict) and "id" in value:
+                    summary = {"id": value["id"], "details_omitted": True}
+                    for name in ("statement", "observation", "proposed_question"):
+                        if isinstance(value.get(name), str) and value[name]:
+                            summary[name + "_excerpt"] = value[name][:240]
+                    add_item(target[key], summary, budget)
+
+        selected = list(enumerate(terminal_records, start=1))[-3:]
+        for number, record in reversed(selected):
+            result = record.result
+            rounds.append({
+                "round": number,
+                "work_order_id": record.work_order.work_order_id,
+                "full_report_path": f"expert-report:{record.work_order.work_order_id}",
+                "status": record.state.value,
+                "result": {
+                    "result_origin": result.result_origin.value if result.result_origin else None,
+                    "outputs": [],
+                },
+            })
+
+        # Reserve a bounded index for older declared open issues before recent
+        # output manifests consume the packet. This does not judge their importance.
+        for record in terminal_records[:-3]:
+            result = record.result
+            report = result.report
+            report_has_open_items = report is not None and (
+                report.answer.open_gaps or report.limitations or report.leads or report.open_conflicts
+            )
+            if not report_has_open_items and not result.unresolved_questions and not result.limitations:
+                continue
+            summary = {
+                "work_order_id": record.work_order.work_order_id,
+                "full_report_path": f"expert-report:{record.work_order.work_order_id}",
+            }
+            if not add_item(memory["earlier_open_items"], summary, 3_000):
+                continue
+            if report is not None:
+                for key, values in (
+                    ("open_gaps", list(report.answer.open_gaps)),
+                    ("limitations", [item.model_dump(mode="json", exclude_defaults=True) for item in report.limitations]),
+                    ("leads", [item.model_dump(mode="json", exclude_defaults=True) for item in report.leads]),
+                    ("open_conflicts", list(report.open_conflicts)),
+                ):
+                    pack_items(summary, key, values, 3_000)
+            else:
+                pack_items(summary, "unresolved_questions", list(result.unresolved_questions), 3_000)
+                pack_items(summary, "limitations", list(result.limitations), 3_000)
+
+        for entry, (_number, record) in zip(rounds, reversed(selected), strict=True):
+            result = record.result
+            target = entry["result"]
+            excerpt(entry, "goal", record.work_order.task_goal, 500)
+            add_field(entry, "requested_outcomes", list(record.work_order.outcome_intents))
+            if result.report is not None:
+                report = result.report.model_dump(mode="json", exclude_none=True, exclude_defaults=True)
+                target["report"] = {"answer": {}}
+                answer = target["report"]["answer"]
+                excerpt(answer, "statement", report["answer"]["statement"], 1_200)
+                for key in ("direction", "level"):
+                    if key in report["answer"]:
+                        add_field(answer, key, report["answer"][key])
+                pack_items(answer, "open_gaps", report["answer"].get("open_gaps", []))
+                for key in ("limitations", "leads", "open_conflicts", "required_outputs_status", "tests", "path_deviations"):
+                    pack_items(target["report"], key, report.get(key, []))
+                pack_items(answer, "evidence_refs", report["answer"].get("evidence_refs", []))
+            else:
+                excerpt(target, "text", result.text, 2_000)
+                target["conclusions"] = []
+                pack_items(target, "conclusions", [item.model_dump(mode="json") for item in result.conclusions])
+                pack_items(target, "limitations", list(result.limitations))
+                pack_items(target, "unresolved_questions", list(result.unresolved_questions))
+            if result.failure_code is not None:
+                add_field(target, "failure_code", result.failure_code.value)
+            if result.error:
+                excerpt(target, "error", result.error, 700)
+            pack_items(target, "outputs", [item.coordinator_payload() for item in result.outputs])
+            pack_items(target, "evidence_refs", [item.model_dump(mode="json") for item in result.evidence_refs])
+        return serialized()
 
     @staticmethod
     def _team_work_token_usage(records: list[TeamWorkRecord]) -> int:
@@ -2568,6 +2637,7 @@ class OceanRequestRouter:
         plan_goal = str(payload.pop("plan_goal")).strip()
         todos = list(payload.pop("todos"))
         dispatch = tuple(str(todo_id) for todo_id in payload.pop("dispatch"))
+        research_test_ids = tuple(payload.pop("research_test_ids", ()))
         if payload:
             raise RequestStoreError(
                 "Team assignment contains unsupported fields: " + ", ".join(sorted(payload))
@@ -2608,6 +2678,9 @@ class OceanRequestRouter:
             workspace_id=workspace_id,
             task_id=task_id,
         )
+        explicit_source_selection = {
+            str(todo["todo_id"]): "source_handles" in todo for todo in dispatched_todos
+        }
         for todo in dispatched_todos:
             bind_agent_profile(todo)
             authority = ChildAuthority(todo["authority"])
@@ -2637,14 +2710,15 @@ class OceanRequestRouter:
                 # trigger a response retry.
                 selected_sources = task_sources
             todo["task_goal"] = todo.pop("question")
-            todo["context_summary"] = "\n\n".join(
+            todo["question_ref"] = str(todo["todo_id"])
+            todo["context_summary"] = self._bounded_text("\n\n".join(
                 part
                 for part in (
                     f"Why this Expert: {todo.pop('why_this_expert')}",
                     str(todo.pop("context", "")).strip(),
                 )
                 if part
-            )
+            ), 16_000)
             todo["outcome_intents"] = tuple(todo.pop("expected_outputs"))
             # Experts receive backend-mounted Task Sources. The Scientific
             # Discussion Partner receives only the Coordinator's question,
@@ -2697,6 +2771,7 @@ class OceanRequestRouter:
         for todo_id, latest in existing_jobs.items():
             if (
                 latest is None
+                or todos_by_id[todo_id].get("continuation") is not None
                 or latest.work_order.parent_request_id != context.request_id
                 or latest.work_order.todo_id != todo_id
                 or latest.result is None
@@ -2776,10 +2851,9 @@ class OceanRequestRouter:
                     "synthesize the supported answer with its remaining limitation."
                 )
             if continuation is not None:
-                # The Expert still owns this assignment. Coordinator prose,
-                # regenerated parameters, and a new operation id cannot create
-                # another round until the Expert explicitly submits. Refresh
-                # only the revision required by WorkPlan validation.
+                # An implicit recovery retries the same unfinished assignment;
+                # an explicit Coordinator continuation takes the new-round path
+                # below so its approved question and scope are not discarded.
                 orders.append(
                     continuation.work_order.model_copy(
                         update={
@@ -2792,12 +2866,40 @@ class OceanRequestRouter:
             prior_terminal_records = [
                 record for record in prior_records if record.result is not None
             ]
+            todo["mode"] = "continue" if prior_terminal_records else "new"
+            if prior_terminal_records and todo.get("continuation"):
+                source_ref = todo["continuation"].get("source_report_ref")
+                source_records = [
+                    record for record in prior_terminal_records
+                    if source_ref is None or record.work_order.work_order_id == source_ref
+                ]
+                if not source_records:
+                    raise RequestStoreError(
+                        "continuation.source_report_ref must name a returned work_order_id "
+                        "in this Expert session"
+                    )
+                previous_order = source_records[-1].work_order
+                # A short authorized follow-up inherits the existing scientific
+                # envelope unless the Coordinator explicitly replaces it.
+                for field in (
+                    "answer_standard", "required_outputs", "target_node",
+                    "alternative_nodes", "suggested_path", "hints", "constraints",
+                ):
+                    if field not in todo:
+                        previous_value = getattr(previous_order, field)
+                        todo[field] = previous_value
+                todo["question_ref"] = previous_order.question_ref or previous_order.todo_id or todo_id
+                if not explicit_source_selection[todo_id]:
+                    todo["input_refs"] = previous_order.input_refs
+                todo["context_summary"] = (
+                    f"Continuing scientific question: {previous_order.task_goal}\n\n"
+                    + todo["context_summary"]
+                )
             if prior_terminal_records:
-                todo["context_summary"] = self._bounded_text(
-                    "\n\n".join(
+                todo["context_summary"] = "\n\n".join(
                         part
                         for part in (
-                            str(todo.get("context_summary", "")).strip(),
+                            self._bounded_text(str(todo.get("context_summary", "")).strip(), 4_000),
                             "This is a new Coordinator follow-up round in the same logical Expert "
                             "session. Reuse the durable results and execution evidence below. "
                             "Answer the new incremental question; do not repeat or recompute "
@@ -2805,9 +2907,7 @@ class OceanRequestRouter:
                             + self._agent_session_capsule(prior_terminal_records),
                         )
                         if part
-                    ),
-                    16_000,
-                )
+                    )
             candidate = WorkOrder(
                 work_order_id=key_to_id[todo_id],
                 task_id=task_id,
@@ -2831,6 +2931,17 @@ class OceanRequestRouter:
             work_orders=tuple(orders),
             preserve_disagreements=True,
         )
+        if research_test_ids:
+            # Reserve once per actual Expert round, including stable identities
+            # reused after interruption. Discussion has no scientific execution.
+            execution_ids = [
+                order.work_order_id for order in orders if order.authority is ChildAuthority.EXPERT
+            ]
+            if execution_ids:
+                begin_tests(
+                    self.store, workspace_id, task_id, research_test_ids,
+                    execution_ids=execution_ids,
+                )
         results = await orchestrator.execute_plan(
             workspace_id=workspace_id,
             workspace_path=workspace_path,
@@ -2856,7 +2967,7 @@ class OceanRequestRouter:
             # The Coordinator already authored the WorkPlan. Do not echo it or
             # return backend bookkeeping inside the semantic ExpertResult.
             # Work state remains in work_records/todo_progress; scientific
-            # handoff is deliberately only text plus fully described outputs.
+            # handoff is one scientific report plus fully described outputs.
             "expert_results": [result.coordinator_payload() for result in results],
             "work_records": [
                 (
@@ -3150,6 +3261,32 @@ class OceanRequestRouter:
         )
         return record.ref
 
+    def _explicit_research_outcome(
+        self, workspace_id: str, task_id: str | None, request_id: str
+    ) -> Literal["answered", "insufficient_evidence", "partial", "blocked"] | None:
+        """Copy an explicit current-turn scientific decision, never infer one.
+
+        Message delivery still completes normally if no research label was set.
+        A previous turn's tree decision is not a verdict about this answer.
+        """
+        if task_id is None:
+            return None
+        try:
+            tree = exploration_action(
+                self.store, workspace_id, task_id, ExplorationInput(action="read")
+            )
+        except (RequestStoreError, ValueError):
+            return None
+        if tree.get("stop_request_id") != request_id:
+            return None
+        decision = tree.get("stop_decision")
+        if not isinstance(decision, dict):
+            return None
+        return {
+            "answered": "answered",
+            "unable_to_answer": "insufficient_evidence",
+        }.get(decision.get("exit"))
+
     def _canonical_user_answer(
         self,
         *,
@@ -3395,6 +3532,9 @@ class OceanRequestRouter:
                             result_refs=fallback_results,
                         ),
                         decision=fallback_decision,
+                        research_outcome=self._explicit_research_outcome(
+                            agent_session.workspace_id, agent_session.task_id, request.request_id
+                        ),
                         answer_basis=(
                             CoordinatorAnswerBasis.EXPERT_EVIDENCE
                             if team_records

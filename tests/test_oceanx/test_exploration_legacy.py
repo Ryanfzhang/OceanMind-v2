@@ -60,7 +60,7 @@ def assignment(question=None):
                 "why_this_expert": "Data coverage",
                 "profile_id": "data_reproducibility_expert",
                 "expected_outputs": ["answer"],
-                "done_when": "Report available variables",
+                "answer_standard": {"sufficient_if": "Report available variables"},
             }
         ],
         dispatch=["inspect"],
@@ -81,7 +81,8 @@ async def test_research_assignment_initializes_root_and_returns_loop_context(sto
     async def sink(payload, context):
         # Root is durable before the expert starts. No new fields reach WorkOrder parsing.
         assert call(store, "read")["goal"] == question
-        assert set(payload) == {"plan_goal", "todos", "dispatch"}
+        assert {"plan_goal", "todos", "dispatch"} <= set(payload)
+        assert not set(payload) - {"plan_goal", "todos", "dispatch", "research_test_ids"}
         dispatched.append(payload)
         observation(store)
         return {"results": [{"summary": "Data inspected"}]}
@@ -104,10 +105,10 @@ async def test_research_assignment_initializes_root_and_returns_loop_context(sto
     payload = json.loads(result.output)
     tree = payload["research_exploration"]
     assert tree["mode"] == "iterative"
-    assert tree["recommendation"] == {"action": "repair", "node_ids": ["root"]}
+    assert tree["recommendation"] == {"action": "assess", "node_ids": ["root"]}
     assert tree["recent_evidence"]
     assert tree["tree_text"] == question
-    assert "Record each dispatched Test" in payload["research_next_step"]
+    assert "Interpret evidence before adjudicating state" in payload["research_next_step"]
     # A transport replay neither dispatches the expert again nor resets the tree.
     replay = await tool.execute(assignment(question), context)
     assert replay.metadata["replayed"]
@@ -115,7 +116,7 @@ async def test_research_assignment_initializes_root_and_returns_loop_context(sto
     call(store, "propose", expected_revision=1,
          candidates=[{"id": "A", "claim": "A", "relation_to_children": "alternatives"}],
          tests=[{"id": "TA", "targets": ["A"], "method": "Compare data", "feasible": True,
-                 "cost": 1, "discriminates": [{"outcome": "observed", "effects": {"A": "supported"}}]}])
+                 "cost": 1, "discriminates": [{"outcome": "observed", "interpretation": "Support A"}]}])
     call(store, "pause", expected_revision=2)
     resumed = await tool.execute(assignment(question).model_copy(update={"research_test_ids": ("TA",)}), ToolExecutionContext(cwd=tmp_path))
     assert not resumed.is_error

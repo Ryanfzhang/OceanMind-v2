@@ -37,7 +37,12 @@ from oceanx.expert_execution import (
     ExpertCodeExecutionError,
     ExpertCodeExecutionService,
 )
-from oceanx.exploration import ExplorationInput, begin_tests, exploration_action
+from oceanx.exploration import (
+    ExpertTestInput,
+    ExplorationInput,
+    expert_test_action,
+    exploration_action,
+)
 from oceanx.jina_reader import JinaReaderTool
 from oceanx.protocol.v2.models import EventEnvelope
 from oceanx.research_learning import (
@@ -52,8 +57,11 @@ from oceanx.skills import (
 )
 from oceanx.task_results import TaskResultError, TaskResultRef
 from oceanx.team.models import (
+    AnswerStandard,
     ChildAuthority,
     ExpertOutput,
+    RequiredOutput,
+    WorkContinuation,
     expert_output_item_id,
     validate_todo_graph,
 )
@@ -524,22 +532,16 @@ class OceanSaveExperienceInput(OceanToolInput):
 class OceanExplorationTool(_OceanTool):
     name = "ocean_exploration"
     description = (
-        "Coordinator-owned hypothesis tree with separate cross-hypothesis tests. propose candidates "
-        "with id, claim and relation_to_children (alternatives or prerequisites); plan_test with "
-        "targets, feasible, cost, method and predeclared discriminates (outcome and effects by hypothesis ID). "
-        "Every nonterminal leaf needs a feasible pending test or decomposition. Two consecutive "
-        "decompositions without a feasible test close that line as unverifiable. Select tests affecting "
-        "the shallowest hypotheses first, then lower cost. Dispatch research_test_ids via ocean_assign. "
-        "record a dispatched test's result with evidence_refs and outcome_observed; unexpected outcomes "
-        "are retained without inventing effects. mark_infeasible settles a pending/running test with "
-        "test_id and summary (reason), without refuting hypotheses. Contrary evidence "
-        "becomes contested; direct established requires two distinct targets. All-terminal children "
-        "roll up by strong three-valued OR/AND, preserving unknown reasons in summary. "
-        "reflect acknowledges pending terminal/periodic triggers and adds root candidates only when "
-        "coverage_complete=false. No numeric beliefs, node quotas or sampling. pause with completion_summary "
-        "requires all root hypotheses terminal and reflection done; classifies answered/unable_to_answer. "
-        "Budget/user stops omit completion_summary. Mutations require expected_revision. Historical v1 "
-        "trees remain readable but are not converted. Only Coordinator owns this tool."
+        "Coordinator-owned hypotheses and scientific decisions. Propose authorized hypotheses; "
+        "plan_test and record preserve test facts without changing scientific state. After interpreting "
+        "evidence, adjudicate a node's status; direct established still requires a test with at least "
+        "two distinct targets, which is not proof of independent or sufficient evidence. Parent/child "
+        "relationships organize reasoning, not automatic scientific verdicts. Optional tests and leads "
+        "do not prevent answering. pause with completion_summary and decision answered or "
+        "unable_to_answer records YOUR assessment of the question; supported or negative findings can "
+        "answer it without establishing every branch. Budget/user stops omit completion_summary. "
+        "No compulsory reflection or preregistration round. Mutations use existing expected_revision; "
+        "historical v1 trees remain read-only. Only Coordinator owns hypothesis/state mutations."
     )
     input_model = ExplorationInput
 
@@ -561,7 +563,68 @@ class OceanExplorationTool(_OceanTool):
         async def action() -> ToolResult:
             return self._json(exploration_action(
                 self.services.store, self.services.workspace_id, self.services.task_id, arguments,
+                request_id=context.request_id,
             ))
+
+        if self.is_read_only(arguments):
+            try:
+                return await action()
+            except (RequestStoreError, ValueError) as exc:
+                return self._error(str(exc))
+        return await self._run_mutation(context, action)
+
+
+class OceanExpertTestsTool(_OceanTool):
+    name = "ocean_expert_tests"
+    description = (
+        "Read your authorized research context or record your own scientific test facts. "
+        "Optional: analysis does not require preregistering every code call. Record plans or "
+        "retrospective exploratory results honestly, with evidence references. You may not create "
+        "hypotheses, reopen nodes or change scientific status; propose new goals as leads to the "
+        "Coordinator. Without a tree, records stay attached to the current question. "
+        "evidence_refs are observation IDs returned by read, not file paths. For a code result "
+        "you may instead provide its execution_id and leave evidence_refs empty."
+    )
+    input_model = ExpertTestInput
+
+    def is_read_only(self, arguments: ExpertTestInput) -> bool:
+        return arguments.action == "read"
+
+    def effect_for(self, arguments: ExpertTestInput) -> ToolEffect:
+        return ToolEffect.READ_ONLY if self.is_read_only(arguments) else ToolEffect.MUTATION
+
+    def concurrency_key(self, arguments: ExpertTestInput) -> str:
+        return f"exploration:{self.services.workspace_id}:{self.services.task_id}"
+
+    async def execute(self, arguments: ExpertTestInput, context: ToolExecutionContext) -> ToolResult:
+        services = self.services
+        record = services.store.get_team_work(services.work_order_id) if services.work_order_id else None
+        if (
+            record is None
+            or services.task_id is None
+            or record.workspace_id != services.workspace_id
+            or record.work_order.task_id != services.task_id
+            or record.work_order.authority is not ChildAuthority.EXPERT
+        ):
+            return self._error("Expert research context is unavailable for this WorkOrder")
+        order = record.work_order
+        authorized_nodes = tuple(dict.fromkeys(
+            (*( (order.target_node,) if order.target_node else () ), *order.alternative_nodes)
+        ))
+
+        async def action() -> ToolResult:
+            value = expert_test_action(
+                services.store, services.workspace_id, services.task_id,
+                order.work_order_id, authorized_nodes, arguments,
+            )
+            if self.is_read_only(arguments):
+                value["evidence_observations"] = [
+                    {"id": item.observation_id, "kind": item.kind.value,
+                     "statement": item.statement[:700]}
+                    for item in services.store.list_research_observations(task_id=services.task_id)
+                    if item.work_order_id == order.work_order_id
+                ][-16:]
+            return self._json(value)
 
         if self.is_read_only(arguments):
             try:
@@ -639,7 +702,8 @@ class OceanReadFileTool(_OceanTool):
     description = (
         "Read saved UTF-8 text from this Expert's persistent session or explicitly assigned review evidence. "
         "Use the exact logs or result_bundle_path returned by ocean_expert_run_code or session "
-        "memory to retrieve omitted results without running Python or recomputing. Follow "
+        "memory, including expert-report:<work_order_id> for a prior report in this session, "
+        "to retrieve omitted results without running Python or recomputing. Follow "
         "next_offset to read more. Binary arrays require scientific code."
     )
     input_model = OceanReadFileInput
@@ -1485,13 +1549,24 @@ class OceanTodoInput(OceanToolInput):
         ),
     )
     constraints: tuple[str, ...] = Field(default=(), max_length=32)
-    done_when: str = Field(
-        min_length=1,
-        max_length=8_000,
+    answer_standard: AnswerStandard | None = Field(
+        default=None,
         description=(
-            "Evidence-sufficiency stopping condition for the delegated question. Do not turn the "
-            "Expert profile or Manual into an exhaustive completion checklist."
+            "What evidence would answer this question and how strong a claim this round permits. "
+            "Scientific guidance, not a mandatory sequence or backend acceptance gate."
         ),
+    )
+    required_outputs: tuple[RequiredOutput, ...] = Field(
+        default=(), description="User-required calculations/files or essential outcomes, not optional methods."
+    )
+    suggested_path: tuple[str, ...] = Field(
+        default=(), description="Optional, replaceable analysis suggestions; Experts may choose better tests."
+    )
+    target_node: str | None = Field(default=None, description="Existing authorized hypothesis; omit for no-tree work.")
+    alternative_nodes: tuple[str, ...] = Field(default=(), description="Existing alternatives this Expert may test.")
+    hints: tuple[str, ...] = Field(default=(), description="Optional scientific doubts, not checklist items.")
+    continuation: WorkContinuation | None = Field(
+        default=None, description="Incremental same-instance follow-up to a gap, lead or returned result."
     )
     budget_tier: Literal["quick", "standard", "deep"] = Field(
         default="standard",
@@ -1519,7 +1594,7 @@ class OceanTodoInput(OceanToolInput):
 
 class OceanAssignmentInput(OceanToolInput):
     research_test_ids: tuple[str, ...] = Field(
-        default=(), description="Planned research Test IDs executed by this wave; Coordinator-only, never sent to Experts",
+        default=(), description="Optional planned Test IDs associated with this wave; not a prerequisite for analysis.",
     )
     research_question: str | None = Field(
         default=None,
@@ -1651,32 +1726,31 @@ class OceanAssignmentTool(_OceanTool):
                     )
                 elif not tree["active"] or tree["mode"] != "iterative":
                     tree_action("resume", expected_revision=tree["revision"], mode="iterative")
-                tree = tree_action("read")
-                if arguments.research_test_ids:
-                    begin_tests(self.services.store, self.services.workspace_id,
-                                self.services.task_id, arguments.research_test_ids)
-                elif len(tree.get("hypotheses", {})) > 1:
-                    return self._error("Research execution requires planned research_test_ids. Record/review existing results without dispatching another Expert.")
             elif arguments.research_test_ids:
                 return self._error("research_test_ids require research_question")
-            # Research context belongs to the Coordinator, not the expert WorkOrder schema.
+            # The full tree remains Coordinator context. Each WorkOrder passes only
+            # its explicitly authorized target/alternatives, not all hypotheses.
+            assignment = arguments.model_dump(
+                mode="json", exclude_unset=True, exclude={"research_question", "research_test_ids"}
+            )
+            if arguments.research_test_ids:
+                # The router binds real WorkOrder identities before reserving the
+                # wave; several Tests executed by one Expert cost one attempt.
+                assignment["research_test_ids"] = list(arguments.research_test_ids)
             value = await self.services.team_assign_sink(
-                arguments.model_dump(mode="json", exclude={"research_question", "research_test_ids"}), context
+                assignment, context
             )
             payload = dict(value)
             if research:
                 payload["research_exploration"] = tree_action("read")
                 payload["research_next_step"] = (
-                    "Record each dispatched Test using returned task evidence IDs and its declared "
-                    "outcome_observed before selecting another test. If this was initial data inspection, "
-                    "propose hypotheses and feasible discriminating tests now. Restore the invariant: "
-                    "every nonterminal leaf has a pending feasible test or is decomposed. Follow pending "
-                    "reflect triggers; only add root hypotheses when coverage is incomplete. Parent "
-                    "summaries roll up automatically after all children terminate, including unverifiable "
-                    "reasons. supported/contested are nonterminal. Finish only with all root hypotheses "
-                    "terminal and reflection complete: report answered, unable_to_answer, or budget_exhausted "
-                    "as distinct exits. Budget/user pauses omit completion_summary. "
-                    "Include the saved tree_text in your final answer."
+                    "Read the returned evidence: what did we learn, what remains uncertain, and what "
+                    "else is worth analyzing within the user's question and budget? Recording test "
+                    "facts does not establish hypotheses. Interpret evidence before adjudicating state. "
+                    "Continue the same Expert instance for valuable gaps or authorized leads; do not "
+                    "force follow-ups or a review form. Answer once the requested evidence standard is "
+                    "met, including a justified negative answer; optional untested branches and supported "
+                    "states do not block completion. Distinguish insufficient evidence from interruption."
                 )
             return self._json(payload, metadata={"team_work": value})
 
@@ -1856,6 +1930,8 @@ def create_ocean_lead_tool_registry(services: OceanToolServices) -> ToolRegistry
 def create_ocean_expert_tool_registry(services: OceanToolServices) -> ToolRegistry:
     registry = ToolRegistry()
     _register_agent_skill_tools(registry, services)
+    if services.task_id is not None and services.work_order_id is not None:
+        registry.register(OceanExpertTestsTool(services))
     if "web.search" in services.skill_capabilities:
         registry.register(_create_web_search_tool(services))
     if "jina.reader" in services.skill_capabilities:

@@ -24,20 +24,15 @@ material gaps that prevent a responsible conclusion. Decompose only gaps that ca
 reviewable evidence. A search query, plot, file conversion, or formatting action is not itself a
 research question.
 
-For each gap, state:
-
-- what decision or claim it affects;
-- what evidence would close or materially narrow it;
-- which professional role owns that evidence;
-- dependencies on earlier results;
-- what would make further work unproductive or impossible.
+Describe the decisions a material gap affects and what evidence would resolve or narrow it. Select a
+professional role and dependencies when delegation helps. Keep user-requested outputs and evidence
+standards distinct from optional methods and future questions; explain why any added output is essential.
 
 Before adding children, identify at least one proposed child with a feasible test: name the available
 data, the measurement or calculation, and outcomes that distinguish the claims. If no child qualifies,
 record the missing data and the conditions under which testing becomes possible, rather than adding
-another descriptive layer. In protocol v2, declare the infeasible test and continue other feasible work;
-if none remains, pause without `completion_summary`. The existing two-decomposition `unverifiable`
-fallback remains a safety net, not a target to reach by creating empty branches.
+another descriptive layer. A key untestable gap can justify `unable_to_answer` directly. Do not wait
+for repeated decompositions to diagnose it or treat unavailable evidence as a refuted hypothesis.
 
 Distinguish competing explanations from contributions that may coexist. When using `alternatives`
 for attribution, formulate mutually exclusive judgments (one contribution dominates, another
@@ -48,21 +43,26 @@ report attribution as unresolved instead of forcing coupled mechanisms into an O
 
 The Coordinator owns the WorkOrder graph. Literature discovery and source review remain with the
 Literature Expert; scientific data interpretation remains with the relevant domain Expert. This skill
-must not prescribe another Agent's internal method or choose skills for it.
+may suggest concrete methods with a reason, while leaving the Expert free to choose an alternative.
+User-specified methods and necessary corrections remain requirements when their reason is explicit.
+Do not choose skills for another Agent or make suggested methods an acceptance checklist.
 
 ## Revise after evidence, not on a fixed script
 
-After each returned result, update the evidence picture:
-
-- accepted findings and their source or result references;
-- contradictions and whether they arise from definitions, region, period, scale, method, or genuine
-  scientific disagreement;
-- unresolved gaps that could still change the answer;
-- new questions exposed by actual evidence rather than generic comprehensiveness.
+After each returned result, consider what it adds or changes, which observations or conflicts are
+worth explaining, and whether the original question has been answered. Assess what the evidence
+distinguishes and what limitations could change the answer. Decide what further analysis could add
+and whether that knowledge is worth its cost. Record consequential new judgments with their evidence
+in normal responses, follow-ups, or state-update reasons; omit inapplicable points and reference
+unchanged judgments. This does not require five paragraphs, a review form, or another model call.
 
 Dispatch independent gaps together when useful and preserve the same Expert identity for focused
 continuations. Do not follow a fixed number of phases, papers, queries, or iterations. A broad request
-may require multiple source types, but breadth is evidence-driven rather than a checklist.
+may require multiple source types, but breadth is evidence-driven rather than a checklist. Experts
+can add or replace Tests within their authorized question and nodes. New hypotheses or substantive
+goal changes require the Coordinator's approval; out-of-scope work still needs the user's authority.
+Empty leads are valid. A lead can be pursued, deferred, or declined without declaring the current
+answer incomplete; explain an approved extension's value and incremental budget.
 
 When a numerical result conflicts with an interpretation, make the next WorkOrder about resolving
 that specific conflict, not defending the intended conclusion. Cite the conflicting outputs and
@@ -75,17 +75,19 @@ confirmation of its scientific claim.
 A numerical or code audit can validate an estimate without distinguishing causal hypotheses. Save
 pure audit findings as observations; do not manufacture a multi-target test merely to upgrade a
 hypothesis to `established`. Multiple targets satisfy a structural requirement, not a scientific
-one: explain how the observed outcome actually separates those claims. A reviewer approving the
-calculations does not remove attribution limits stated in that same review.
+one: explain how the observed outcome actually separates those claims. Assess independence through
+shared signals, assumptions, and possible errors, not counts of sources, methods, or Experts. A
+reviewer approving the calculations does not remove attribution limits stated in that same review.
 
-Before finalizing consequential mechanism or inferential claims, consolidate their independent
-review into one bounded evidence gap, rather than reviewing each partial return. Use existing
+When independent review can resolve a material question about consequential evidence, define that
+bounded gap and use existing
 domain/statistical profiles in separate instances with `review=true` and the relevant `depends_on`
 todos; the runtime forwards the full original results and read-only evidence locations, using the
 Coordinator model configuration. Ask which claims survive concrete checks, not whether the author
 sounds convincing. Keep normal intermediate continuation with the original Expert. After review,
-request only a material correction and, if needed, a focused recheck; otherwise synthesize the
-supported evidence and remaining limits. An interrupted reviewer has not approved the analysis.
+request a material correction or focused recheck when warranted; otherwise synthesize the supported
+evidence and remaining limits. Review is not an automatic stage. An interrupted reviewer has not
+approved the analysis, and a passed review does not update a hypothesis by itself.
 
 After a correction, revisit only the affected evidence chain: derived quantities, figures, claims,
 and research-branch judgments. A repaired sign or mask validates that repair, not the full budget or
@@ -95,19 +97,18 @@ than inheriting it from the superseded result; preserve unaffected verified work
 
 ## Stop deliberately
 
-When the Coordinator uses research-tree protocol v2, use its three exits rather than
-closing based only on diminishing returns. Hypotheses and Tests have separate IDs.
-Declare each test's possible outcome/effects and associate it with all relevant targets;
-dispatch its research_test_ids through ocean_assign. supported and contested are not
-terminal. Record returned evidence before acknowledging terminal/periodic reflection.
-All root hypotheses must be terminal and pending reflection acknowledged for an answered
-or unable_to_answer report. Budget/user interruptions pause without completion_summary.
-Parent OR/AND summaries preserve every unverifiable reason. An unexpected result or an
-infeasible test does not refute its hypothesis. Never invent a second target merely to
-meet the structural established guard.
+Judge the evidence before adjudicating a hypothesis state. Test records preserve observations and
+do not apply scientific verdicts. Keep hypothesis state separate from question completion: supported
+or contested nodes and untested optional leads can remain when the required question is answered.
+Sufficient negative evidence can also answer a question. No established hypothesis, all-root terminal
+state, or mandatory reflection is needed to finish; the existing multi-target established guard is
+not a reason to invent another target.
 
-Stop and synthesize when the user's evidence threshold is met, the next round is unlikely to change
-the main conclusion, repeated work adds no material evidence, a blocking limitation cannot be resolved
-with available sources or tools, or the remaining uncertainty should be reported rather than hidden.
-Preserve conflicting evidence and unclosed gaps in the final boundary instead of manufacturing a
-complete-looking trajectory.
+Stop when the evidence resolves the question at its sufficient_level. max_level is a ceiling, not
+an invitation to keep increasing claim strength. Continuing after sufficiency needs an explicit
+scientific benefit, an approved lead within scope, and an incremental budget. If a consequential gap
+cannot be resolved by reasonable further work, give the supported partial answer and missing evidence
+with an insufficient-evidence decision (`unable_to_answer` in the tree). Budget, cancellation, or
+service interruptions use the existing pause path without changing a scientific state to refuted or
+unverifiable. Preserve running-work status and saved outputs. Delivery repair follows the existing
+file and publication path; it does not automatically reopen scientific analysis.

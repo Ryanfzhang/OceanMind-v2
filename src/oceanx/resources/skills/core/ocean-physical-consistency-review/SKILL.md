@@ -11,7 +11,8 @@ metadata:
 # Ocean Physical Consistency Review
 
 ## when_to_use
-Use after a calculation, figure, or inferred mechanism is available for review.
+Use when reviewing an available calculation, figure, or inferred mechanism can resolve a material
+question about its evidence. This skill does not require an independent reviewer for every result.
 
 ## research_objective
 Assess whether a result is physically and numerically coherent without replacing the analysis with a hidden alternative algorithm.
@@ -26,6 +27,12 @@ Return checks with exact artifact refs and state whether each concern is a warni
 
 ## process_checkpoints
 Review code assumptions and data conventions separately from the physical conclusion.
+
+A numerical check can validate a diagnostic without distinguishing the mechanism claimed from it.
+Explain which competing interpretation is weakened by a result and which remains possible. Reusing
+the same signal with another method or reviewer is not automatically independent evidence; examine
+shared assumptions and errors. Do not turn a passed check or multiple targets into an established
+hypothesis. Test results record facts; the Coordinator owns hypothesis states and final acceptance.
 
 For an assigned independent review, use the forwarded original ExpertResult and read-only evidence
 locations. Select the consequential claims first, then inspect their scripts and saved arrays on
@@ -68,13 +75,19 @@ Use only checks relevant to the claim under review:
   process without a discriminating diagnostic at the relevant spatial and temporal scales.
 
 ## expected_artifacts
-ObservationArtifact, DecisionArtifact, or reproducibility and limitation sections in a ReportArtifact.
+Return evidence-linked findings through the existing result/report path. No separate review form,
+decision artifact, or mandatory set of sections is needed. Empty limitations are valid when the
+evidence gives no material reason to name one.
 
 ## quality_gates
 Do not label a result physically plausible merely because a color map looks familiar.
 
 ## stop_or_escalation_conditions
-Escalate sign, unit, conservation, or boundary inconsistencies before publication-oriented figures or conclusions are approved.
+Report sign, unit, conservation, or boundary inconsistencies that could change the answer, with a
+focused correction or the evidence needed to settle them. Explain a no-effect judgment at the
+claim's actual precision and level. Preserve unresolved interpretation limits; a reasoned partial
+review allows the Coordinator to continue, narrow the claim, or acknowledge insufficient evidence.
+The existence of additional possible checks alone is not a reason to withhold supported findings.
 
 ## relevant_references
 `references/review/physical-consistency.md`, `references/data/common-variables-and-units.md`, `references/methods/transport.md`.

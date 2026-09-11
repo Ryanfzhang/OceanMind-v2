@@ -29,7 +29,7 @@ def collect_run(run: Path, destination: Path | None = None) -> Path:
         target.mkdir(parents=True)
         result = json.loads(result_path.read_text())
         errors = []
-        for name in ("result.json", "query.json", "answer.md", "analysis.ipynb", "model_protocol.json", "delivery_protocol.json", "tree.json"):
+        for name in ("result.json", "query.json", "submitted_prompt.txt", "answer.md", "analysis.ipynb", "model_protocol.json", "delivery_protocol.json", "tree.json"):
             source = attempt / name
             if source.is_file() and not source.is_symlink():
                 shutil.copyfile(source, target / name)

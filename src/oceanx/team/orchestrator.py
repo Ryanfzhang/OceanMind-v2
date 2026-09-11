@@ -53,6 +53,7 @@ from oceanx.team.models import (
     EvidenceRef,
     ExpertConclusion,
     ExpertDecision,
+    ExpertReport,
     ExpertResult,
     ExpertResultOrigin,
     FindingBasis,
@@ -641,21 +642,7 @@ class OceanTeamOrchestrator:
 
     def _participant_spec(self, binding: _ParticipantBinding) -> _ParticipantSpec:
         order = binding.work_order
-        payload = order.model_dump(
-            mode="json",
-            include={
-                "work_order_id",
-                "review",
-                "task_goal",
-                "profile_id",
-                "semantic_role",
-                "authority",
-                "context_summary",
-                "outcome_intents",
-                "constraints",
-                "done_when",
-            },
-        )
+        payload = order.scientific_assignment()
         payload["sources"] = self._source_contract(
             workspace_id=binding.workspace_id, input_refs=order.input_refs
         )
@@ -665,6 +652,12 @@ class OceanTeamOrchestrator:
             payload["review_evidence"] = self.expert_code_execution.review_evidence(order.work_order_id)
         prompt = (
             "Own this bounded scientific question. Python is required only if you choose to run code. "
+            "task_goal is the question; answer_standard states the requested evidence level and "
+            "what it must resolve. required_outputs explains what is necessary. suggested_path and "
+            "hints are optional and replaceable, never a mandatory method checklist. Choose and "
+            "adjust analyses within this question, its authorized target_node/alternative_nodes, "
+            "sources and budget. Return new mechanisms or research objectives as optional leads "
+            "for the Coordinator to consider; do not expand the authorized objective yourself. "
             "Assigned source paths and available metadata are supplied below before your first turn. "
             "Do not run code merely to locate an input manifest or inspect the environment. "
             "Inside Python, read the full manifest directly with "
@@ -691,11 +684,18 @@ class OceanTeamOrchestrator:
             "Include the scientific conclusion "
             "supported by each saved view in that API's conclusions argument. Reuse preserved "
             "executions, working data, and shared accepted results instead of recomputing them. Use "
-            "another code call only for "
-            "a concrete execution error, an assigned independent spot-check, or a scientifically necessary correction. When finished, "
+            "another code call when it adds useful discriminating evidence within the authorized "
+            "question, checks a consequential limitation, repairs an execution error, performs an "
+            "assigned independent spot-check, or scientifically corrects prior results. No separate "
+            "Test registration or method approval is required before analysis. When finished, "
             "return one ordinary concise answer to the Coordinator. That final answer ends this "
             "round; the runtime attaches saved outputs and evidence automatically. If evidence is "
-            "insufficient, say exactly what remains unsupported.\n\n"
+            "insufficient, say exactly what remains unsupported. Ordinary Markdown is sufficient. "
+            "If structured scientific information helps, you may instead return a JSON report "
+            "with answer.statement and optional answer.direction, answer.level, answer.evidence_refs, "
+            "answer.open_gaps, tests (saved Test IDs), limitations, leads, path_deviations, "
+            "open_conflicts, and required_outputs_status. Do not repeat the same answer outside the "
+            "report. Empty optional sections are valid; never invent entries to fill them.\n\n"
             + json.dumps(payload, ensure_ascii=False, sort_keys=True)
         )
         professional_section = ""
@@ -1369,6 +1369,9 @@ class OceanTeamOrchestrator:
             for record in execution_records
             if record.state == "succeeded" or record.execution_id in output_execution_ids
         )
+        execution_evidence = tuple(
+            EvidenceRef(kind="code_execution", ref=record.execution_id) for record in executions
+        )
         runtime_conclusions = self._runtime_conclusions(outputs)
         if completed:
             completed_text = final_text
@@ -1382,22 +1385,24 @@ class OceanTeamOrchestrator:
                     binding.work_order,
                     outputs,
                 )
+                completed_report = (
+                    binding.prior_result.report
+                    if not final_text and binding.prior_result is not None
+                    and binding.prior_result.report is not None
+                    else ExpertReport.from_response(completed_text, evidence_refs=execution_evidence)
+                )
                 return ExpertResult(
                     work_order_id=binding.work_order.work_order_id,
                     status=(WorkStatus.INCOMPLETE if missing_outputs else WorkStatus.COMPLETED),
                     result_origin=ExpertResultOrigin.AGENT_SUBMITTED,
                     expert_decision=(
-                        ExpertDecision.INSUFFICIENT_EVIDENCE
-                        if missing_outputs
-                        else ExpertDecision.ACCEPTED
+                        ExpertDecision.INSUFFICIENT_EVIDENCE if missing_outputs else None
                     ),
                     text=completed_text,
+                    report=completed_report,
                     outputs=outputs,
                     conclusions=runtime_conclusions,
-                    evidence_refs=tuple(
-                        EvidenceRef(kind="code_execution", ref=record.execution_id)
-                        for record in executions
-                    ),
+                    evidence_refs=execution_evidence,
                     method_summary=(
                         "The runtime preserved the Expert's complete analysis program, notebook, "
                         "execution evidence, and every framework-saved result."
@@ -1420,6 +1425,12 @@ class OceanTeamOrchestrator:
             if binding.prior_result is not None:
                 partial_candidates.append(binding.prior_result.text.strip())
             partial_summary = max(partial_candidates, key=len).strip()
+            prior_report = (
+                binding.prior_result.report
+                if binding.prior_result is not None
+                and partial_summary == binding.prior_result.text.strip()
+                else None
+            )
             if len(partial_summary) > 8_000:
                 partial_summary = (
                     partial_summary[:4_000]
@@ -1436,12 +1447,12 @@ class OceanTeamOrchestrator:
                 status=WorkStatus.INCOMPLETE,
                 result_origin=ExpertResultOrigin.BACKEND_RECOVERED,
                 text=partial_summary,
+                report=prior_report or ExpertReport.from_response(
+                    partial_summary, evidence_refs=execution_evidence
+                ),
                 outputs=outputs,
                 conclusions=runtime_conclusions,
-                evidence_refs=tuple(
-                    EvidenceRef(kind="code_execution", ref=record.execution_id)
-                    for record in executions
-                ),
+                evidence_refs=execution_evidence,
                 method_summary=(
                     "Preserved every validated result and its code-execution evidence from "
                     "the interrupted AgentJob; no computation was repeated by the backend."
@@ -1459,12 +1470,15 @@ class OceanTeamOrchestrator:
                 work_order_id=binding.work_order.work_order_id,
                 status=WorkStatus.CANCELLED,
                 result_origin=ExpertResultOrigin.BACKEND_RECOVERED,
+                report=(
+                    ExpertReport.from_response(final_text, evidence_refs=execution_evidence)
+                    if final_text else (
+                        checkpoint.draft_result.report if checkpoint.draft_result is not None else None
+                    )
+                ),
                 outputs=outputs,
                 conclusions=runtime_conclusions,
-                evidence_refs=tuple(
-                    EvidenceRef(kind="code_execution", ref=record.execution_id)
-                    for record in executions
-                ),
+                evidence_refs=execution_evidence,
                 method_summary=(
                     "The runtime preserved every validated result event emitted before "
                     "the participant was cancelled."

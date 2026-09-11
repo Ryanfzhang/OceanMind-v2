@@ -55,6 +55,7 @@ from oceanx.runtime import (
 )
 from oceanx.task_results import TaskResultRef
 from oceanx.team.models import (
+    AnswerStandard,
     ChildAuthority,
     CoordinatorAnswerBasis,
     CoordinatorDecision,
@@ -160,7 +161,7 @@ def _order(order_id: str, profile_id: str = "data_reproducibility_expert") -> Wo
         authority=profile.authority,
         allowed_capabilities=tuple(sorted(capabilities_for_authority(profile.authority))),
         outcome_intents=("answer",),
-        done_when="Return evidence, method, checks, limitations, and a decision.",
+        answer_standard={"sufficient_if": "Return an evidence-backed answer at the requested scope."},
         workspace_revision=3,
     )
 
@@ -488,7 +489,9 @@ def test_assignment_schema_describes_answer_level_contract() -> None:
         in properties["expected_outputs"]["description"]
     )
     assert "Do not enumerate domain properties" in properties["expected_outputs"]["description"]
-    assert "Evidence-sufficiency stopping condition" in properties["done_when"]["description"]
+    assert "done_when" not in properties
+    assert "not a mandatory sequence" in properties["answer_standard"]["description"]
+    assert "replaceable" in properties["suggested_path"]["description"]
 
 
 def test_assignment_carries_the_complete_plan_but_coordinator_owns_readiness() -> None:
@@ -501,7 +504,7 @@ def test_assignment_carries_the_complete_plan_but_coordinator_owns_readiness() -
                 why_this_expert="This Expert owns source evidence.",
                 profile_id="data_reproducibility_expert",
                 expected_outputs=("answer",),
-                done_when="Return the source facts needed by the analysis.",
+                answer_standard={"sufficient_if": "Return the source facts needed by the analysis."},
             ),
             OceanTodoInput(
                 todo_id="water_mass",
@@ -510,7 +513,7 @@ def test_assignment_carries_the_complete_plan_but_coordinator_owns_readiness() -
                 why_this_expert="This Expert owns water-mass interpretation.",
                 profile_id="ocean_process_expert",
                 expected_outputs=("answer", "interactive_view"),
-                done_when="Return an evidence-linked water-mass interpretation.",
+                answer_standard={"sufficient_if": "Return an evidence-linked water-mass interpretation."},
             ),
         ),
         # Structural validation deliberately does not infer whether data_scope
@@ -541,7 +544,7 @@ def test_assignment_carries_the_complete_plan_but_coordinator_owns_readiness() -
                     why_this_expert="This role owns the physical interpretation.",
                     profile_id="ocean_process_expert",
                     expected_outputs=("answer",),
-                    done_when="Return the horizontal interpretation.",
+                    answer_standard={"sufficient_if": "Return the horizontal interpretation."},
                 ),
                 OceanTodoInput(
                     todo_id="vertical_structure",
@@ -549,7 +552,7 @@ def test_assignment_carries_the_complete_plan_but_coordinator_owns_readiness() -
                     why_this_expert="This role owns the physical interpretation.",
                     profile_id="ocean_process_expert",
                     expected_outputs=("answer",),
-                    done_when="Return the vertical interpretation.",
+                    answer_standard={"sufficient_if": "Return the vertical interpretation."},
                 ),
             ),
             dispatch=("horizontal_structure", "vertical_structure"),
@@ -565,7 +568,7 @@ def test_assignment_allows_parallel_experts_of_the_same_profile() -> None:
             profile_id="ocean_process_expert",
             expert_key=expert_key,
             expected_outputs=("answer",),
-            done_when="Return one independently reviewable conclusion.",
+            answer_standard={"sufficient_if": "Return one independently reviewable conclusion."},
         )
         for todo_id, expert_key, question in (
             ("horizontal", "horizontal_analyst", "Resolve the horizontal structure."),
@@ -1271,7 +1274,7 @@ def test_expert_session_capsule_preserves_prior_round_evidence() -> None:
 
     assert '"round_count": 1' in capsule
     assert '"outputs": []' in capsule
-    assert '"conclusions": []' in capsule
+    assert "work_session_round_1" in capsule
     assert "Temperature and salinity were identified." in capsule
 
 
@@ -1669,7 +1672,7 @@ def test_code_runtime_pins_assignment_and_installs_scientific_view(tmp_path) -> 
                     "context_summary": "Use the supplied scientific source only.",
                     "outcome_intents": ("answer", "interactive_view"),
                     "constraints": ("Keep the result bounded.",),
-                    "done_when": "Return one checked view and its interpretation.",
+                    "answer_standard": AnswerStandard(sufficient_if="Return one checked view and its interpretation."),
                     "workspace_revision": 1,
                 }
             )
@@ -2265,7 +2268,7 @@ def test_coordinator_follow_up_creates_a_new_round_with_prior_session_memory(
                             why_this_expert="This Expert owns source evidence.",
                             profile_id="data_reproducibility_expert",
                             expected_outputs=(output,),
-                            done_when="Return enough evidence for the requested answer.",
+                            answer_standard={"sufficient_if": "Return enough evidence for the requested answer."},
                             budget_tier="quick",
                         ).model_dump(mode="json"),
                         OceanTodoInput(
@@ -2275,7 +2278,7 @@ def test_coordinator_follow_up_creates_a_new_round_with_prior_session_memory(
                             why_this_expert="This Expert owns scientific interpretation.",
                             profile_id="ocean_process_expert",
                             expected_outputs=("answer",),
-                            done_when="Return the requested interpretation.",
+                            answer_standard={"sufficient_if": "Return the requested interpretation."},
                             budget_tier="quick",
                         ).model_dump(mode="json"),
                     ],
@@ -2604,7 +2607,8 @@ def test_normal_child_final_answer_completes_an_expert_round(tmp_path) -> None:
             )
             assert report_ready_result.status is WorkStatus.COMPLETED
             assert report_ready_result.result_origin.value == "agent_submitted"
-            assert report_ready_result.expert_decision is ExpertDecision.ACCEPTED
+            assert report_ready_result.expert_decision is None
+            assert report_ready_result.report.answer.statement
             assert report_ready_result.outputs == ()
             assert report_ready_result.conclusions == ()
             assert report_ready_result.failure_code is None
@@ -4788,7 +4792,7 @@ def test_independent_review_forwards_full_result_and_reads_only_assigned_evidenc
 def test_review_assignment_requires_explicit_dependencies_and_identity():
     todo = dict(
         todo_id="review", question="Check the numerical evidence", why_this_expert="Physical review",
-        profile_id="ocean_process_expert", expected_outputs=("answer",), done_when="Report checks",
+        profile_id="ocean_process_expert", expected_outputs=("answer",), answer_standard={"sufficient_if": "Report checks"},
         review=True,
     )
     with pytest.raises(ValidationError, match="review requires"):

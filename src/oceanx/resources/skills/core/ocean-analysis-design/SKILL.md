@@ -20,13 +20,25 @@ Translate a scientific question into inspectable selections, transformations, co
 ## questions_to_resolve
 - What spatial, temporal, vertical, and variable selection is scientifically intended?
 - Which baseline, aggregation, area or volume weighting, mask, and seasonality treatment are defensible?
-- How will autocorrelation, uncertainty, sensitivity, and alternative choices be evaluated?
+- Which dependence, uncertainty, or alternative choices could change the requested answer?
 
 ## evidence_requirements
-Declare exact input refs, requested outputs, method assumptions, and definition of done in the WorkOrder before computation.
+Use the supplied question, source refs, answer_standard, and required_outputs. Keep suggested_path
+and hints replaceable. Select assumptions and checks relevant to the conclusion; the possible methods
+above are not default deliverables. sufficient_level describes the answer needed, while max_level
+limits its strength. Neither is a requirement to obtain a positive finding.
 
 ## process_checkpoints
-An Expert may repair its own implementation in the same workstream. A scientific-method change must be explained to the Coordinator and the affected result recomputed.
+Choose, add, or replace methods and Tests within the authorized question, nodes, data, and budget
+without waiting for Coordinator approval. Explain material path changes and recompute affected
+results. New objectives or mechanism hypotheses need Coordinator approval; return those as leads
+with their observed basis when useful. Empty leads and path_deviations are legitimate.
+
+For a formal discrimination, describe beforehand which observations would distinguish the relevant
+claims in the normal plan or code record. A separate preregistration call is not required. Record
+chance findings as exploratory and retain their actual timing. Test summaries can accompany the
+report, and small reads or code repairs need not each become a Test. Experts record their own Test
+facts only; the Coordinator judges the evidence and updates hypothesis states.
 
 Before scaling up a consequential transformation, test its non-obvious assumptions on a small,
 hand-checkable example. Select checks for the operations actually used, not an exhaustive audit:
@@ -51,13 +63,22 @@ Preserve the relevant check outputs with the calculation. If a check fails, repa
 computation and its dependent figures or claims; formatting an old result does not repair it.
 
 ## expected_artifacts
-ExperimentArtifact, InteractiveView, and a reproducible ReportArtifact when the task produces durable results.
+Return the requested outputs through the existing result path, together with the evidence needed to
+interpret them. Do not create additional reports or artifacts just because this skill lists them.
+Explain any partial or blocked required output while preserving completed work.
 
 ## quality_gates
-Do not treat a plotted pattern as a test. Do not hide weighting, baseline, or selection decisions in prose.
+Explain whether a pattern describes an observation, supports an association, or actually distinguishes
+the authorized claims. Keep consequential weighting, baseline, and selection choices inspectable.
+Check feasible limitations that could change the answer, or retain them as unresolved with their
+implications. A check being completed does not automatically exclude the concern.
 
 ## stop_or_escalation_conditions
-Pause for user input when competing scientifically reasonable methods would yield different conclusions.
+If reasonable methods disagree, investigate or report the material difference within the assignment.
+Ask the Coordinator to resolve a missing scientific objective or authorization, not to choose every
+method. Finish when the bounded question is supported at its required level, including a supported
+negative answer; do not continue solely to approach max_level. Unresolvable gaps and reasoned partial
+results let the Coordinator choose a narrower answer, continuation, or insufficient evidence.
 
 ## relevant_references
 `references/methods/anomaly.md`, `references/methods/trend.md`, `references/methods/transport.md`, `references/coding/large-array-practices.md`.

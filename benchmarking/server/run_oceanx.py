@@ -1,7 +1,8 @@
 """Run OceanX with a benchmark-only file delivery adapter.
 
-The query, research policy and execution sandbox are unchanged. All model roles
-use the root benchmark.yaml API configuration in this process only.
+Q07–Q30 append an explicit research-tree instruction to OceanX's submitted prompt.
+The scientific query and execution sandbox are unchanged. All model roles use the
+root benchmark.yaml API configuration in this process only.
 """
 from __future__ import annotations
 
@@ -10,6 +11,7 @@ import asyncio
 import hashlib
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from uuid import uuid4
@@ -17,6 +19,16 @@ from uuid import uuid4
 from oceanx import __version__, batch
 
 _original_interaction_answer = batch.interaction_answer
+
+
+def oceanx_prompt(case):
+    if re.fullmatch(r"Q(?:0[7-9]|[12][0-9]|30)", case.id):
+        return case.query + (
+            "\n\nUse Research Tree to guide this investigation. As Coordinator, create and "
+            "maintain the tree as the research progresses, and include the saved tree "
+            "in your final answer."
+        )
+    return case.query
 
 
 def benchmark_interaction_answer(case, payload):
@@ -28,6 +40,12 @@ def benchmark_interaction_answer(case, payload):
 
 
 class BenchmarkClient(batch.BatchClient):
+    async def send(self, kind, payload):
+        if kind == "session.submit":
+            payload = {**payload, "text": oceanx_prompt(self.case)}
+            (self.directory / "submitted_prompt.txt").write_text(payload["text"], encoding="utf-8")
+        return await super().send(kind, payload)
+
     async def start(self):
         self.process = await asyncio.create_subprocess_exec(
             sys.executable, str(Path(__file__).resolve()), "--backend",

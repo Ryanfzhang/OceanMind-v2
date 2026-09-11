@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Iterable
 from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from oceanx.artifacts.models import ArtifactRef
 from oceanx.task_results import TaskResultRef
 
 NonEmptyText = Annotated[str, Field(min_length=1, max_length=8_000)]
 Identifier = Annotated[str, Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")]
+EvidenceLevel = Literal["description", "association", "mechanism_consistent", "causal_attribution"]
 
 
 def expert_output_item_id(*, execution_id: str, output_name: str) -> str:
@@ -396,6 +398,9 @@ class CoordinatorResult(FrozenModel):
 
     answer_markdown: Annotated[str, Field(min_length=1, max_length=64_000)]
     decision: CoordinatorDecision = CoordinatorDecision.ANSWERED
+    # An unlabelled successful response completes the request without inventing
+    # a scientific resolution. Only the Coordinator supplies this judgment.
+    research_outcome: Literal["answered", "insufficient_evidence", "partial", "blocked"] | None = None
     answer_basis: CoordinatorAnswerBasis = CoordinatorAnswerBasis.GENERAL_KNOWLEDGE
     evidence_refs: tuple[EvidenceRef, ...] = Field(default=(), max_length=256)
     result_refs: tuple[TaskResultRef, ...] = Field(default=(), max_length=64)
@@ -503,6 +508,40 @@ class CoordinatorTodo(FrozenModel):
         return self
 
 
+class AnswerStandard(FrozenModel):
+    """Coordinator-authored evidence expectations, never backend scientific gates."""
+
+    sufficient_level: EvidenceLevel | None = None
+    sufficient_if: str = ""
+    max_level: EvidenceLevel | None = None
+    required_discrimination: tuple[NonEmptyText, ...] = ()
+    not_allowed: tuple[NonEmptyText, ...] = ()
+
+
+class RequiredOutput(FrozenModel):
+    """Why an answer or existing deliverable is necessary for this question."""
+
+    id: Identifier
+    requirement: NonEmptyText
+    origin: Literal["user_request", "necessary_to_answer"] = "user_request"
+    reason: str | None = None
+
+
+class WorkContinuation(FrozenModel):
+    """Incremental question within an existing logical Expert session."""
+
+    source_report_ref: str | None = Field(
+        default=None,
+        description="Returned work_order_id in this Expert instance, not a file path; omit for latest round.",
+    )
+    approved_lead_id: Identifier | None = None
+    gap_refs: tuple[str, ...] = ()
+    test_refs: tuple[str, ...] = ()
+    required_output_refs: tuple[str, ...] = ()
+    question_delta: str = ""
+    reason: str = ""
+
+
 class WorkOrder(FrozenModel):
     """One bounded Coordinator round in an Expert or Discussion session."""
 
@@ -528,6 +567,15 @@ class WorkOrder(FrozenModel):
     depends_on: tuple[Identifier, ...] = ()
     parent_request_id: Identifier
     task_goal: NonEmptyText
+    question_ref: Identifier | None = None
+    mode: Literal["new", "continue"] = "new"
+    target_node: Identifier | None = None
+    alternative_nodes: tuple[Identifier, ...] = ()
+    answer_standard: AnswerStandard | None = None
+    required_outputs: tuple[RequiredOutput, ...] = ()
+    suggested_path: tuple[NonEmptyText, ...] = ()
+    hints: tuple[NonEmptyText, ...] = ()
+    continuation: WorkContinuation | None = None
     context_summary: Annotated[str, Field(max_length=16_000)] = ""
     profile_id: Identifier | None = None
     semantic_role: Annotated[str, Field(min_length=1, max_length=160)]
@@ -536,11 +584,33 @@ class WorkOrder(FrozenModel):
     allowed_capabilities: tuple[Identifier, ...] = ()
     outcome_intents: tuple[Identifier, ...] = ("answer",)
     constraints: tuple[NonEmptyText, ...] = ()
-    done_when: NonEmptyText = "Return an evidence-backed answer to the assigned question."
     budget_tier: Literal["quick", "standard", "deep"] = "standard"
     budget: WorkBudget = Field(default_factory=WorkBudget)
     deadline: datetime | None = None
     workspace_revision: int = Field(ge=0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def read_legacy_answer_standard(cls, value: Any) -> Any:
+        """Read old journals without retaining a second active evidence standard."""
+
+        if not isinstance(value, dict):
+            return value
+        payload = dict(value)
+        legacy = payload.pop("done_when", None)
+        if legacy and payload.get("answer_standard") is None:
+            payload["answer_standard"] = {"sufficient_if": legacy}
+        return payload
+
+    def scientific_assignment(self) -> dict[str, Any]:
+        """One projection shared by the Expert prompt and execution manifest."""
+
+        return self.model_dump(mode="json", include={
+            "work_order_id", "todo_id", "question_ref", "mode", "session_round", "review",
+            "task_goal", "target_node", "alternative_nodes", "answer_standard", "required_outputs",
+            "suggested_path", "hints", "continuation", "profile_id", "semantic_role", "authority",
+            "context_summary", "outcome_intents", "constraints",
+        })
 
     @model_validator(mode="after")
     def validate_sets_and_authority(self) -> WorkOrder:
@@ -615,6 +685,145 @@ class WorkPlan(FrozenModel):
         return self
 
 
+class ExpertAnswer(FrozenModel):
+    """An answer and its author-declared evidence direction and inference level."""
+
+    statement: Annotated[str, Field(min_length=1)]
+    direction: Literal["supports", "opposes", "mixed", "undetermined"] | None = None
+    level: EvidenceLevel | None = None
+    evidence_refs: tuple[EvidenceRef, ...] = ()
+    open_gaps: tuple[str, ...] = ()
+
+
+class ExpertLimitation(FrozenModel):
+    id: Identifier
+    statement: NonEmptyText
+    would_change: Literal["yes", "no", "uncertain"] = "uncertain"
+    disposition: Literal["checked", "unverifiable", "no_effect"] | None = None
+    evidence_refs: tuple[EvidenceRef, ...] = ()
+    missing_and_implication: str | None = None
+    rationale: str = ""
+
+
+class ExpertLead(FrozenModel):
+    id: Identifier
+    observation: NonEmptyText
+    evidence_refs: tuple[EvidenceRef, ...] = ()
+    proposed_question: str = ""
+    would_become: str = ""
+    test_available: bool | Literal["unknown"] = "unknown"
+    rough_cost: str = ""
+
+
+class RequiredOutputStatus(FrozenModel):
+    id: Identifier
+    disposition: Literal["complete", "partial", "blocked", "not_attempted"]
+    existing_output_refs: tuple[str, ...] = ()
+    reason: str | None = None
+
+
+class ExpertReport(FrozenModel):
+    """Optional scientific structure; empty lists never block an Expert handoff."""
+
+    answer: ExpertAnswer
+    tests: tuple[str, ...] = ()
+    limitations: tuple[ExpertLimitation, ...] = ()
+    leads: tuple[ExpertLead, ...] = ()
+    path_deviations: tuple[str, ...] = ()
+    open_conflicts: tuple[str, ...] = ()
+    required_outputs_status: tuple[RequiredOutputStatus, ...] = ()
+
+    @classmethod
+    def from_response(
+        cls, text: str, *, evidence_refs: tuple[EvidenceRef, ...] = ()
+    ) -> ExpertReport:
+        """Accept an optional report object or preserve ordinary Markdown verbatim.
+
+        Invalid or unrelated JSON remains answer text. This is a lossless response
+        adapter, not a formatting gate or an extra model call. Inference level and
+        scientific direction are never guessed from prose. Backend execution refs
+        remain on ExpertResult; they are not inferred support for an individual claim.
+        """
+
+        # Retain the keyword for existing runtime callers; the owning ExpertResult
+        # preserves this provenance separately from the Expert-authored report.
+        del evidence_refs
+        candidate = text.strip()
+        if candidate.startswith("```") and candidate.endswith("```"):
+            first_line, separator, fenced = candidate.partition("\n")
+            if separator and first_line.lower() in {"```", "```json"}:
+                candidate = fenced[:-3].strip()
+        try:
+            payload = json.loads(candidate)
+            if isinstance(payload, dict):
+                if set(payload) == {"report"}:
+                    payload = payload["report"]
+                return cls.model_validate(payload)
+        except (ValueError, TypeError, ValidationError):
+            pass
+        return cls(answer=ExpertAnswer(statement=text))
+
+    def to_markdown(self) -> str:
+        """Project the same report for existing Markdown display consumers."""
+
+        sections = [self.answer.statement]
+        declarations = []
+        if self.answer.direction is not None:
+            declarations.append(f"Evidence direction: {self.answer.direction}")
+        if self.answer.level is not None:
+            declarations.append(f"Inference level: {self.answer.level}")
+        if declarations:
+            sections.append("; ".join(declarations))
+
+        def evidence(refs: tuple[EvidenceRef, ...]) -> str:
+            return "; ".join(
+                ref.ref + (f" ({ref.locator})" if ref.locator else "") for ref in refs
+            )
+
+        if self.answer.evidence_refs:
+            sections.append("Evidence: " + evidence(self.answer.evidence_refs))
+        if self.answer.open_gaps:
+            sections.append("Open gaps:\n" + "\n".join(f"- {gap}" for gap in self.answer.open_gaps))
+        if self.tests:
+            sections.append("Tests: " + ", ".join(self.tests))
+        if self.limitations:
+            items = []
+            for item in self.limitations:
+                detail = [item.statement, f"Could change the answer: {item.would_change}."]
+                if item.disposition:
+                    detail.append(f"Disposition: {item.disposition}.")
+                detail.extend(part for part in (item.rationale, item.missing_and_implication) if part)
+                if item.evidence_refs:
+                    detail.append("Evidence: " + evidence(item.evidence_refs))
+                items.append(f"- {item.id}: " + " ".join(detail))
+            sections.append("Limitations:\n" + "\n".join(items))
+        if self.leads:
+            items = []
+            for item in self.leads:
+                detail = [item.observation]
+                detail.extend(part for part in (item.proposed_question, item.would_become) if part)
+                detail.append(f"Test available: {item.test_available}.")
+                if item.rough_cost:
+                    detail.append("Incremental effort: " + item.rough_cost)
+                if item.evidence_refs:
+                    detail.append("Evidence: " + evidence(item.evidence_refs))
+                items.append(f"- {item.id}: " + " ".join(detail))
+            sections.append("Optional leads:\n" + "\n".join(items))
+        for title, items in (
+            ("Path deviations", self.path_deviations), ("Open conflicts", self.open_conflicts)
+        ):
+            if items:
+                sections.append(title + ":\n" + "\n".join(f"- {item}" for item in items))
+        if self.required_outputs_status:
+            sections.append("Required outputs:\n" + "\n".join(
+                f"- {item.id}: {item.disposition}"
+                + ("; " + ", ".join(item.existing_output_refs) if item.existing_output_refs else "")
+                + ("; " + item.reason if item.reason else "")
+                for item in self.required_outputs_status
+            ))
+        return "\n\n".join(sections)
+
+
 class ExpertResult(FrozenModel):
     """One unified Expert delivery returned to the Coordinator.
 
@@ -636,6 +845,7 @@ class ExpertResult(FrozenModel):
     # Optional Expert self-assessment.  The Coordinator, not the transport
     # receiver, decides whether the returned content is sufficient.
     expert_decision: ExpertDecision | None = None
+    report: ExpertReport | None = None
     text: Annotated[str, Field(max_length=8_000)] = ""
     outputs: tuple[ExpertOutput, ...] = Field(default=(), max_length=256)
     conclusions: tuple[ExpertConclusion, ...] = Field(default=(), max_length=128)
@@ -668,6 +878,11 @@ class ExpertResult(FrozenModel):
         payload.pop("completed_outcomes", None)
         payload.pop("result_refs", None)
         payload.pop("deliverable_refs", None)
+        if payload.get("report") is not None:
+            report = ExpertReport.model_validate(payload["report"])
+            # Keep old Markdown views working without a second author-owned answer.
+            markdown = report.to_markdown()
+            payload["text"] = markdown if len(markdown) <= 8_000 else markdown[:7_997] + "..."
         return payload
 
     @model_validator(mode="after")
@@ -733,22 +948,29 @@ class ExpertResult(FrozenModel):
         )
 
     def coordinator_payload(self) -> dict[str, Any]:
-        """Return the two-field scientific handoff consumed by the Coordinator.
-
-        Work status and budgets remain in backend-owned work records. A technical
-        interruption is disclosed in prose so saved partial evidence cannot be
-        mistaken for a newly completed Expert answer.
-        The semantic result itself contains only prose and fully described
-        outputs, avoiding duplicated conclusions and cumulative execution state.
-        """
+        """Send one authoritative scientific answer and the unchanged output list."""
 
         text = self.text
+        notice = None
         if self.result_origin is ExpertResultOrigin.BACKEND_RECOVERED and self.error:
-            text = (
+            notice = (
                 "Execution notice (not a scientific verdict): " + self.error[:1000]
                 + "\nSaved partial evidence follows; reuse it without assuming this round completed.\n"
-                + text
             )
+        if self.report is not None:
+            payload = {
+                "report": self.report.model_dump(mode="json", exclude_none=True, exclude_defaults=True),
+                "outputs": [output.coordinator_payload() for output in self.outputs],
+            }
+            if self.evidence_refs:
+                # Runtime provenance is independent from the Expert's explicit
+                # per-claim support links, including when the report omits them.
+                payload["evidence_refs"] = [ref.model_dump(mode="json") for ref in self.evidence_refs]
+            if notice:
+                payload["execution_notice"] = notice
+            return payload
+        if notice:
+            text = notice + text
         return {
             "text": text,
             "outputs": [output.coordinator_payload() for output in self.outputs],
@@ -783,25 +1005,34 @@ WorkstreamCheckpoint.model_rebuild()
 
 
 __all__ = [
+    "AnswerStandard",
     "ChildAuthority",
     "CoordinatorAnswerBasis",
     "CoordinatorDecision",
     "CoordinatorResult",
     "CoordinatorTodo",
+    "EvidenceLevel",
     "EvidenceRef",
+    "ExpertAnswer",
     "ExpertConclusion",
     "ExpertDecision",
+    "ExpertLead",
+    "ExpertLimitation",
     "ExpertOutput",
+    "ExpertReport",
     "ExpertResult",
     "Finding",
     "FindingBasis",
     "InteractiveViewSpec",
+    "RequiredOutput",
+    "RequiredOutputStatus",
     "ResourceVersion",
     "ResultBundle",
     "UsageRecord",
     "ViewDataSchema",
     "ViewDataVariable",
     "WorkBudget",
+    "WorkContinuation",
     "WorkFailureCode",
     "WorkOrder",
     "WorkPlan",
