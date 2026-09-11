@@ -14,6 +14,7 @@ import type {BackendFrame, DesktopBackendLaunch, DesktopBackendStatus, DesktopPr
 import {parseDesktopUpdateConfig} from './shared/update-config.js';
 import {loadElectronPlatformUpdater} from './shared/electron-updater-adapter.js';
 import {parseStrictJsonBytes} from './shared/strict-json.js';
+import {developmentPython} from './shared/python-environment.mjs';
 import {UpdateHandoffStore, type UpdateHandoffOutcome} from './shared/update-handoff.js';
 import {DesktopUpdateService} from './shared/update-service.js';
 import {UpdateStagingStore} from './shared/update-staging.js';
@@ -278,24 +279,7 @@ function defaultPythonExecutable(): string {
     }
     return executable;
   }
-  if (process.env.OCEAN_PYTHON) {
-    return process.env.OCEAN_PYTHON;
-  }
-  if (!app.isPackaged) {
-    const checkoutPython = join(
-      moduleDirectory,
-      '..',
-      '..',
-      '..',
-      '.venv',
-      process.platform === 'win32' ? 'Scripts' : 'bin',
-      process.platform === 'win32' ? 'python.exe' : 'python',
-    );
-    if (existsSync(checkoutPython)) {
-      return checkoutPython;
-    }
-  }
-  return process.platform === 'win32' ? 'python.exe' : 'python3';
+  return developmentPython();
 }
 
 function parseDesktopBackendLaunch(value: unknown): DesktopBackendLaunch {

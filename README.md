@@ -93,6 +93,18 @@ npm run check
 npm run build
 ```
 
+Keep `conda activate oceanx` active when running `npm start`, `npm run dev`, or
+`npm run build:sidecar`. Local desktop startup and sidecar builds use that
+environment's Python and installed dependencies, not a repository `.venv`.
+`requirements.txt` includes the scientific runtime and PyInstaller build dependency.
+`OCEAN_PYTHON` is an explicit override; otherwise `CONDA_PREFIX` takes priority
+over Python on `PATH`. A broken active Conda environment reports an error rather
+than silently selecting another interpreter. Installed desktop packages still
+use their bundled backend. Scientific code execution also follows active Conda
+by default; `OCEAN_CONDA_ENV` and `OCEAN_SANDBOX_PYTHON` remain explicit scientific
+runtime overrides. Without activation, scientific execution still looks for the
+named `oceanx` environment.
+
 Run the OceanMind backend tests:
 
 ```bash

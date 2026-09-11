@@ -434,20 +434,25 @@ def _validate_python_launcher(candidate: Path) -> Path:
 
 
 def current_python_executable() -> Path:
-    """Return the Python launcher for the configured ``oceanx`` Conda runtime.
+    """Return the explicitly configured or activated Conda Python launcher.
 
     OceanMind intentionally does not fall back to the backend virtualenv. Set
     ``OCEAN_SANDBOX_PYTHON`` only for an explicit packaged/test override, or
-    ``OCEAN_CONDA_ENV`` to select a non-default named environment.
+    ``OCEAN_CONDA_ENV`` to select a named environment. Otherwise honor active
+    Conda; without activation (e.g. a packaged app), find the named oceanx runtime.
     """
 
     override = os.environ.get(_PYTHON_OVERRIDE_VARIABLE)
     if override:
         return _validate_python_launcher(Path(override))
 
-    environment_name = os.environ.get(_CONDA_ENV_NAME_VARIABLE, _DEFAULT_CONDA_ENV_NAME).strip()
-    if not environment_name:
-        environment_name = _DEFAULT_CONDA_ENV_NAME
+    configured_name = os.environ.get(_CONDA_ENV_NAME_VARIABLE, "").strip()
+    active_prefix = os.environ.get("CONDA_PREFIX")
+    if not configured_name and active_prefix:
+        # Do not silently switch dependencies when the active environment is
+        # broken. Keep its launcher path so Conda's package discovery is intact.
+        return _validate_python_launcher(_python_launcher(Path(active_prefix)))
+    environment_name = configured_name or _DEFAULT_CONDA_ENV_NAME
     for prefix in _configured_conda_prefixes(environment_name):
         launcher = _python_launcher(prefix)
         if launcher.exists():

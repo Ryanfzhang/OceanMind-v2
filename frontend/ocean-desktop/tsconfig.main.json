@@ -4,10 +4,11 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
+    "allowJs": true,
     "skipLibCheck": true,
     "outDir": "dist-electron",
     "rootDir": "src",
     "types": ["node", "electron"]
   },
-  "include": ["src/main.ts", "src/preload.ts", "src/shared/**/*.ts"]
+  "include": ["src/main.ts", "src/preload.ts", "src/shared/**/*.ts", "src/shared/python-environment.mjs"]
 }

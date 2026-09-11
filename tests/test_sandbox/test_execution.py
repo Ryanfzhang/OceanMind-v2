@@ -296,6 +296,37 @@ def test_python_launcher_resolves_parent_alias_without_leaving_environment(tmp_p
     assert expected != launcher.resolve()
 
 
+def test_python_runtime_uses_active_conda_even_with_a_custom_name(tmp_path, monkeypatch):
+    prefix = tmp_path / "envs" / "ocean"
+    launcher = prefix / "bin" / "python"
+    launcher.parent.mkdir(parents=True)
+    launcher.symlink_to(Path(sys.executable).resolve())
+    monkeypatch.delenv("OCEAN_SANDBOX_PYTHON", raising=False)
+    monkeypatch.delenv("OCEAN_CONDA_ENV", raising=False)
+    monkeypatch.setenv("CONDA_PREFIX", str(prefix))
+    assert current_python_executable() == launcher.absolute()
+
+
+def test_python_runtime_does_not_fall_back_from_broken_active_conda(tmp_path, monkeypatch):
+    monkeypatch.delenv("OCEAN_SANDBOX_PYTHON", raising=False)
+    monkeypatch.delenv("OCEAN_CONDA_ENV", raising=False)
+    monkeypatch.setenv("CONDA_PREFIX", str(tmp_path / "removed"))
+    with pytest.raises(SandboxUnavailableError, match="Python interpreter"):
+        current_python_executable()
+
+
+def test_explicit_named_scientific_environment_overrides_active_conda(tmp_path, monkeypatch):
+    prefix = tmp_path / "envs" / "selected"
+    launcher = prefix / "bin" / "python"
+    launcher.parent.mkdir(parents=True)
+    launcher.symlink_to(Path(sys.executable).resolve())
+    monkeypatch.delenv("OCEAN_SANDBOX_PYTHON", raising=False)
+    monkeypatch.setenv("CONDA_PREFIX", str(tmp_path / "other"))
+    monkeypatch.setenv("OCEAN_CONDA_ENV", "selected")
+    monkeypatch.setattr("oceanx.sandbox.execution._configured_conda_prefixes", lambda name: (prefix,) if name == "selected" else ())
+    assert current_python_executable() == launcher.absolute()
+
+
 def test_macos_runtime_roots_include_homebrew_native_library_trees(tmp_path: Path) -> None:
     prefix = tmp_path / "homebrew"
     cellar = prefix / "Cellar"

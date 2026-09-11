@@ -1,2 +1,2 @@
 # Environment: oceanx (Python 3.11). Run from the repository root.
--e .[ocean-runtime]
+-e .[ocean-runtime,desktop-build]

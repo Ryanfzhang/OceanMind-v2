@@ -9,7 +9,8 @@ def test_runtime_dependencies_match_packaged_manifest_and_two_install_entries():
     project = tomllib.loads((ROOT/'pyproject.toml').read_text())
     runtime = project['project']['optional-dependencies']['ocean-runtime']
     assert json.loads((ROOT/'src/oceanx/resources/runtime/dependencies.json').read_text()) == runtime
-    assert '-e .[ocean-runtime]' in (ROOT/'requirements.txt').read_text()
+    assert '-e .[ocean-runtime,desktop-build]' in (ROOT/'requirements.txt').read_text()
+    assert any(item.startswith('pyinstaller') for item in project['project']['optional-dependencies']['desktop-build'])
     assert '-r ../requirements.txt' in (ROOT/'benchmarking/requirements.txt').read_text()
     for old in ['requirements-ocean.txt', 'benchmarking/download/requirements.txt',
                 'benchmarking/server/requirements.txt', 'src/oceanx/resources/runtime/requirements.txt',

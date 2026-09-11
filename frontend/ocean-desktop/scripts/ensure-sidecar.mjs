@@ -27,6 +27,9 @@ const inputs = [
   resolve(repositoryRoot, 'scripts', 'ocean_desktop_sidecar_entry.py'),
   resolve(repositoryRoot, 'scripts', 'build_desktop_sidecar.py'),
   resolve(repositoryRoot, 'pyproject.toml'),
+  resolve(repositoryRoot, 'requirements.txt'),
+  resolve(desktopRoot, 'scripts', 'build-sidecar.mjs'),
+  resolve(desktopRoot, 'src', 'shared', 'python-environment.mjs'),
   resolve(repositoryRoot, 'src/oceanx/resources/runtime/dependencies.json'),
 ];
 const newestInput = Math.max(...inputs.map(newestModification));
