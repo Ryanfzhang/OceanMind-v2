@@ -2,12 +2,13 @@
   "id": "Q21",
   "track": "autoresearch",
   "title": "MODIS coastal versus offshore chlorophyll",
-  "query": "Using monthly MODIS-Aqua chlorophyll for 2003–2012, compare the SEATS-area box 115.5–116.5 E, 17.5–18.5 N with the Pearl River coastal box 112–115 E, 21–23 N. Calculate regional time series and seasonal climatologies, identify supported contrasts and anomalies, and assess how valid-pixel coverage affects interpretation. Only the supplied chlorophyll product is required; do not attempt a three-algorithm or in-situ validation. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "query": "Using the provided MODIS-Aqua data for 2003–2012, investigate how chlorophyll variability differs between the SEATS area (115.5–116.5°E, 17.5–18.5°N) and Pearl River coastal waters (112–115°E, 21–23°N).",
   "catalog_version": "2026-09-08-accessible-v1",
   "data_status": "scripted_acquisition_pending_execution",
   "data_groups": [
     "P_MODIS"
   ],
   "analysis_period": "2003–2012",
-  "adaptation": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive."
+  "adaptation": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "query_version": "2026-09-11-general-v1"
 }

@@ -1,5 +1,7 @@
 # Evaluator protocol
 
+Q13–Q30 now use the [general-query revision](../GENERAL_QUERIES.md). Q13–Q24 allow defensible agent-selected methods; original-paper figures and detailed procedures are context only. Q25–Q30 retain evaluator-only idea-quality anchors. Updated query hashes distinguish this revision from historical detailed-query runs; all revised references remain draft pending calibration.
+
 ## Per-query references
 
 For every query Q01–Q30, use its per-task files (only paper-reproduction tasks need source images):

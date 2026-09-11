@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "rubric_version": "1.1-panel-evidence-draft",
+  "rubric_version": "1.3-general-objective-draft",
   "status": "draft",
   "task_id": "Q24",
   "title": "2023 East China Sea heat-budget attribution",
-  "query_sha256": "53918af6ee135cfb0e604c79ec36563123addbb9917283b633ca0242cdb35027",
+  "query_sha256": "8fe5b6fc0da44634e75a2c16c5e17e371a650fb3a615d3d056340b71415e7d10",
   "data_fingerprint": null,
   "reference_mode": "Original heat-budget component; no CMIP6 projection or unsupplied IORS validation required.",
   "paper": {
@@ -13,23 +13,23 @@
     "doi": "10.1038/s41612-024-00846-4",
     "url": "https://doi.org/10.1038/s41612-024-00846-4"
   },
-  "reference_text": "Score actual executed evidence, not agreement by quotation. Published figures support diagnostic comparison; frozen-data numerical tolerances require independent computation. Do not require unperformed extensions or unavailable model experiments.\n\nPublished result context (not a validated numerical answer): Oh Results/Fig. 3 contrasts early shortwave/ocean contributions with later surface-flux influence, including latent heat flux, and notes residual cooling later in the event. Only the selected aggregate-budget terms are required; unseen mean/eddy processes must not be claimed verified.",
+  "reference_text": "Evaluate this general-objective adaptation on the supplied inputs. The agent chooses diagnostics, thresholds, baselines, comparisons and figures; accept scientifically defensible alternatives. Score correctness, evidence sufficiency and appropriately bounded inference, not compliance with an unstated recipe or the number of analyses. Original-paper methods, figures and numbers are context only, never mandatory targets. Negative or unresolved findings can earn full credit when justified by executed evidence. Scientific quality expectations belong to the evaluator and are not appended to the agent query.\n\nResearch query:\nUsing the provided OISST, GLORYS12 and ERA5 data, investigate the formation and persistence mechanisms of the 2023 East China Sea marine heatwave (25–34°N, 120–128°E).",
   "criteria": [
     {
       "id": "Q24-C1",
       "weight": 20,
-      "description": "Derive the 0.5 C temperature-threshold mixed layer and apply a consistent1993–2011 heat-budget baseline over 25–34 N, 120–128 E. Convert accumulated ERA5 energy to flux and align sampling/grids.",
+      "description": "Use the specified data, region and period. Establish the metadata, units, coordinates, masks and valid sampling support relevant to the chosen analysis; do not assume observations and reanalysis are interchangeable.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Methods/Data and Fig. 3 caption: GLORYS/ERA5, 0.5 C MLD and1993–2011 baseline.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [],
       "visual_checks": []
     },
     {
       "id": "Q24-C2",
       "weight": 25,
-      "description": "Compute mixed-layer temperature tendency, horizontal advection and surface heat input with shortwave penetration correction. Parameterize entrainment/detrainment and vertical diffusion following Methods rather than naming an unexplained residual as observed mixing.",
+      "description": "Choose and correctly execute defensible diagnostics that address the formation and persistence mechanisms of the 2023 marine heatwave. Justify consequential method choices. No particular threshold, estimator, diagnostic depth, regional subdivision or sequence of calculations is prescribed beyond the query.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Methods heat-budget equation, penetration formula and vertical parameterization (Kv=1e-4 m2/s); vertical velocity neglected in entrainment as in the paper.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Oh2024_Fig3_budget_series.png",
         "images/Oh2024_Fig3_surface_fluxes.png"
@@ -39,16 +39,13 @@
           "id": "Q24-V01",
           "reference_figure": "images/Oh2024_Fig3_budget_series.png",
           "source_panel": "Fig. 3a",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units.",
-            "Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3a; Methods heat-budget equation, penetration formula and vertical parameterization (Kv=1e-4 m2/s); vertical velocity neglected in entrainment as in the paper."
         },
@@ -56,16 +53,13 @@
           "id": "Q24-V02",
           "reference_figure": "images/Oh2024_Fig3_surface_fluxes.png",
           "source_panel": "Fig. 3b",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Shortwave, longwave, sensible and latent contributions with correct signs, units and mixed-layer conversion.",
-            "Resolve which components support net surface heating and cooling; accumulated energy must first be converted correctly."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3b; Methods heat-budget equation, penetration formula and vertical parameterization (Kv=1e-4 m2/s); vertical velocity neglected in entrainment as in the paper."
         }
@@ -80,9 +74,9 @@
     {
       "id": "Q24-C3",
       "weight": 25,
-      "description": "Plot budget/flux components over July 30–October 19, 2023 and compare developing phases August 12–28 and September 6–28, as labelled in Fig. 3. Separate shortwave, longwave, sensible and latent terms.",
+      "description": "Provide quantitative evidence sufficient for the research objective. Address material sampling, baseline, dependence or method-choice limitations with discriminating checks where feasible. Accept equivalent designs; do not require a fixed list of correlations, transforms, sensitivity folds, or panels.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Oh2024_Fig3_budget_series.png",
         "images/Oh2024_Fig3_surface_fluxes.png",
@@ -94,16 +88,13 @@
           "id": "Q24-V01",
           "reference_figure": "images/Oh2024_Fig3_budget_series.png",
           "source_panel": "Fig. 3a",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units.",
-            "Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3a; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
         },
@@ -111,16 +102,13 @@
           "id": "Q24-V02",
           "reference_figure": "images/Oh2024_Fig3_surface_fluxes.png",
           "source_panel": "Fig. 3b",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Shortwave, longwave, sensible and latent contributions with correct signs, units and mixed-layer conversion.",
-            "Resolve which components support net surface heating and cooling; accumulated energy must first be converted correctly."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3b; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
         },
@@ -128,16 +116,13 @@
           "id": "Q24-V03",
           "reference_figure": "images/Oh2024_Fig3_early_phase.png",
           "source_panel": "Fig. 3c",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Phase-mean heat-budget and surface-flux contributions for August 12-28, 2023.",
-            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3c; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
         },
@@ -145,16 +130,13 @@
           "id": "Q24-V04",
           "reference_figure": "images/Oh2024_Fig3_late_phase.png",
           "source_panel": "Fig. 3d",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Phase-mean heat-budget and surface-flux contributions for September 6-28, 2023.",
-            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3d; Fig. 3a–d labels July 30–October 19 and developing phases8/12–28 and9/6–28. Caption says June 30: retain acquisition margin and document the discrepancy."
         }
@@ -169,9 +151,9 @@
     {
       "id": "Q24-C4",
       "weight": 20,
-      "description": "Quantify closure and distinguish resolved advection, parameterized vertical processes and residual. Interpret the difference between phases without requiring the paper's magnitudes on a different reprocessing release.",
+      "description": "Interpret the executed evidence at its supported scale. Distinguish description and association from mechanism or independent validation; assess relevant competing explanations for causal claims. Do not require a positive finding, a named observed event, or agreement with the reference paper. Missing data cannot establish a preferred explanation.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Oh2024_Fig3_budget_series.png",
         "images/Oh2024_Fig3_early_phase.png",
@@ -182,16 +164,13 @@
           "id": "Q24-V01",
           "reference_figure": "images/Oh2024_Fig3_budget_series.png",
           "source_panel": "Fig. 3a",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Mixed-layer tendency and resolved/parameterized heat-budget terms over July 30-October 19, 2023, in consistent temperature-rate units.",
-            "Separate resolved horizontal advection, corrected surface heat input, parameterized vertical terms and residual; quantify closure."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Line, point or bar plots with equivalent temporal support and variability information; a different layout or color scheme is acceptable."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3a; Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task."
         },
@@ -199,16 +178,13 @@
           "id": "Q24-V03",
           "reference_figure": "images/Oh2024_Fig3_early_phase.png",
           "source_panel": "Fig. 3c",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Phase-mean heat-budget and surface-flux contributions for August 12-28, 2023.",
-            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3c; Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task."
         },
@@ -216,16 +192,13 @@
           "id": "Q24-V04",
           "reference_figure": "images/Oh2024_Fig3_late_phase.png",
           "source_panel": "Fig. 3d",
-          "requirement": "scientific_information",
+          "requirement": "context_only",
           "evidence_group": "Q24-Oh2024_Fig03",
-          "required_information": [
-            "Phase-mean heat-budget and surface-flux contributions for September 6-28, 2023.",
-            "Contribution signs, relative/absolute magnitudes and closure must follow the calculation; distinguish measured/resolved terms, parameterizations and residual."
-          ],
+          "required_information": [],
           "acceptable_alternatives": [
             "Bars, signed dot plots or a contribution table paired with a visual phase comparison using common units."
           ],
-          "instruction": "Assess the required scientific information, together with this criterion's quantitative and methodological evidence. Accept equivalent visual representations, not just the source plot type. Do not award extra points for matching layout or producing extra panels.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Budget-rate units: degree C/day. Source mean/eddy subcolumns are context unless the query requires them; no extra score for recreating them. No arbitrary visual-match tolerance replaces numerical validation.",
           "source_basis": "10.1038/s41612-024-00846-4; Fig. 3d; Results/Discussion discuss residual effects. Mean/eddy decomposition in Fig. 3c/d is not required in this bounded aggregate-advection task."
         }
@@ -240,9 +213,9 @@
     {
       "id": "Q24-C5",
       "weight": 10,
-      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "description": "Provide a traceable answer and inspectable calculation code with numerical or visual evidence sufficient to assess the claims. Evaluate any delivery requirements in the shared runner contract; do not require an unstated notebook format, figure count or report length. Stored outputs alone do not verify rerunability.",
       "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
-      "source_basis": "Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [],
       "visual_checks": []
     }
@@ -419,10 +392,10 @@
     }
   ],
   "release_requirements": [
-    "Obtain authorized original-period inputs, record product versions/QC and freeze the input fingerprint.",
-    "Freeze spatial masks, interpolation, temporal processing and any unresolved original-method parameters.",
-    "Independently compute numerical targets and review tolerances on those inputs.",
-    "Review source-image permissions and notebook execution before validated release."
+    "Verify and freeze the supplied inputs, product identities and query version before runs.",
+    "Calibrate the general-objective criteria on independently audited analyses; validate numerical evidence conditional on the submitted method rather than imposing the old recipe.",
+    "Retain original-paper images as context only and review their permitted use.",
+    "Do not relabel old detailed-query attempts with the new query hash or pool their scores with this version."
   ],
   "scoring": {
     "scale": [
@@ -460,5 +433,6 @@
     "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
     "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
     "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
-  }
+  },
+  "query_version": "2026-09-11-general-v1"
 }

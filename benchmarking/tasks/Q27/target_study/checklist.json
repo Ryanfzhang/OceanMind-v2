@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "rubric_version": "1.1-idea-value-anchored-draft",
+  "rubric_version": "2.1-general-idea-draft",
   "status": "draft",
   "task_id": "Q27",
   "title": "An idea about coastal oxygen variability",
-  "query_sha256": "8e870e83e6cfec1efdf9f8adb353239f1df6ffac7479a82e8fa19a2e31648b29",
+  "query_sha256": "bd6f957388e9c83e467aba05fc8573f10f6ab748b010a416f5292f6697b4e10e",
   "data_fingerprint": null,
   "reading_pack_fingerprint": null,
   "reference_mode": "Open-ended hypothesis testing; no unique gold hypothesis, expected result sign or target figure.",
-  "reference_text": "Apply each criterion's specific 0-4 anchors. Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer. A supported, contradicted or genuinely unresolved hypothesis can receive full credit. Demand adequate testing and evidence, not a positive finding. Cite source and submission locations and mark unavailable verification; never invent source passages, unseen images or a successful replay. Technical checks use the selected hypothesis and frozen inputs, not paper values as ground truth. Do not demand extra fields or the reference papers' full model experiments.\n\nTask-specific interpretation limits: Verify oxygen units and geometric bottom indices where used. Distinguish continuous oxygen variability from threshold-event claims. Predictor timing and a persistence baseline matter if forecasting is claimed; they are not mandatory for a non-predictive hypothesis. Sediment/respiration causal attribution requires evidence not present in the six-field archive.\nData alignment: Same estuary and explicitly linked model lineage, but different process experiments; neither is proven identical to the historical CMOMS archive. This is the least exact data match and remains provisional.\n\nUse related-work source texts supplied separately to verify literature fidelity. This JSON contains bibliographic screening notes, not substitutes for the full texts. The current judge helper does not automatically load this reading pack or perform replay.",
+  "reference_text": "Apply the existing criterion-specific 0–4 anchors to the agent-selected idea. Assess scientific value and fidelity to the supplied readings, not worldwide first discovery. Support, contradiction and justified unresolved findings can receive full credit. Verify claimed execution and cite evidence locations; do not invent a successful replay. Do not prescribe an idea or reward extra analyses merely for their number.\n\nEvaluate the general research objective on the supplied inputs. The agent chooses diagnostics, thresholds, baselines, comparisons and figures; accept scientifically defensible alternatives. Score correctness, evidence sufficiency and appropriately bounded inference, not compliance with an unstated recipe or the number of analyses. Original-paper methods, figures and numbers are context only, never mandatory targets. Negative or unresolved findings can earn full credit when justified by executed evidence. Scientific quality expectations belong to the evaluator and are not appended to the agent query.\n\nTask-specific interpretation limits: Distinguish oxygen concentration, hypoxic extent and exposure where relevant. Do not infer unmeasured respiration, sediment fluxes or causal budget closure from the available fields.\n\nData alignment: Same estuary and explicitly linked model lineage, but different process experiments; neither is proven identical to the historical CMOMS archive. This is the least exact data match and remains provisional.\n\nResearch query:\nDrawing on the supplied related work and 2018–2022 CMOMS data for the supplied northern South China Sea coastal domain, develop and investigate a research idea about oxygen variability or hypoxia.",
   "criteria": [
     {
       "id": "Q27-L1",
@@ -343,9 +343,11 @@
     "Calibrate item anchors on pilot submissions and confirm identical budgets, tool access and literature policy for both systems.",
     "Prepare independent numerical and execution-audit procedures for agent-selected analyses, without inventing a single gold hypothesis or demanding the published conclusion.",
     "Confirm evaluator evidence fits configured limits without silent truncation; a single-judge API call does not perform full-source reading or clean replay automatically.",
-    "Only mark validated after release checks are actually satisfied; retain originals, failures, judge disagreement and adjudication records."
+    "Only mark validated after release checks are actually satisfied; retain originals, failures, judge disagreement and adjudication records.",
+    "Calibrate against the general query without exposing evaluator procedures in the prompt; do not pool prior detailed-query attempts with this version."
   ],
   "reading_data_alignment": "Same estuary and explicitly linked model lineage, but different process experiments; neither is proven identical to the historical CMOMS archive. This is the least exact data match and remains provisional.",
   "reading_inspiration": "Circulation-driven oxygen variability paired with a newer benthic-pelagic legacy mechanism; the mechanism is reading context, not a prescribed causal claim.",
-  "contribution_policy": "Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer."
+  "contribution_policy": "Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer.",
+  "query_version": "2026-09-11-general-v1"
 }

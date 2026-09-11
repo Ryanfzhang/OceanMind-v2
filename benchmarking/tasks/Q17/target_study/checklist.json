@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "rubric_version": "1.3-general-objective-draft",
   "status": "draft",
   "task_id": "Q17",
   "title": "Seasonal subsurface salinity evolution in a Gulf subregion",
-  "query_sha256": "a9dc7e18b141e5d551ded794697f2f49811c0ee21a7749c8e5049d6d17072b44",
+  "query_sha256": "497aaf329badf41a206480a704060c6074b5a7f086ea2a5b9f4fe5d50cff9861",
   "data_fingerprint": null,
   "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
   "paper": {
@@ -13,14 +13,14 @@
     "doi": "10.1029/2019JC015397",
     "url": "https://doi.org/10.1029/2019JC015397"
   },
-  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing daily GLORYS temperature and salinity from 6 August 2016 to 25 July 2017, examine the fixed central Gulf box 92–88 W, 23–27 N. Calculate the 50–300 m salinity maximum and its depth, a regional salinity time-depth diagram, and density-threshold mixed-layer depth relative to 10 m (0.03 kg m-3). Compare November–March with the remaining supplied months and test whether salinity-core changes accompany mixed-layer deepening. This is a fixed-region seasonal diagnostic, not Lagrangian tracking of the original glider eddy. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "reference_text": "Evaluate this general-objective adaptation on the supplied inputs. The agent chooses diagnostics, thresholds, baselines, comparisons and figures; accept scientifically defensible alternatives. Score correctness, evidence sufficiency and appropriately bounded inference, not compliance with an unstated recipe or the number of analyses. Original-paper methods, figures and numbers are context only, never mandatory targets. Negative or unresolved findings can earn full credit when justified by executed evidence. Scientific quality expectations belong to the evaluator and are not appended to the agent query.\n\nResearch query:\nUsing the provided GLORYS12 data for 6 August 2016–25 July 2017 in the central Gulf of Mexico (92–88°W, 23–27°N), investigate how subsurface salinity structure evolves seasonally and relates to upper-ocean mixing.",
   "criteria": [
     {
       "id": "Q17-C1",
       "weight": 20,
-      "description": "Use the fixed 92–88 W, 23–27 N box and exact date window; compute daily columns before area aggregation and report wet/depth support.",
+      "description": "Use the specified data, region and period. Establish the metadata, units, coordinates, masks and valid sampling support relevant to the chosen analysis; do not assume observations and reanalysis are interchangeable.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Sections 2.2.2.1/3 and Fig. 2a: tracking and slope interactions. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Sosa2020_Fig2_position.png"
       ],
@@ -35,7 +35,7 @@
           "acceptable_alternatives": [
             "Position/coverage time series or an eddy-relative track with equivalent temporal and exclusion information."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 2a; Sections 2.2.2.1/3 and Fig. 2a: tracking and slope interactions."
         }
@@ -50,9 +50,9 @@
     {
       "id": "Q17-C2",
       "weight": 25,
-      "description": "Plot daily or explicitly aggregated salinity time-depth structure with MLD, plus 50–300 m maximum strength/depth; preserve missing values and show units.",
+      "description": "Choose and correctly execute defensible diagnostics that address seasonal subsurface salinity evolution and its relationship with upper-ocean mixing. Justify consequential method choices. No particular threshold, estimator, diagnostic depth, regional subdivision or sequence of calculations is prescribed beyond the query.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Section 3 and Fig. 2b–c: observed hydrographic time evolution. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Sosa2020_Fig2_salinity.png",
         "images/Sosa2020_Fig2_temperature.png"
@@ -68,7 +68,7 @@
           "acceptable_alternatives": [
             "Time-depth sections or mission-resolved sections on a common depth and time frame."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 2b; Section 3 and Fig. 2b–c: observed hydrographic time evolution."
         },
@@ -82,7 +82,7 @@
           "acceptable_alternatives": [
             "Time-depth sections or mission-resolved sections on a common depth and time frame."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 2c; Section 3 and Fig. 2b–c: observed hydrographic time evolution."
         }
@@ -97,9 +97,9 @@
     {
       "id": "Q17-C3",
       "weight": 25,
-      "description": "Quantify November–March versus other supplied months with matched support and temporally aware uncertainty; evaluate the association rather than assume winter erosion.",
+      "description": "Provide quantitative evidence sufficient for the research objective. Address material sampling, baseline, dependence or method-choice limitations with discriminating checks where feasible. Accept equivalent designs; do not require a fixed list of correlations, transforms, sensitivity folds, or panels.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Fig. 3 and caption: r<0.7 core means and slope-interaction exclusions. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Sosa2020_Fig3ab_core_profiles.png",
         "images/Sosa2020_Fig3c_ts.png"
@@ -115,7 +115,7 @@
           "acceptable_alternatives": [
             "Depth profiles or a depth-resolved heatmap preserving the same groups, values and vertical comparisons."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 3a-b; Fig. 3 and caption: r<0.7 core means and slope-interaction exclusions."
         },
@@ -129,7 +129,7 @@
           "acceptable_alternatives": [
             "T-S scatter/curves with mission grouping, or equivalent paired temperature-salinity distributions."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 3c; Fig. 3 and caption: r<0.7 core means and slope-interaction exclusions."
         }
@@ -144,9 +144,9 @@
     {
       "id": "Q17-C4",
       "weight": 20,
-      "description": "Recognize fixed-box advection and a single annual cycle as alternatives/limits; do not claim a measured salt budget, original mission r<0.7 core, or causal mixing mechanism.",
+      "description": "Interpret the executed evidence at its supported scale. Distinguish description and association from mechanism or independent validation; assess relevant competing explanations for causal claims. Do not require a positive finding, a named observed event, or agreement with the reference paper. Missing data cannot establish a preferred explanation.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Section 3 observations contrasted with Section 4 numerical budget; no model-only diagnostic imposed. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Sosa2020_Fig2_salinity.png",
         "images/Sosa2020_Fig2_temperature.png"
@@ -162,7 +162,7 @@
           "acceptable_alternatives": [
             "Time-depth sections or mission-resolved sections on a common depth and time frame."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 2b; Section 3 observations contrasted with Section 4 numerical budget; no model-only diagnostic imposed."
         },
@@ -176,7 +176,7 @@
           "acceptable_alternatives": [
             "Time-depth sections or mission-resolved sections on a common depth and time frame."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2019JC015397; Fig. 2c; Section 3 observations contrasted with Section 4 numerical budget; no model-only diagnostic imposed."
         }
@@ -191,9 +191,9 @@
     {
       "id": "Q17-C5",
       "weight": 10,
-      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "description": "Provide a traceable answer and inspectable calculation code with numerical or visual evidence sufficient to assess the claims. Evaluate any delivery requirements in the shared runner contract; do not require an unstated notebook format, figure count or report length. Stored outputs alone do not verify rerunability.",
       "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
-      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [],
       "visual_checks": []
     }
@@ -464,9 +464,10 @@
     }
   ],
   "release_requirements": [
-    "Download and verify the canonical public input groups and freeze file hashes.",
-    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
-    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+    "Verify and freeze the supplied inputs, product identities and query version before runs.",
+    "Calibrate the general-objective criteria on independently audited analyses; validate numerical evidence conditional on the submitted method rather than imposing the old recipe.",
+    "Retain original-paper images as context only and review their permitted use.",
+    "Do not relabel old detailed-query attempts with the new query hash or pool their scores with this version."
   ],
   "scoring": {
     "scale": [
@@ -504,5 +505,6 @@
     "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
     "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
     "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
-  }
+  },
+  "query_version": "2026-09-11-general-v1"
 }

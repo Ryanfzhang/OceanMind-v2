@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "rubric_version": "1.1-idea-value-anchored-draft",
+  "rubric_version": "2.1-general-idea-draft",
   "status": "draft",
   "task_id": "Q25",
   "title": "An idea about vertical chlorophyll structure",
-  "query_sha256": "cc40e6e36dcff5ed0b264aa910038c45108e6494ead0d0851fb8ac73b9f4de9b",
+  "query_sha256": "cd1009047b07705906db603e11c1fceae62c99d66bb2e0b1c7218e696842f1d3",
   "data_fingerprint": null,
   "reading_pack_fingerprint": null,
   "reference_mode": "Open-ended hypothesis testing; no unique gold hypothesis, expected result sign or target figure.",
-  "reference_text": "Apply each criterion's specific 0-4 anchors. Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer. A supported, contradicted or genuinely unresolved hypothesis can receive full credit. Demand adequate testing and evidence, not a positive finding. Cite source and submission locations and mark unavailable verification; never invent source passages, unseen images or a successful replay. Technical checks use the selected hypothesis and frozen inputs, not paper values as ground truth. Do not demand extra fields or the reference papers' full model experiments.\n\nTask-specific interpretation limits: Differentiate chlorophyll concentration, depth-integrated chlorophyll, biomass and productivity. Respect vertical resolution, varying integration support and temporal/spatial dependence. Do not require nutrient/light/organic-matter flux variables absent from I1. The MITgcm-Darwin reading is conceptual/methodological context, not an additional input package; no mandatory SSH-based eddy tracking.\nData alignment: Same South China Sea physical-biogeochemical setting; Lu uses CMOMS, Xu uses MITgcm-Darwin, not the same model/run or years. I1 remains the proposed 2018–2022 CMOMS archive.\n\nUse related-work source texts supplied separately to verify literature fidelity. This JSON contains bibliographic screening notes, not substitutes for the full texts. The current judge helper does not automatically load this reading pack or perform replay.",
+  "reference_text": "Apply the existing criterion-specific 0–4 anchors to the agent-selected idea. Assess scientific value and fidelity to the supplied readings, not worldwide first discovery. Support, contradiction and justified unresolved findings can receive full credit. Verify claimed execution and cite evidence locations; do not invent a successful replay. Do not prescribe an idea or reward extra analyses merely for their number.\n\nEvaluate the general research objective on the supplied inputs. The agent chooses diagnostics, thresholds, baselines, comparisons and figures; accept scientifically defensible alternatives. Score correctness, evidence sufficiency and appropriately bounded inference, not compliance with an unstated recipe or the number of analyses. Original-paper methods, figures and numbers are context only, never mandatory targets. Negative or unresolved findings can earn full credit when justified by executed evidence. Scientific quality expectations belong to the evaluator and are not appended to the agent query.\n\nTask-specific interpretation limits: Distinguish chlorophyll concentration from biomass and productivity. Assess vertical sampling and dependence where material. No absent nutrient or light fields, or SSH-based eddy tracking, are mandatory.\n\nData alignment: Same South China Sea physical-biogeochemical setting; Lu uses CMOMS, Xu uses MITgcm-Darwin, not the same model/run or years. I1 remains the proposed 2018–2022 CMOMS archive.\n\nResearch query:\nDrawing on the supplied related work and 2018–2022 CMOMS data for the northern South China Sea shelf and slope, develop and investigate a research idea about vertical chlorophyll structure and its physical controls.",
   "criteria": [
     {
       "id": "Q25-L1",
@@ -343,9 +343,11 @@
     "Calibrate item anchors on pilot submissions and confirm identical budgets, tool access and literature policy for both systems.",
     "Prepare independent numerical and execution-audit procedures for agent-selected analyses, without inventing a single gold hypothesis or demanding the published conclusion.",
     "Confirm evaluator evidence fits configured limits without silent truncation; a single-judge API call does not perform full-source reading or clean replay automatically.",
-    "Only mark validated after release checks are actually satisfied; retain originals, failures, judge disagreement and adjudication records."
+    "Only mark validated after release checks are actually satisfied; retain originals, failures, judge disagreement and adjudication records.",
+    "Calibrate against the general query without exposing evaluator procedures in the prompt; do not pool prior detailed-query attempts with this version."
   ],
   "reading_data_alignment": "Same South China Sea physical-biogeochemical setting; Lu uses CMOMS, Xu uses MITgcm-Darwin, not the same model/run or years. I1 remains the proposed 2018–2022 CMOMS archive.",
   "reading_inspiration": "Regional transport context paired with vertically resolved ecosystem analysis.",
-  "contribution_policy": "Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer."
+  "contribution_policy": "Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer.",
+  "query_version": "2026-09-11-general-v1"
 }

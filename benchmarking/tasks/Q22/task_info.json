@@ -2,7 +2,7 @@
   "id": "Q22",
   "track": "autoresearch",
   "title": "Vietnam-region chlorophyll and monsoon winds",
-  "query": "Using monthly MODIS-Aqua chlorophyll and NOAA blended winds for May–September 2004–2012 in the Vietnam-region box 109–112 E, 10–16 N, examine whether summer chlorophyll anomalies covary with meridional wind and scalar wind speed. Show regional series and raw versus calendar-month-anomaly relationships, and test sensitivity to dropping one summer at a time. This reduced analysis concerns chlorophyll concentration and wind association, not primary productivity, wind stress, an upwelling transport index or a circulation budget. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "query": "Using the provided MODIS-Aqua and NOAA blended wind data for May–September 2004–2012 off Vietnam (109–112°E, 10–16°N), investigate how summer chlorophyll variability relates to monsoon winds.",
   "catalog_version": "2026-09-08-accessible-v1",
   "data_status": "scripted_acquisition_pending_execution",
   "data_groups": [
@@ -10,5 +10,6 @@
     "P_WIND"
   ],
   "analysis_period": "2004–2012; May–September",
-  "adaptation": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive."
+  "adaptation": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
+  "query_version": "2026-09-11-general-v1"
 }

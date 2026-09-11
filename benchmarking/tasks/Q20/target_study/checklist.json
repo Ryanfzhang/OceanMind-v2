@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "rubric_version": "1.2-accessible-method-transfer-draft",
+  "rubric_version": "1.3-general-objective-draft",
   "status": "draft",
   "task_id": "Q20",
   "title": "Seasonal and anomaly chlorophyll–wind association",
-  "query_sha256": "3b7353e8285f980e5e0d12a272023c7f45f5b8216c2b8bcbe42e0c7f55121671",
+  "query_sha256": "25b263bae3b7506ae2000428a3b88400aa3d33d05b98d8f97b58d16f1bc8b618",
   "data_fingerprint": null,
   "reference_mode": "Public-data method transfer with reduced scope, authorized 2026-09-08; not exact reproduction of the original observational archive.",
   "paper": {
@@ -13,23 +13,23 @@
     "doi": "10.1029/2011JC007064",
     "url": "https://doi.org/10.1029/2011JC007064"
   },
-  "reference_text": "Evaluate the canonical adapted query on the frozen downloaded inputs. Original-paper figures and numbers are context only, not expected outputs. Full credit requires correct executed evidence, not agreement with published signs, event identities or values. Accept scientifically equivalent plots. Independent numerical reference generation and input validation remain required.\nUsing monthly MODIS-Aqua chlorophyll and NOAA blended scalar wind speed over 104–122 E, 1–25 N for 2003–2012, construct matched area-weighted South China Sea time series. Compare the association in the raw records with that after removal of calendar-month climatologies, and check sensitivity to omitting the first and last year. Show the series and association estimates; a full EEMD decomposition is not required. Use only the supplied public data and coordinate-defined masks; no private profiles, author simulations or additional measurements are required. Report methods, executed numerical evidence, a concise interpretation and an editable analysis.ipynb. The reference paper motivates the diagnostic, but its observational values are not target answers for this adapted input.",
+  "reference_text": "Evaluate this general-objective adaptation on the supplied inputs. The agent chooses diagnostics, thresholds, baselines, comparisons and figures; accept scientifically defensible alternatives. Score correctness, evidence sufficiency and appropriately bounded inference, not compliance with an unstated recipe or the number of analyses. Original-paper methods, figures and numbers are context only, never mandatory targets. Negative or unresolved findings can earn full credit when justified by executed evidence. Scientific quality expectations belong to the evaluator and are not appended to the agent query.\n\nResearch query:\nUsing the provided MODIS-Aqua and NOAA blended wind data for 2003–2012 in the South China Sea (104–122°E, 1–25°N), investigate the relationship between regional chlorophyll variability and wind speed.",
   "criteria": [
     {
       "id": "Q20-C1",
       "weight": 20,
-      "description": "Use scalar monthly wind speed, not the magnitude of monthly mean vectors; align months and reproducible ocean/valid-area support with MODIS and state any remapping.",
+      "description": "Use the specified data, region and period. Establish the metadata, units, coordinates, masks and valid sampling support relevant to the chosen analysis; do not assume observations and reanalysis are interchangeable.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Section 2: monthly satellite/wind inputs; scalar speed is not the magnitude of mean vectors. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [],
       "visual_checks": []
     },
     {
       "id": "Q20-C2",
       "weight": 25,
-      "description": "Compute raw and deseasonalized monthly records with explicit area weighting, climatology and missingness handling; show both temporal diagnostics.",
+      "description": "Choose and correctly execute defensible diagnostics that address the relationship between regional chlorophyll variability and wind speed. Justify consequential method choices. No particular threshold, estimator, diagnostic depth, regional subdivision or sequence of calculations is prescribed beyond the query.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Palacz2011_Fig1_input.png",
         "images/Palacz2011_Fig1_C1.png",
@@ -51,7 +51,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, input (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -65,7 +65,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C1 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -79,7 +79,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C2 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -93,7 +93,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C3 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -107,7 +107,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C4 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -121,7 +121,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C5 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -135,7 +135,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C6 (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         },
@@ -149,7 +149,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, trend (chlorophyll left, wind right); Section 2 and Figs.1–2: EEMD and IMF statistical/postprocessing assessment."
         }
@@ -164,9 +164,9 @@
     {
       "id": "Q20-C3",
       "weight": 25,
-      "description": "Report matched correlations or regressions and support for raw/anomaly relationships with uncertainty that accounts for temporal dependence.",
+      "description": "Provide quantitative evidence sufficient for the research objective. Address material sampling, baseline, dependence or method-choice limitations with discriminating checks where feasible. Accept equivalent designs; do not require a fixed list of correlations, transforms, sensitivity folds, or panels.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [
         "images/Palacz2011_Fig1_input.png",
         "images/Palacz2011_Fig1_C1.png",
@@ -188,7 +188,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, input (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -202,7 +202,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C1 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -216,7 +216,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C2 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -230,7 +230,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C3 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -244,7 +244,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C4 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -258,7 +258,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C5 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -272,7 +272,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, C6 (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         },
@@ -286,7 +286,7 @@
           "acceptable_alternatives": [
             "Paired component plots, a scale-time representation or grouped decomposition diagnostics showing equivalent amplitudes, timescales and coupling."
           ],
-          "instruction": "Original-paper context only. Do not deduct for missing this panel or require agreement with its values, dataset or layout. Evaluate the adapted criterion's explicitly requested outputs.",
+          "instruction": "Original-paper context only. Do not require this panel, method, threshold, event identity or numerical value. Evaluate evidence sufficient for the general query; accept scientifically equivalent alternatives.",
           "source_context": "Original paper used different inputs/analysis scope. This retained crop is not a validated target for the adapted task.",
           "source_basis": "10.1029/2011JC007064; Fig. 1, trend (chlorophyll left, wind right); Section 3.1, Figs.1–3 and Table1: timescale-dependent coupling."
         }
@@ -301,18 +301,18 @@
     {
       "id": "Q20-C4",
       "weight": 20,
-      "description": "Repeat on the interior 2004–2011 window, discuss seasonal confounding, spatial support and finite-record sensitivity; neither association nor a robust sign establishes wind causation.",
+      "description": "Interpret the executed evidence at its supported scale. Distinguish description and association from mechanism or independent validation; assess relevant competing explanations for causal claims. Do not require a positive finding, a named observed event, or agreement with the reference paper. Missing data cannot establish a preferred explanation.",
       "evidence_requirements": "Executed calculations, diagnostic arrays/tables and the relevant report/figure evidence.",
-      "source_basis": "Motivation: Section 3.1 finite-record/end-point check; seed documentation is an execution requirement. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [],
       "visual_checks": []
     },
     {
       "id": "Q20-C5",
       "weight": 10,
-      "description": "Provide an evidence-linked report, task figures and machine-readable diagnostics with one editable analysis.ipynb, declared dependencies and configurable input paths. A separately recorded run is required to verify execution; file presence or stored outputs alone do not establish reproducibility.",
+      "description": "Provide a traceable answer and inspectable calculation code with numerical or visual evidence sufficient to assess the claims. Evaluate any delivery requirements in the shared runner contract; do not require an unstated notebook format, figure count or report length. Stored outputs alone do not verify rerunability.",
       "evidence_requirements": "Report, figures, diagnostics, notebook and independent execution record.",
-      "source_basis": "Motivation: Benchmark delivery and traceability requirement, not an analysis or scoring rule prescribed by the source paper. Scope change: OceanX accessible-data adaptation (2026-09-08); thresholds/boxes and reduced requirements in the canonical query are benchmark choices, not claims about the original experiment.",
+      "source_basis": "General-objective benchmark design (2026-09-11); the retained paper provides scientific context, not a mandatory analysis recipe or numerical target.",
       "reference_figures": [],
       "visual_checks": []
     }
@@ -688,9 +688,10 @@
     }
   ],
   "release_requirements": [
-    "Download and verify the canonical public input groups and freeze file hashes.",
-    "Independently compute diagnostics on these files and validate tolerances; do not reuse original-paper numerical answers.",
-    "Check adapted masks/units/coverage and ensure old runs are not relabelled with new query hashes."
+    "Verify and freeze the supplied inputs, product identities and query version before runs.",
+    "Calibrate the general-objective criteria on independently audited analyses; validate numerical evidence conditional on the submitted method rather than imposing the old recipe.",
+    "Retain original-paper images as context only and review their permitted use.",
+    "Do not relabel old detailed-query attempts with the new query hash or pool their scores with this version."
   ],
   "scoring": {
     "scale": [
@@ -728,5 +729,6 @@
     "tolerance_policy": "Do not infer exact values or invent tolerances by eye. Numerical targets require frozen inputs and independently validated diagnostics.",
     "uninspected_images": "If images were not supplied to a vision-capable reviewer, mark visual claims unassessed. Text, captions or filenames do not prove that unseen images are correct.",
     "context_only": "Do not require source-only variables, algorithms, validation datasets or panels identified as contextual. Alternative reference examples are not cumulative deliverables."
-  }
+  },
+  "query_version": "2026-09-11-general-v1"
 }

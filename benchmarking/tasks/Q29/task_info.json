@@ -3,7 +3,7 @@
   "track": "idea_hypothesis",
   "title": "An idea about the evolving structure of a Loop Current eddy",
   "catalog_version": "2026-09-08-accessible-v1",
-  "query": "Read the supplied Loop Current eddy related work. Using only public GLORYS temperature, salinity and sea-surface height for 6 August 2016-25 July 2017 in the Gulf of Mexico (98-82 W, 18-30 N), propose and test one falsifiable idea about the vertical structure or evolution of a resolved anticyclonic feature. Choose a feasible feature/contrast from the fields instead of assuming GLORYS contains the observed Poseidon trajectory. Original glider missions and bio-optical data are not supplied or required. Separate model-internal evidence from independent observational validation. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "query": "Drawing on the supplied related work and GLORYS12 data for 6 August 2016–25 July 2017 in the Gulf of Mexico (98–82°W, 18–30°N), develop and investigate a research idea about the evolving vertical structure of a Loop Current-region anticyclonic eddy.",
   "analysis_period": "6 August 2016–25 July 2017",
   "data_groups": [
     "P_GULF"
@@ -80,5 +80,6 @@
   ],
   "reading_pack_status": "citations_selected_full_text_pack_not_staged",
   "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
-  "reading_data_alignment": "Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample."
+  "reading_data_alignment": "Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample.",
+  "query_version": "2026-09-11-general-v1"
 }

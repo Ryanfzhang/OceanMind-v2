@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "rubric_version": "1.1-idea-value-anchored-draft",
+  "rubric_version": "2.1-general-idea-draft",
   "status": "draft",
   "task_id": "Q29",
   "title": "An idea about the evolving structure of a Loop Current eddy",
-  "query_sha256": "7a58960a16ba404bcaedcb32af807f703a2303dfa309dd7014590844a1b78cb6",
+  "query_sha256": "58d1e1beb40d78f1c6902f2172492d6c8879e3842eea6cea303d0128e1554643",
   "data_fingerprint": null,
   "reading_pack_fingerprint": null,
   "reference_mode": "Open-ended hypothesis testing; no unique gold hypothesis, expected result sign or target figure.",
-  "reference_text": "Apply each criterion's specific 0-4 anchors. Assess scientific value and the explained extension, comparison, synthesis or boundary test, not worldwide first discovery. A related idea already studied elsewhere is not automatically penalized. Mere restatement of a supplied conclusion is insufficient; changing years alone is not a scientific rationale. No predetermined example hypothesis is a target answer. A supported, contradicted or genuinely unresolved hypothesis can receive full credit. Demand adequate testing and evidence, not a positive finding. Cite source and submission locations and mark unavailable verification; never invent source passages, unseen images or a successful replay. Technical checks use the selected hypothesis and frozen inputs, not paper values as ground truth. Do not demand extra fields or the reference papers' full model experiments.\n\nTask-specific interpretation limits: Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample. Read the supplied Loop Current eddy related work. Using only public GLORYS temperature, salinity and sea-surface height for 6 August 2016-25 July 2017 in the Gulf of Mexico (98-82 W, 18-30 N), propose and test one falsifiable idea about the vertical structure or evolution of a resolved anticyclonic feature. Choose a feasible feature/contrast from the fields instead of assuming GLORYS contains the observed Poseidon trajectory. Original glider missions and bio-optical data are not supplied or required. Separate model-internal evidence from independent observational validation.\n\nRelated-work full texts remain required for literary fidelity checks; bibliography alone is not a frozen reading pack.",
+  "reference_text": "Apply the existing criterion-specific 0–4 anchors to the agent-selected idea. Assess scientific value and fidelity to the supplied readings, not worldwide first discovery. Support, contradiction and justified unresolved findings can receive full credit. Verify claimed execution and cite evidence locations; do not invent a successful replay. Do not prescribe an idea or reward extra analyses merely for their number.\n\nEvaluate the general research objective on the supplied inputs. The agent chooses diagnostics, thresholds, baselines, comparisons and figures; accept scientifically defensible alternatives. Score correctness, evidence sufficiency and appropriately bounded inference, not compliance with an unstated recipe or the number of analyses. Original-paper methods, figures and numbers are context only, never mandatory targets. Negative or unresolved findings can earn full credit when justified by executed evidence. Scientific quality expectations belong to the evaluator and are not appended to the agent query.\n\nTask-specific interpretation limits: Evaluate the feature and comparison supported by the reanalysis. Do not require the observed Poseidon chronology or unprovided glider or bio-optical data; distinguish model-internal results from independent validation.\n\nData alignment: Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample.\n\nResearch query:\nDrawing on the supplied related work and GLORYS12 data for 6 August 2016–25 July 2017 in the Gulf of Mexico (98–82°W, 18–30°N), develop and investigate a research idea about the evolving vertical structure of a Loop Current-region anticyclonic eddy.",
   "criteria": [
     {
       "id": "Q29-L1",
@@ -361,7 +361,8 @@
     "Calibrate item anchors on pilot submissions and confirm identical budgets, tool access and literature policy for both systems.",
     "Prepare independent numerical and execution-audit procedures for agent-selected analyses, without inventing a single gold hypothesis or demanding the published conclusion.",
     "Confirm evaluator evidence fits configured limits without silent truncation; a single-judge API call does not perform full-source reading or clean replay automatically.",
-    "Only mark validated after release checks are actually satisfied; retain originals, failures, judge disagreement and adjudication records."
+    "Only mark validated after release checks are actually satisfied; retain originals, failures, judge disagreement and adjudication records.",
+    "Calibrate against the general query without exposing evaluator procedures in the prompt; do not pool prior detailed-query attempts with this version."
   ],
   "reading_data_alignment": "Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample.",
   "reading_inspiration": "The same observed eddy connects physical structure and evolution with a newer bio-optical perspective; no bio-optical result is required from temperature/salinity alone. Accessible-data revision: develop a feasible idea on the supplied monthly MODIS or daily GLORYS fields; do not require the readings' original data or claim an exact observational replication.",
@@ -370,5 +371,6 @@
     "Related work concerns the same region but observed missions are not identical to this reanalysis. The experiment tests a model-resolved feature, not reproduction of the original Poseidon sample.",
     "Use only the canonical public group; no private observational archive or author reconstruction is compulsory.",
     "Uncertainty/control and blocked held-out testing must match the chosen hypothesis and actual sampling."
-  ]
+  ],
+  "query_version": "2026-09-11-general-v1"
 }

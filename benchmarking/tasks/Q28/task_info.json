@@ -3,7 +3,7 @@
   "track": "idea_hypothesis",
   "title": "An idea about inference from incomplete ocean-colour records",
   "catalog_version": "2026-09-08-accessible-v1",
-  "query": "Read the supplied South China Sea ocean-colour related work. Using only the public monthly MODIS-Aqua chlorophyll fields and their native valid-pixel masks for 2013-2017 (104-122 E, 1-25 N), propose and test one falsifiable idea about regional seasonal variability or the sensitivity of inference to incomplete spatial coverage. No author reconstruction or daily predictor dataset is supplied or required. If testing reconstruction, mask only originally valid observations, keep held-out values out of fitting and state that artificial missingness is not independent validation of real cloud gaps. Do not infer submonthly events from monthly means. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "query": "Drawing on the supplied related work and 2013–2017 MODIS-Aqua data for the South China Sea (104–122°E, 1–25°N), develop and investigate a research idea about what incomplete ocean-colour records reveal about regional chlorophyll variability.",
   "analysis_period": "2013–2017",
   "data_groups": [
     "P_MODIS"
@@ -63,5 +63,6 @@
   ],
   "reading_pack_status": "citations_selected_full_text_pack_not_staged",
   "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
-  "reading_data_alignment": "The readings discuss daily reconstruction; this reduced task uses independent monthly MODIS inputs for a methodological/seasonal hypothesis, not the shared author target or an exact replication."
+  "reading_data_alignment": "The readings discuss daily reconstruction; this reduced task uses independent monthly MODIS inputs for a methodological/seasonal hypothesis, not the shared author target or an exact replication.",
+  "query_version": "2026-09-11-general-v1"
 }

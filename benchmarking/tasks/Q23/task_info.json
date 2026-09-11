@@ -2,11 +2,12 @@
   "id": "Q23",
   "track": "autoresearch",
   "title": "2023 East China Sea marine heatwave",
-  "query": "Characterize the onset, duration, intensity and seasonal timing of East China Sea marine heatwaves during 2023 using daily SST over 25–34 degrees N, 120–128 degrees E. Place the June–October events in the 1982–2023 historical context using a fixed 1982–2011 seasonal baseline.",
+  "query": "Using the provided daily SST data for 1982–2023 in the East China Sea (25–34°N, 120–128°E), investigate the characteristics of the 2023 marine heatwaves and how unusual they were in the historical record.",
   "catalog_version": "2026-09-08-accessible-v1",
   "data_status": "scripted_acquisition_pending_execution",
   "data_groups": [
     "P_OISST"
   ],
-  "analysis_period": "1982–2023; event 2023, baseline 1982–2011"
+  "analysis_period": "1982–2023; event 2023, baseline 1982–2011",
+  "query_version": "2026-09-11-general-v1"
 }

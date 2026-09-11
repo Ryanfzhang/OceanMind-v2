@@ -3,7 +3,7 @@
   "track": "idea_hypothesis",
   "title": "An idea about vertical chlorophyll structure",
   "catalog_version": "2026-09-07-idea-v2",
-  "query": "Read the supplied related work on vertical chlorophyll structure and physical-biogeochemical coupling in the South China Sea. Using the supplied 2018-2022 CMOMS archive, identify one research opportunity, propose a specific falsifiable hypothesis, and execute a test. Choose the hypothesis yourself; it may concern spatial or temporal structure, a boundary condition, or the information carried by different observations. Explain what your idea adds to the supplied studies and report whether the data support, contradict or cannot resolve it. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "query": "Drawing on the supplied related work and 2018–2022 CMOMS data for the northern South China Sea shelf and slope, develop and investigate a research idea about vertical chlorophyll structure and its physical controls.",
   "analysis_period": "2018–2022",
   "data_groups": [
     "I1"
@@ -68,5 +68,6 @@
   ],
   "reading_pack_status": "citations_selected_full_text_pack_not_staged",
   "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
-  "reading_data_alignment": "Same South China Sea physical-biogeochemical setting; Lu uses CMOMS, Xu uses MITgcm-Darwin, not the same model/run or years. I1 remains the proposed 2018–2022 CMOMS archive."
+  "reading_data_alignment": "Same South China Sea physical-biogeochemical setting; Lu uses CMOMS, Xu uses MITgcm-Darwin, not the same model/run or years. I1 remains the proposed 2018–2022 CMOMS archive.",
+  "query_version": "2026-09-11-general-v1"
 }

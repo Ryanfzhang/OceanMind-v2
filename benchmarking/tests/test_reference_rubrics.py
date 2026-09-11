@@ -107,7 +107,7 @@ def test_no_duplicate_catalogue_or_source_images():
 @pytest.mark.parametrize("task_id", TASK_IDS)
 def test_scientific_equivalence_does_not_add_panel_points(task_id):
     ref = reference(task_id)
-    assert ref["rubric_version"] == ("1.2-accessible-method-transfer-draft" if 13 <= int(task_id[1:]) <= 22 else "1.1-panel-evidence-draft")
+    assert ref["rubric_version"] == ("1.3-general-objective-draft" if int(task_id[1:]) >= 13 else "1.1-panel-evidence-draft")
     policy = ref["visual_scoring_policy"]
     assert policy["version"] == "1.0-scientific-information"
     assert "not pixel similarity" in policy["comparison_target"]
@@ -271,9 +271,27 @@ def test_idea_value_does_not_require_worldwide_novelty(task_id):
     task = read(ROOT / "tasks" / task_id / "task_info.json")
     ref = reference(task_id)
     assert task["catalog_version"] == ("2026-09-08-accessible-v1" if int(task_id[1:]) >= 28 else "2026-09-07-idea-v2")
-    assert "worldwide novelty is not required" in task["query"]
+    assert task["query_version"] == "2026-09-11-general-v1"
+    assert "worldwide novelty is not required" not in task["query"]
     assert "already studied elsewhere is not automatically penalized" in ref["contribution_policy"]
     item = next(c for c in ref["criteria"] if c["id"].endswith("-L2"))
     assert item["title"] == "Scientific value and development of the idea"
     assert "studied elsewhere" in item["anchors"]["3"]
     assert ref["reading_inspiration"]
+
+
+@pytest.mark.parametrize("task_id", [f"Q{i:02}" for i in range(13, 31)])
+def test_general_queries_leave_procedures_to_agents_and_version_the_rubric(task_id):
+    task = read(ROOT / "tasks" / task_id / "task_info.json")
+    ref = reference(task_id)
+    assert task["query_version"] == ref["query_version"] == "2026-09-11-general-v1"
+    assert len(task["query"].split()) <= 65
+    for recipe in ("0.03", "0.2 degrees", "6 degree C", "Before the main test",
+                   "leave-one", "dropping one summer", "analysis.ipynb",
+                   "1982–2011 seasonal baseline", "calendar-month climatologies"):
+        assert recipe not in task["query"]
+    assert task["query"] in ref["reference_text"]
+    if int(task_id[1:]) <= 24:
+        assert all(check["requirement"] == "context_only"
+                   for criterion in ref["criteria"] for check in criterion.get("visual_checks", []))
+        assert "agent chooses diagnostics" in ref["reference_text"]

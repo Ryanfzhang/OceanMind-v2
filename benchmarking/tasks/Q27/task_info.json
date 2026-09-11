@@ -3,7 +3,7 @@
   "track": "idea_hypothesis",
   "title": "An idea about coastal oxygen variability",
   "catalog_version": "2026-09-07-idea-v2",
-  "query": "Read the supplied related work on coastal oxygen dynamics and benthic-pelagic coupling. Using the supplied 2018-2022 CMOMS archive, propose and test one data-supported hypothesis about coastal oxygen variability or hypoxia. You may investigate an explanatory relationship, a boundary condition or predictive information, but the choice of idea is yours. State what the available variables can and cannot establish, compare against a relevant alternative, and report the outcome without assuming that the hypothesis must be confirmed. Before the main test, record the primary hypothesis, operational variables, comparison and what would count against it; label subsequent revisions or exploratory analyses. Use an appropriate baseline/control, address a plausible competing explanation, quantify uncertainty with the sampling dependence considered, and perform a relevant robustness or independent-validation check. Provide reproducible analysis code, supporting numerical/visual evidence and a conclusion whose scope matches the evidence. Explain the scientific value of your question and its connection to the readings; worldwide novelty is not required, and a negative or inconclusive result is not a failure. Use only the authorized input package for the primary test; log any additional literature retrieval.",
+  "query": "Drawing on the supplied related work and 2018–2022 CMOMS data for the supplied northern South China Sea coastal domain, develop and investigate a research idea about oxygen variability or hypoxia.",
   "analysis_period": "2018–2022",
   "data_groups": [
     "I1"
@@ -69,5 +69,6 @@
   ],
   "reading_pack_status": "citations_selected_full_text_pack_not_staged",
   "reading_policy": "Supply the same frozen full texts to both agents before running. Bibliographic records and abstracts alone are not the full reading pack. Extra literature retrieval follows the same logged policy. Evaluator checklists and selection rationales are not handed to agents.",
-  "reading_data_alignment": "Same estuary and explicitly linked model lineage, but different process experiments; neither is proven identical to the historical CMOMS archive. This is the least exact data match and remains provisional."
+  "reading_data_alignment": "Same estuary and explicitly linked model lineage, but different process experiments; neither is proven identical to the historical CMOMS archive. This is the least exact data match and remains provisional.",
+  "query_version": "2026-09-11-general-v1"
 }
