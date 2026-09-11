@@ -415,6 +415,9 @@ def begin_tests(store, workspace_id, task_id, test_ids, *, execution_id=None, ex
     The router passes all Expert WorkOrder IDs in the selected wave. Recovered
     WorkOrders retain their reservation; a new follow-up WorkOrder costs another
     attempt. Runtime code/token budgets still account for the work within it.
+    Test status and feasibility are research annotations, not dispatch gates:
+    the Coordinator may revisit the same Test to retry or supplement evidence.
+    Existing results and hypothesis judgments are never reset by a reservation.
     The singular execution_id and implicit per-test keys support older callers.
     """
     with store._transaction() as db:
@@ -441,13 +444,10 @@ def begin_tests(store, workspace_id, task_id, test_ids, *, execution_id=None, ex
         for key in test_ids:
             test = tree["tests"].get(key)
             if test is None:
-                raise ValueError("Only feasible, unexecuted tests can be dispatched")
+                raise ValueError(f"Unknown research test in this task: {key}")
             linked = set(test.get("execution_ids", ()))
             if test.get("execution_id"):
                 linked.add(test["execution_id"])
-            replay = explicit and set(keys) <= linked
-            if not (test["feasible"] and test["status"] == "todo") and not replay:
-                raise ValueError("Only feasible, unexecuted tests can be dispatched")
             tests.append((test, linked))
         charged = tree.setdefault("execution_ids", [])
         new_keys = [key for key in keys if key not in charged]
@@ -456,7 +456,10 @@ def begin_tests(store, workspace_id, task_id, test_ids, *, execution_id=None, ex
         changed = bool(new_keys)
         for test, linked in tests:
             if test["status"] == "todo":
-                test.update(status="running", attempt_charged=True)
+                test["status"] = "running"
+                changed = True
+            if not test.get("attempt_charged"):
+                test["attempt_charged"] = True
                 changed = True
             if explicit and not set(keys) <= linked:
                 test["execution_ids"] = list(dict.fromkeys((*sorted(linked), *keys)))

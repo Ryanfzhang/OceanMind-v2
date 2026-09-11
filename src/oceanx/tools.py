@@ -1594,7 +1594,12 @@ class OceanTodoInput(OceanToolInput):
 
 class OceanAssignmentInput(OceanToolInput):
     research_test_ids: tuple[str, ...] = Field(
-        default=(), description="Optional planned Test IDs associated with this wave; not a prerequisite for analysis.",
+        default=(),
+        description=(
+            "Optional existing Test IDs associated with this wave; not a prerequisite for analysis. "
+            "Reuse the same IDs for retries or follow-up evidence, even after prior execution. "
+            "A new Expert round is recorded separately without resetting prior results."
+        ),
     )
     research_question: str | None = Field(
         default=None,

@@ -1,0 +1,9 @@
+name: oceanx
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - nodejs=24
+  - pip
+  - pip:
+      - -r requirements.txt

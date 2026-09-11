@@ -82,6 +82,10 @@ New projects use:
 
 ## Development
 
+Create the `oceanx` environment once with `conda env create -f environment.yml`.
+For an existing environment, use `conda env update -n oceanx -f environment.yml`.
+This installs Python 3.11, Node.js 24, and the Python requirements in one environment.
+
 ```bash
 conda activate oceanx
 python -m pip install -r requirements.txt
@@ -97,6 +101,9 @@ Keep `conda activate oceanx` active when running `npm start`, `npm run dev`, or
 `npm run build:sidecar`. Local desktop startup and sidecar builds use that
 environment's Python and installed dependencies, not a repository `.venv`.
 `requirements.txt` includes the scientific runtime and PyInstaller build dependency.
+Node.js is managed by `environment.yml`. On Apple Silicon, check that
+`node -p process.arch` reports `arm64`; after changing Node architecture, rerun
+`npm ci` to replace platform-specific frontend dependencies.
 `OCEAN_PYTHON` is an explicit override; otherwise `CONDA_PREFIX` takes priority
 over Python on `PATH`. A broken active Conda environment reports an error rather
 than silently selecting another interpreter. Installed desktop packages still
@@ -104,6 +111,24 @@ use their bundled backend. Scientific code execution also follows active Conda
 by default; `OCEAN_CONDA_ENV` and `OCEAN_SANDBOX_PYTHON` remain explicit scientific
 runtime overrides. Without activation, scientific execution still looks for the
 named `oceanx` environment.
+
+### Runtime context summaries
+
+All Coordinator and Expert graphs reuse DeepAgents' built-in summarization.
+OceanX starts summarizing at 24,000 context tokens **and** 12 messages, retaining
+the latest six messages; models with a known context window also retain an
+earlier 65%-of-window safety trigger. These are initial cost-oriented settings,
+not scientific completion criteria or a promised benchmark speedup.
+Short conversations remain unsummarized. Summaries preserve scientific quantities,
+statistical definitions, evidence IDs, working-file locations and unresolved work.
+The same configured model/API produces the summary with at most 4,096 output
+tokens, and its usage counts toward the existing cumulative budget. Internal
+summary text is not emitted as an agent answer.
+
+DeepAgents archives evicted history in the thread's checkpointed state.
+`ocean_read_context_archive` can retrieve bounded text excerpts from that archive
+after a restart; it cannot read local files or another expert's thread. Existing
+code/log retrieval, research-tree decisions, and output publication are unchanged.
 
 Run the OceanMind backend tests:
 

@@ -288,6 +288,65 @@ def test_shared_execution_accounting_and_budget_resume(store):
     assert call(store, "pause")["stop_decision"]["exit"] == "budget_exhausted"
 
 
+@pytest.mark.parametrize("prior_status", ["running", "done", "infeasible"])
+def test_same_test_accepts_new_work_without_a_scientific_status_gate(store, prior_status):
+    setup_pair(store, execution_budget=2)
+    begin_tests(store, "ws", "task", ["AB"], execution_id="work_first")
+    if prior_status == "done":
+        record(store, "AB", [evidence(store)])
+        judge(store, "A", "supported", test_id="AB", summary="Prior evidence")
+    elif prior_status == "infeasible":
+        call(store, "mark_infeasible", test_id="AB", summary="Previously missing data")
+    before = call(store)
+
+    followed = begin_tests(store, "ws", "task", ["AB"], execution_id="work_followup")
+    assert followed["executions_used"] == 2
+    assert set(followed["tests"]["AB"]["execution_ids"]) == {"work_first", "work_followup"}
+    assert followed["tests"]["AB"]["status"] == prior_status
+    assert followed["tests"]["AB"]["result"] == before["tests"]["AB"]["result"]
+    assert followed["tests"]["AB"]["feasible"] == before["tests"]["AB"]["feasible"]
+    assert followed["hypotheses"] == before["hypotheses"]
+    replay = begin_tests(store, "ws", "task", ["AB"], execution_id="work_followup")
+    assert replay == followed  # even at the ceiling, a replay is free and idempotent
+    before_failed = call(store)
+    with pytest.raises(ValueError, match="budget"):
+        begin_tests(store, "ws", "task", ["AB"], execution_id="work_third")
+    assert call(store) == before_failed
+
+
+def test_mixed_old_and_new_tests_share_one_new_work_order_reservation(store):
+    setup_pair(store, execution_budget=2)
+    begin_tests(store, "ws", "task", ["AB"], execution_id="first")
+    record(store, "AB", [evidence(store)])
+    call(store, "plan_test", tests=[plan("extra", ["A"])])
+    before = call(store)["tests"]["AB"]["result"]
+    state = begin_tests(store, "ws", "task", ["AB", "extra"], execution_ids=["next"])
+    assert state["executions_used"] == 2
+    assert state["tests"]["AB"]["result"] == before
+    assert state["tests"]["AB"]["status"] == "done"
+    assert state["tests"]["extra"]["status"] == "running"
+    assert state["tests"]["extra"]["execution_ids"] == ["next"]
+
+
+def test_dispatch_still_checks_references_scope_and_pause_atomically(store):
+    setup_pair(store)
+    before = call(store)
+    with pytest.raises(ValueError, match="Unknown research test"):
+        begin_tests(store, "ws", "task", ["AB", "foreign"], execution_id="work")
+    with pytest.raises(ValueError, match="unique"):
+        begin_tests(store, "ws", "task", ["AB", "AB"], execution_id="work")
+    with pytest.raises(ValueError, match="identity"):
+        begin_tests(store, "ws", "task", ["AB"], execution_ids=[])
+    with pytest.raises(RequestStoreError, match="bound research task"):
+        begin_tests(store, "other_workspace", "task", ["AB"], execution_id="work")
+    assert call(store) == before
+    call(store, "pause")
+    paused = call(store)
+    with pytest.raises(ValueError, match="Resume iterative"):
+        begin_tests(store, "ws", "task", ["AB"], execution_id="work")
+    assert call(store) == paused
+
+
 def test_reflection_is_optional_and_does_not_force_candidates(store):
     setup_pair(store, reflection_interval_percent=1)
     call(store, "reflect", coverage_complete=False, summary="An optional reflection")
@@ -507,7 +566,7 @@ def test_legacy_read_only_preserves_bytes(store):
     )
 
 
-def assignment_tool(store, tmp_path, monkeypatch):
+def assignment_tool(store, tmp_path, monkeypatch, *, initial_status="completed"):
     """Use the production tool/router path, substituting only Expert execution."""
     router = object.__new__(OceanRequestRouter)
     router.store = store
@@ -537,8 +596,12 @@ def assignment_tool(store, tmp_path, monkeypatch):
             store.mark_team_work_running(order.work_order_id)
             result = ExpertResult(
                 work_order_id=order.work_order_id,
-                status="completed",
-                result_origin="agent_submitted",
+                status=initial_status if len(started) == 1 else "completed",
+                result_origin=(
+                    "backend_recovered"
+                    if len(started) == 1 and initial_status == "incomplete"
+                    else "agent_submitted"
+                ),
                 text="Evidence returned",
             )
             store.complete_team_work(result)
@@ -667,6 +730,49 @@ async def test_assignment_budget_receipt_and_work_order_replay_then_followup(
     assert not followup.is_error, followup.output
     assert len(started) == 2 and started[0] != started[1]
     assert call(store)["executions_used"] == 2
+
+
+@pytest.mark.parametrize("initial_status", ["incomplete", "completed"])
+async def test_coordinator_continues_same_expert_and_same_test_after_partial_or_full_result(
+    store, tmp_path, monkeypatch, initial_status
+):
+    """Q19: supplement the original Test without dropping research_test_ids."""
+    setup_pair(store, execution_budget=2)
+    tool, _sink, started = assignment_tool(
+        store, tmp_path, monkeypatch, initial_status=initial_status
+    )
+    args = assignment_args()
+    first = await tool.execute(args, assignment_context(tmp_path))
+    assert not first.is_error, first.output
+    if initial_status == "completed":
+        record(store, "AB", [evidence(store)])
+    before = call(store)
+    prior = store.get_team_work(started[0]).work_order
+
+    payload = args.model_dump(mode="json")
+    payload["todos"][0]["continuation"] = {
+        "source_report_ref": prior.work_order_id,
+        "question_delta": "Resolve the difference in statistical definitions using saved results.",
+        "reason": "Additional evidence is needed for the same Test.",
+    }
+    continuation = OceanAssignmentInput.model_validate(payload)
+    context = assignment_context(tmp_path, "continue")
+    followup = await tool.execute(continuation, context)
+    assert not followup.is_error, followup.output
+    assert len(started) == 2 and started[0] != started[1]
+    new = store.get_team_work(started[1]).work_order
+    assert (new.profile_id, new.expert_key, new.job_key) == (
+        prior.profile_id, prior.expert_key, prior.job_key
+    )
+    assert new.continuation.source_report_ref == prior.work_order_id
+    after = call(store)
+    assert after["executions_used"] == 2
+    assert set(after["tests"]["AB"]["execution_ids"]) == set(started)
+    assert after["tests"]["AB"]["result"] == before["tests"]["AB"]["result"]
+    assert after["hypotheses"] == before["hypotheses"]
+    assert len(after["tests"]) == 1
+    assert (await tool.execute(continuation, context)).metadata["replayed"]
+    assert len(started) == 2 and call(store) == after
 
 
 async def test_coordinator_tool_remains_role_isolated(store, tmp_path):

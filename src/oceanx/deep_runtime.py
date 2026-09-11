@@ -40,6 +40,7 @@ from oceanx.agent_contract import (
     _message_text,
 )
 from oceanx.agent_tools import ToolRegistry
+from oceanx.context_summary import SUMMARY_TAG, build_context_summary, context_archive_reader
 from oceanx.expert_context import ExpertContextMiddleware
 from oceanx.model_config import OceanModelProfile, create_chat_model
 from oceanx.model_recovery import model_error_event
@@ -164,8 +165,12 @@ class TokenBudgetWindDownMiddleware(AgentMiddleware):
             if not isinstance(message, AIMessage):
                 continue
             usage = _usage(message)
-            self.input_tokens += usage.input_tokens
-            self.output_tokens += usage.output_tokens
+            self.record_usage(usage)
+
+    def record_usage(self, usage: UsageSnapshot) -> None:
+        """Include internal summary calls in the same cumulative token ceiling."""
+        self.input_tokens += usage.input_tokens
+        self.output_tokens += usage.output_tokens
 
     @staticmethod
     def _wind_down_request(request: ModelRequest) -> ModelRequest:
@@ -238,12 +243,14 @@ class DeepAgentEngine:
         system_prompt: str,
         max_turns: int,
         operation_id_factory: Any,
+        summary_usage_callback: Callable[[UsageSnapshot], None] | None = None,
     ) -> None:
         self.graph = graph
         self.thread_id = thread_id
         self.system_prompt = system_prompt
         self.max_turns = max_turns
         self.operation_id_factory = operation_id_factory
+        self._summary_usage_callback = summary_usage_callback
         self._messages: list[ConversationMessage] = []
         self._seed_messages: list[BaseMessage] = []
         self._model_call_state_hook: Callable[[bool], None] | None = None
@@ -399,6 +406,10 @@ class DeepAgentEngine:
                 if parent_ids & opaque_tool_runs:
                     continue
                 data = event.get("data") or {}
+                is_summary = (
+                    SUMMARY_TAG in (event.get("tags") or ())
+                    or (event.get("metadata") or {}).get("lc_source") == "summarization"
+                )
                 if name == "on_chat_model_start":
                     turn_index += 1
                     self._stream_turn_index = turn_index
@@ -408,6 +419,8 @@ class DeepAgentEngine:
                         self._model_call_state_hook(True)
                     continue
                 if name == "on_chat_model_stream":
+                    if is_summary:
+                        continue
                     chunk = data.get("chunk")
                     if isinstance(chunk, AIMessageChunk):
                         delta = _message_text(chunk)
@@ -426,6 +439,19 @@ class DeepAgentEngine:
                         self._model_call_state_hook(False)
                     message = _ai_message(data.get("output"))
                     if message is None:
+                        continue
+                    if is_summary:
+                        usage = _usage(message)
+                        if self._summary_usage_callback is not None:
+                            self._summary_usage_callback(usage)
+                        # Meter internal work without presenting its prose as a
+                        # research answer, tool request, or final response.
+                        yield AssistantTurnComplete(
+                            message=ConversationMessage.from_langchain(AIMessage(content="")),
+                            usage=usage,
+                            turn_id=model_turns.get(run_id),
+                            request_id=request_id,
+                        )
                         continue
                     last_model_message = message
                     log.info("Model response request=%s turn=%s finish=%s text_chars=%s tools=%s",
@@ -564,20 +590,25 @@ async def build_deep_agent_engine(
     await checkpointer.conn.execute("PRAGMA journal_mode=WAL")
     await checkpointer.conn.execute("PRAGMA busy_timeout=30000")
     await checkpointer.setup()
-    middleware: list[AgentMiddleware] = [filesystem, ExpertContextMiddleware(), ToolHistoryRepairMiddleware()]
+    middleware: list[AgentMiddleware] = [
+        filesystem,
+        build_context_summary(model, state_backend),
+        ExpertContextMiddleware(),
+        ToolHistoryRepairMiddleware(),
+    ]
+    token_budget = None
     if max_input_tokens > 0 or max_output_tokens > 0:
-        middleware.append(
-            TokenBudgetWindDownMiddleware(
-                max_input_tokens=max_input_tokens,
-                max_output_tokens=max_output_tokens,
-            )
+        token_budget = TokenBudgetWindDownMiddleware(
+            max_input_tokens=max_input_tokens,
+            max_output_tokens=max_output_tokens,
         )
+        middleware.append(token_budget)
     graph = create_deep_agent(
         model=model,
-        tools=tools.as_langchain_tools(
-            cwd=cwd,
-            operation_id_factory=operation_id_factory,
-        ),
+        tools=[
+            *tools.as_langchain_tools(cwd=cwd, operation_id_factory=operation_id_factory),
+            context_archive_reader(state_backend),
+        ],
         system_prompt=system_prompt,
         middleware=middleware,
         subagents=[],
@@ -591,6 +622,7 @@ async def build_deep_agent_engine(
         system_prompt=system_prompt,
         max_turns=max_turns,
         operation_id_factory=operation_id_factory,
+        summary_usage_callback=token_budget.record_usage if token_budget is not None else None,
     )
 
     async def close() -> None:
